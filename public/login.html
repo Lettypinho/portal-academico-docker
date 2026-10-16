@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login | Portal Acadêmico</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-page">
+
+    <div class="login-container">
+
+        <h1>Portal Acadêmico</h1>
+
+        <p>Entre para acessar o sistema</p>
+
+        <form id="form-login">
+
+            <label>E-mail</label>
+
+            <input
+                type="email"
+                id="login-email"
+                required
+            >
+
+            <label>Senha</label>
+
+            <input
+                type="password"
+                id="login-senha"
+                required
+            >
+
+            <button type="submit">
+                Entrar
+            </button>
+
+            <p id="login-erro"></p>
+
+        </form>
+
+    </div>
+
+    <script>
+        document
+            .getElementById("form-login")
+            .addEventListener("submit", async (event) => {
+
+                event.preventDefault();
+
+                const email =
+                    document.getElementById("login-email").value;
+
+                const senha =
+                    document.getElementById("login-senha").value;
+
+                const resposta = await fetch("/api/login", {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email,
+                        senha
+                    })
+                });
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok) {
+                    document.getElementById("login-erro")
+                        .textContent = dados.erro;
+
+                    return;
+                }
+
+                window.location.href = "/index.html";
+            });
+    </script>
+
+</body>
+
+</html>
