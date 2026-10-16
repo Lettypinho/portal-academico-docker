@@ -1,0 +1,28 @@
+CREATE TABLE faculdade (
+id SERIAL PRIMARY KEY,
+nome VARCHAR(150) NOT NULL,
+cidade VARCHAR(100) NOT NULL,
+estado VARCHAR(2) NOT NULL
+);
+
+CREATE TABLE curso (
+id SERIAL PRIMARY KEY,
+nome VARCHAR(100) NOT NULL,
+duracao_semestres INT NOT NULL,
+faculdade_id INT REFERENCES faculdade(id) ON DELETE CASCADE
+);
+
+CREATE TABLE disciplina (
+id SERIAL PRIMARY KEY,
+nome VARCHAR(100) NOT NULL,
+carga_horaria INT NOT NULL,
+curso_id INT REFERENCES curso(id) ON DELETE CASCADE
+);
+
+CREATE TABLE aluno (
+id SERIAL PRIMARY KEY,
+nome VARCHAR(150) NOT NULL,
+email VARCHAR(150) UNIQUE NOT NULL,
+data_nascimento DATE NOT NULL,
+curso_id INT REFERENCES curso(id) ON DELETE SET NULL
+);
