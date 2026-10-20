@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -13,25 +14,33 @@
 
     <link
         rel="stylesheet"
-        href="/css/style.css"
+        href="/css/style.css?v=3"
     >
+
 </head>
 
 <body class="sia-page">
 
+
     <!-- =====================================================
-         CABEÇALHO
+         TOPO
          ===================================================== -->
 
     <header class="topbar">
 
         <div class="topbar-brand">
 
-            <div class="topbar-logo">
-                SIA
+            <div class="topbar-logo-image">
+
+                <img
+                    src="/assets/logo-sia.png"
+                    alt="SIA"
+                >
+
             </div>
 
-            <div>
+            <div class="topbar-description">
+
                 <strong>
                     Sistema de Indicadores Acadêmicos
                 </strong>
@@ -39,6 +48,7 @@
                 <span>
                     Indicadores e comparações acadêmicas
                 </span>
+
             </div>
 
         </div>
@@ -46,14 +56,16 @@
 
         <div class="topbar-user">
 
-            <div>
+            <div class="user-info">
+
                 <span id="nome-usuario">
                     Carregando...
                 </span>
 
                 <small>
-                    Usuário
+                    Usuário SIA
                 </small>
+
             </div>
 
             <button
@@ -69,7 +81,7 @@
 
 
     <!-- =====================================================
-         MENU
+         NAVEGAÇÃO
          ===================================================== -->
 
     <nav class="public-nav">
@@ -123,21 +135,22 @@
 
             <div class="hero-public">
 
-                <div>
+                <div class="hero-content">
 
                     <span class="hero-label">
-                        Sistema de Indicadores Acadêmicos
+                        Inteligência acadêmica
                     </span>
 
                     <h1>
                         Compare cursos e conheça
-                        o desempenho das instituições
+                        o desempenho das instituições.
                     </h1>
 
                     <p>
-                        Consulte universidades, explore cursos
-                        e compare indicadores acadêmicos de
-                        diferentes instituições.
+                        Explore indicadores acadêmicos,
+                        pesquise universidades e compare
+                        cursos equivalentes de diferentes
+                        instituições de ensino.
                     </p>
 
                     <button
@@ -149,19 +162,49 @@
 
                 </div>
 
+                <div class="hero-decoration">
+
+                    <div class="hero-stat">
+
+                        <strong>Dados</strong>
+
+                        <span>
+                            transformados em indicadores
+                        </span>
+
+                    </div>
+
+                    <div class="hero-chart">
+
+                        <span class="bar bar-1"></span>
+                        <span class="bar bar-2"></span>
+                        <span class="bar bar-3"></span>
+                        <span class="bar bar-4"></span>
+
+                    </div>
+
+                </div>
+
             </div>
 
 
             <div class="section-header">
 
                 <div>
+
+                    <span class="section-eyebrow">
+                        Instituições
+                    </span>
+
                     <h2>
                         Universidades participantes
                     </h2>
 
                     <p>
-                        Instituições atualmente disponíveis no SIA.
+                        Conheça algumas das instituições
+                        disponíveis atualmente no SIA.
                     </p>
+
                 </div>
 
             </div>
@@ -189,13 +232,20 @@
             <div class="section-header">
 
                 <div>
+
+                    <span class="section-eyebrow">
+                        Instituições
+                    </span>
+
                     <h2>
                         Universidades
                     </h2>
 
                     <p>
-                        Consulte as instituições participantes.
+                        Consulte as instituições participantes
+                        do Sistema de Indicadores Acadêmicos.
                     </p>
+
                 </div>
 
             </div>
@@ -232,13 +282,20 @@
             <div class="section-header">
 
                 <div>
+
+                    <span class="section-eyebrow">
+                        Graduação
+                    </span>
+
                     <h2>
                         Cursos
                     </h2>
 
                     <p>
-                        Pesquise cursos oferecidos pelas universidades.
+                        Pesquise cursos oferecidos pelas
+                        universidades cadastradas.
                     </p>
+
                 </div>
 
             </div>
@@ -249,7 +306,7 @@
                 <input
                     type="text"
                     id="busca-curso"
-                    placeholder="Pesquisar curso..."
+                    placeholder="Pesquisar curso, universidade, modalidade ou estado..."
                 >
 
             </div>
@@ -275,14 +332,20 @@
             <div class="section-header">
 
                 <div>
+
+                    <span class="section-eyebrow">
+                        Benchmark acadêmico
+                    </span>
+
                     <h2>
                         Comparar cursos
                     </h2>
 
                     <p>
-                        Compare indicadores do mesmo curso
-                        entre diferentes universidades.
+                        Compare indicadores públicos do mesmo
+                        curso entre diferentes universidades.
                     </p>
+
                 </div>
 
             </div>
@@ -297,9 +360,11 @@
                     </label>
 
                     <select id="curso-comparacao">
+
                         <option value="">
                             Selecione um curso
                         </option>
+
                     </select>
 
                 </div>
@@ -360,13 +425,18 @@
 
                 <div class="empty-state">
 
+                    <div class="empty-icon">
+                        SIA
+                    </div>
+
                     <h3>
                         Selecione um curso
                     </h3>
 
                     <p>
-                        Escolha o curso e o período para visualizar
-                        a comparação entre universidades.
+                        Escolha o curso e o período para
+                        visualizar a comparação entre
+                        universidades.
                     </p>
 
                 </div>
@@ -376,6 +446,20 @@
         </section>
 
     </main>
+
+
+    <footer class="site-footer">
+
+        <span>
+            SIA — Sistema de Indicadores Acadêmicos
+        </span>
+
+        <small>
+            Dados acadêmicos transformados em
+            indicadores para melhores decisões.
+        </small>
+
+    </footer>
 
 
     <script src="/js/explorar.js"></script>

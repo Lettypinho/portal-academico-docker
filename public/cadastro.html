@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Cadastro | SIA</title>
 
-    <link rel="stylesheet" href="/css/style.css">
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=3"
+    >
 </head>
 
 <body class="auth-page">
@@ -15,32 +23,49 @@
 
         <section class="auth-brand">
 
-            <div class="brand-logo">
-                SIA
+            <div class="auth-logo-container">
+                <img
+                    src="/assets/logo-sia.png"
+                    alt="SIA - Sistema de Indicadores Acadêmicos"
+                    class="auth-logo"
+                >
             </div>
 
             <h1>
-                Sistema de Indicadores Acadêmicos
+                Explore o desempenho
+                acadêmico das instituições.
             </h1>
 
             <p>
-                Crie sua conta e acompanhe os indicadores
-                acadêmicos da sua instituição.
+                Crie sua conta para pesquisar universidades,
+                explorar cursos e comparar indicadores
+                acadêmicos públicos.
             </p>
 
         </section>
 
+
         <section class="auth-card">
 
-            <h2>Criar conta</h2>
+            <div class="auth-card-header">
 
-            <p class="auth-subtitle">
-                Informe seus dados para realizar o cadastro.
-            </p>
+                <span class="auth-tag">
+                    Criar acesso
+                </span>
+
+                <h2>Criar conta</h2>
+
+                <p class="auth-subtitle">
+                    Preencha seus dados para começar.
+                </p>
+
+            </div>
+
 
             <form id="form-cadastro">
 
                 <div class="form-group">
+
                     <label for="nome">
                         Nome
                     </label>
@@ -49,11 +74,15 @@
                         type="text"
                         id="nome"
                         placeholder="Seu nome"
+                        autocomplete="name"
                         required
                     >
+
                 </div>
 
+
                 <div class="form-group">
+
                     <label for="email">
                         E-mail
                     </label>
@@ -62,21 +91,27 @@
                         type="email"
                         id="email"
                         placeholder="seu@email.com"
+                        autocomplete="email"
                         required
                     >
+
                 </div>
 
+
                 <div class="form-group">
+
                     <label for="senha">
                         Senha
                     </label>
 
                     <div class="password-container">
+
                         <input
                             type="password"
                             id="senha"
                             minlength="6"
                             placeholder="Mínimo de 6 caracteres"
+                            autocomplete="new-password"
                             required
                         >
 
@@ -87,20 +122,26 @@
                         >
                             Mostrar
                         </button>
+
                     </div>
+
                 </div>
 
+
                 <div class="form-group">
+
                     <label for="confirmar-senha">
                         Confirmar senha
                     </label>
 
                     <div class="password-container">
+
                         <input
                             type="password"
                             id="confirmar-senha"
                             minlength="6"
                             placeholder="Digite novamente"
+                            autocomplete="new-password"
                             required
                         >
 
@@ -111,13 +152,17 @@
                         >
                             Mostrar
                         </button>
+
                     </div>
+
                 </div>
+
 
                 <div
                     id="mensagem"
                     class="form-message"
                 ></div>
+
 
                 <button
                     type="submit"
@@ -128,12 +173,15 @@
 
             </form>
 
+
             <p class="auth-footer">
+
                 Já possui uma conta?
 
                 <a href="/login.html">
                     Entrar
                 </a>
+
             </p>
 
         </section>
@@ -143,4 +191,5 @@
     <script src="/js/auth.js"></script>
 
 </body>
+
 </html>

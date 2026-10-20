@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Login | SIA</title>
 
-    <link rel="stylesheet" href="/css/style.css">
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=3"
+    >
 </head>
 
 <body class="auth-page">
@@ -14,29 +22,50 @@
     <main class="auth-container">
 
         <section class="auth-brand">
-            <div class="brand-logo">SIA</div>
+
+            <div class="auth-logo-container">
+                <img
+                    src="/assets/logo-sia.png"
+                    alt="SIA - Sistema de Indicadores Acadêmicos"
+                    class="auth-logo"
+                >
+            </div>
 
             <h1>
-                Sistema de Indicadores Acadêmicos
+                Transforme dados acadêmicos
+                em melhores decisões.
             </h1>
 
             <p>
-                Dados acadêmicos transformados em indicadores
-                para melhores decisões.
+                Consulte indicadores, acompanhe resultados
+                e compare o desempenho acadêmico entre
+                diferentes instituições de ensino.
             </p>
+
         </section>
+
 
         <section class="auth-card">
 
-            <h2>Entrar</h2>
+            <div class="auth-card-header">
 
-            <p class="auth-subtitle">
-                Acesse sua conta para continuar.
-            </p>
+                <span class="auth-tag">
+                    Bem-vindo ao SIA
+                </span>
+
+                <h2>Entrar</h2>
+
+                <p class="auth-subtitle">
+                    Acesse sua conta para continuar.
+                </p>
+
+            </div>
+
 
             <form id="form-login">
 
                 <div class="form-group">
+
                     <label for="email">
                         E-mail
                     </label>
@@ -45,20 +74,26 @@
                         type="email"
                         id="email"
                         placeholder="seu@email.com"
+                        autocomplete="email"
                         required
                     >
+
                 </div>
 
+
                 <div class="form-group">
+
                     <label for="senha">
                         Senha
                     </label>
 
                     <div class="password-container">
+
                         <input
                             type="password"
                             id="senha"
                             placeholder="Digite sua senha"
+                            autocomplete="current-password"
                             required
                         >
 
@@ -69,13 +104,17 @@
                         >
                             Mostrar
                         </button>
+
                     </div>
+
                 </div>
+
 
                 <div
                     id="mensagem"
                     class="form-message"
                 ></div>
+
 
                 <button
                     type="submit"
@@ -86,12 +125,15 @@
 
             </form>
 
+
             <p class="auth-footer">
+
                 Ainda não possui uma conta?
 
                 <a href="/cadastro.html">
                     Criar conta
                 </a>
+
             </p>
 
         </section>
@@ -101,4 +143,5 @@
     <script src="/js/auth.js"></script>
 
 </body>
+
 </html>
