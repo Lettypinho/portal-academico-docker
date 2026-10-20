@@ -1,50 +1,87 @@
-const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 
-const pool = new Pool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
+const pool = require("./src/config/database");
 
-async function criarAdmin() {
+async function criarSuperAdmin() {
     const email = process.env.ADMIN_EMAIL;
     const senha = process.env.ADMIN_PASSWORD;
 
     if (!email || !senha) {
-        console.error("Defina ADMIN_EMAIL e ADMIN_PASSWORD.");
+        console.error(
+            "Defina ADMIN_EMAIL e ADMIN_PASSWORD."
+        );
+
         process.exit(1);
     }
 
     try {
-        const senhaHash = await bcrypt.hash(senha, 10);
+        const emailNormalizado = email
+            .trim()
+            .toLowerCase();
+
+        const existente = await pool.query(
+            `
+            SELECT id
+            FROM usuario
+            WHERE LOWER(email) = LOWER($1)
+            `,
+            [emailNormalizado]
+        );
+
+        if (existente.rows.length > 0) {
+            console.log(
+                "O super administrador já está cadastrado."
+            );
+
+            return;
+        }
+
+        const senhaHash = await bcrypt.hash(
+            senha,
+            10
+        );
 
         await pool.query(
             `
-            INSERT INTO usuarios
-                (nome, email, senha_hash, perfil)
+            INSERT INTO usuario
+                (
+                    universidade_id,
+                    nome,
+                    email,
+                    senha_hash,
+                    perfil
+                )
             VALUES
-                ($1, $2, $3, $4)
-            ON CONFLICT (email) DO NOTHING
+                (
+                    NULL,
+                    $1,
+                    $2,
+                    $3,
+                    'super_admin'
+                )
             `,
             [
-                "Administrador",
-                email,
-                senhaHash,
-                "admin"
+                "Administrador SIA",
+                emailNormalizado,
+                senhaHash
             ]
         );
 
-        console.log("Administrador criado com sucesso.");
+        console.log(
+            "Super administrador criado com sucesso."
+        );
 
     } catch (erro) {
-        console.error("Erro:", erro);
+        console.error(
+            "Erro ao criar super administrador:",
+            erro
+        );
+
+        process.exitCode = 1;
 
     } finally {
         await pool.end();
     }
 }
 
-criarAdmin();
+criarSuperAdmin();
