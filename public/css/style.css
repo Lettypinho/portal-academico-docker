@@ -85,7 +85,6 @@ a {
     background: #ffffff;
 
     border-radius: 22px;
-
     overflow: hidden;
 
     box-shadow:
@@ -95,7 +94,7 @@ a {
 
 
 /* =========================================================
-   MARCA / APRESENTAÇÃO DO SIA
+   MARCA
    ========================================================= */
 
 .auth-brand {
@@ -151,7 +150,6 @@ a {
 
     font-size: 28px;
     font-weight: 800;
-    letter-spacing: 1px;
 
     box-shadow:
         0 15px 30px
@@ -165,7 +163,6 @@ a {
 
     font-size: 38px;
     line-height: 1.15;
-    font-weight: 750;
 }
 
 .auth-brand p {
@@ -196,7 +193,6 @@ a {
     color: #0f172a;
 
     font-size: 30px;
-    font-weight: 750;
 }
 
 .auth-subtitle {
@@ -239,17 +235,7 @@ a {
     outline: none;
 
     color: #0f172a;
-
     background: #ffffff;
-
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s,
-        background 0.2s;
-}
-
-.form-group input::placeholder {
-    color: #94a3b8;
 }
 
 .form-group input:focus,
@@ -293,10 +279,6 @@ a {
     font-weight: 600;
 }
 
-.toggle-password:hover {
-    color: #1d4ed8;
-}
-
 
 /* =========================================================
    BOTÕES
@@ -316,11 +298,6 @@ a {
     background: #2563eb;
 
     font-weight: 700;
-
-    transition:
-        transform 0.15s,
-        background 0.2s,
-        box-shadow 0.2s;
 }
 
 .btn-primary:hover {
@@ -331,8 +308,8 @@ a {
         rgba(37, 99, 235, 0.25);
 }
 
-.btn-primary:active {
-    transform: translateY(1px);
+.btn-auto {
+    width: auto;
 }
 
 
@@ -346,7 +323,6 @@ a {
     margin: 5px 0 8px;
 
     font-size: 14px;
-    line-height: 1.4;
 }
 
 .form-message.erro {
@@ -374,7 +350,7 @@ a {
 
 
 /* =========================================================
-   RODAPÉ DA AUTENTICAÇÃO
+   RODAPÉ AUTENTICAÇÃO
    ========================================================= */
 
 .auth-footer {
@@ -391,7 +367,6 @@ a {
     color: #2563eb;
 
     font-weight: 700;
-
     text-decoration: none;
 }
 
@@ -401,7 +376,7 @@ a {
 
 
 /* =========================================================
-   RESPONSIVIDADE
+   RESPONSIVIDADE - AUTENTICAÇÃO
    ========================================================= */
 
 @media (max-width: 850px) {
@@ -412,7 +387,6 @@ a {
 
     .auth-container {
         max-width: 520px;
-
         grid-template-columns: 1fr;
     }
 
@@ -442,18 +416,15 @@ a {
     }
 }
 
-
 @media (max-width: 480px) {
 
     .auth-page {
         padding: 0;
-
         align-items: stretch;
     }
 
     .auth-container {
         min-height: 100vh;
-
         border-radius: 0;
     }
 
@@ -487,7 +458,10 @@ a {
     .auth-card h2 {
         font-size: 26px;
     }
-    /* =========================================================
+}
+
+
+/* =========================================================
    ÁREA PÚBLICA DO SIA
    ========================================================= */
 
@@ -513,7 +487,9 @@ a {
     background: #0f172a;
     color: #ffffff;
 
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
+    box-shadow:
+        0 2px 10px
+        rgba(15, 23, 42, 0.15);
 }
 
 .topbar-brand {
@@ -540,7 +516,6 @@ a {
 
 .topbar-brand strong {
     display: block;
-
     font-size: 16px;
 }
 
@@ -581,8 +556,6 @@ a {
 
     color: #ffffff;
     background: transparent;
-
-    transition: background 0.2s;
 }
 
 .btn-logout:hover {
@@ -615,10 +588,6 @@ a {
     background: transparent;
 
     font-weight: 600;
-
-    transition:
-        color 0.2s,
-        border-color 0.2s;
 }
 
 .nav-item:hover {
@@ -721,10 +690,6 @@ a {
     line-height: 1.7;
 }
 
-.btn-auto {
-    width: auto;
-}
-
 
 /* =========================================================
    CABEÇALHOS DE SEÇÃO
@@ -770,10 +735,6 @@ a {
     outline: none;
 
     background: #ffffff;
-
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
 }
 
 .search-box input:focus {
@@ -786,7 +747,7 @@ a {
 
 
 /* =========================================================
-   CARDS DE UNIVERSIDADES
+   UNIVERSIDADES
    ========================================================= */
 
 .cards-grid {
@@ -813,10 +774,6 @@ a {
     box-shadow:
         0 6px 16px
         rgba(15, 23, 42, 0.04);
-
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s;
 }
 
 .institution-card:hover {
@@ -861,7 +818,6 @@ a {
 
 .institution-card span {
     color: #94a3b8;
-
     font-size: 12px;
 }
 
@@ -1044,7 +1000,7 @@ a {
 
 
 /* =========================================================
-   RESPONSIVIDADE
+   RESPONSIVIDADE - ÁREA PÚBLICA
    ========================================================= */
 
 @media (max-width: 900px) {
@@ -1063,7 +1019,6 @@ a {
         font-size: 34px;
     }
 }
-
 
 @media (max-width: 650px) {
 
@@ -1127,5 +1082,4 @@ a {
     .comparison-filters {
         grid-template-columns: 1fr;
     }
-}
 }
