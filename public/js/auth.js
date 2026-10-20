@@ -1,5 +1,6 @@
 // =========================================================
-// SIA - Autenticação
+// SIA - Sistema de Indicadores Acadêmicos
+// Autenticação
 // =========================================================
 
 
@@ -19,20 +20,26 @@ document
             const campo =
                 document.getElementById(campoId);
 
+            if (!campo) {
+                return;
+            }
+
             if (campo.type === "password") {
+
                 campo.type = "text";
                 botao.textContent = "Ocultar";
+
             } else {
+
                 campo.type = "password";
                 botao.textContent = "Mostrar";
             }
         });
-
     });
 
 
 // =========================================================
-// MENSAGEM
+// EXIBIR MENSAGENS
 // =========================================================
 
 function mostrarMensagem(texto, tipo = "erro") {
@@ -52,6 +59,24 @@ function mostrarMensagem(texto, tipo = "erro") {
 
 
 // =========================================================
+// LIMPAR MENSAGEM
+// =========================================================
+
+function limparMensagem() {
+
+    const elemento =
+        document.getElementById("mensagem");
+
+    if (!elemento) {
+        return;
+    }
+
+    elemento.textContent = "";
+    elemento.className = "form-message";
+}
+
+
+// =========================================================
 // LOGIN
 // =========================================================
 
@@ -66,17 +91,38 @@ if (formLogin) {
 
             event.preventDefault();
 
-            mostrarMensagem("");
+            limparMensagem();
 
             const email =
                 document
                     .getElementById("email")
-                    .value;
+                    .value
+                    .trim();
 
             const senha =
                 document
                     .getElementById("senha")
                     .value;
+
+            if (!email || !senha) {
+
+                mostrarMensagem(
+                    "Informe e-mail e senha."
+                );
+
+                return;
+            }
+
+            const botao =
+                formLogin.querySelector(
+                    'button[type="submit"]'
+                );
+
+            const textoOriginal =
+                botao.textContent;
+
+            botao.disabled = true;
+            botao.textContent = "Entrando...";
 
             try {
 
@@ -116,18 +162,46 @@ if (formLogin) {
                     "sucesso"
                 );
 
+                /*
+                 * Por enquanto todos continuam indo
+                 * para index.html.
+                 *
+                 * Depois vamos separar:
+                 *
+                 * publico
+                 * -> explorar.html
+                 *
+                 * admin_universidade / gestor /
+                 * consulta_institucional
+                 * -> dashboard.html
+                 *
+                 * super_admin
+                 * -> admin.html
+                 */
+
                 setTimeout(() => {
+
                     window.location.href =
                         "/index.html";
+
                 }, 500);
 
             } catch (erro) {
 
-                console.error(erro);
+                console.error(
+                    "Erro no login:",
+                    erro
+                );
 
                 mostrarMensagem(
                     "Não foi possível conectar ao servidor."
                 );
+
+            } finally {
+
+                botao.disabled = false;
+                botao.textContent =
+                    textoOriginal;
             }
         }
     );
@@ -135,71 +209,7 @@ if (formLogin) {
 
 
 // =========================================================
-// CARREGAR UNIVERSIDADES
-// =========================================================
-
-async function carregarUniversidades() {
-
-    const select =
-        document.getElementById(
-            "universidade"
-        );
-
-    if (!select) {
-        return;
-    }
-
-    try {
-
-        const resposta =
-            await fetch(
-                "/api/universidades"
-            );
-
-        const universidades =
-            await resposta.json();
-
-        select.innerHTML = `
-            <option value="">
-                Selecione sua universidade
-            </option>
-        `;
-
-        universidades.forEach(
-            (universidade) => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    universidade.id;
-
-                option.textContent =
-                    `${universidade.nome} (${universidade.sigla || universidade.estado})`;
-
-                select.appendChild(
-                    option
-                );
-            }
-        );
-
-    } catch (erro) {
-
-        console.error(erro);
-
-        select.innerHTML = `
-            <option value="">
-                Erro ao carregar universidades
-            </option>
-        `;
-    }
-}
-
-
-// =========================================================
-// CADASTRO
+// CADASTRO DE USUÁRIO PÚBLICO
 // =========================================================
 
 const formCadastro =
@@ -209,32 +219,25 @@ const formCadastro =
 
 if (formCadastro) {
 
-    carregarUniversidades();
-
     formCadastro.addEventListener(
         "submit",
         async (event) => {
 
             event.preventDefault();
 
-            mostrarMensagem("");
+            limparMensagem();
 
             const nome =
                 document
                     .getElementById("nome")
-                    .value;
+                    .value
+                    .trim();
 
             const email =
                 document
                     .getElementById("email")
-                    .value;
-
-            const universidade_id =
-                document
-                    .getElementById(
-                        "universidade"
-                    )
-                    .value;
+                    .value
+                    .trim();
 
             const senha =
                 document
@@ -249,7 +252,38 @@ if (formCadastro) {
                     .value;
 
 
-            if (senha !== confirmarSenha) {
+            // =================================================
+            // VALIDAÇÕES
+            // =================================================
+
+            if (
+                !nome ||
+                !email ||
+                !senha ||
+                !confirmarSenha
+            ) {
+
+                mostrarMensagem(
+                    "Preencha todos os campos."
+                );
+
+                return;
+            }
+
+
+            if (senha.length < 6) {
+
+                mostrarMensagem(
+                    "A senha deve possuir pelo menos 6 caracteres."
+                );
+
+                return;
+            }
+
+
+            if (
+                senha !== confirmarSenha
+            ) {
 
                 mostrarMensagem(
                     "As senhas não coincidem."
@@ -257,6 +291,19 @@ if (formCadastro) {
 
                 return;
             }
+
+
+            const botao =
+                formCadastro.querySelector(
+                    'button[type="submit"]'
+                );
+
+            const textoOriginal =
+                botao.textContent;
+
+            botao.disabled = true;
+            botao.textContent =
+                "Criando conta...";
 
 
             try {
@@ -275,14 +322,14 @@ if (formCadastro) {
                             body: JSON.stringify({
                                 nome,
                                 email,
-                                senha,
-                                universidade_id
+                                senha
                             })
                         }
                     );
 
                 const dados =
                     await resposta.json();
+
 
                 if (!resposta.ok) {
 
@@ -294,10 +341,15 @@ if (formCadastro) {
                     return;
                 }
 
+
                 mostrarMensagem(
                     "Conta criada com sucesso! Redirecionando para o login...",
                     "sucesso"
                 );
+
+
+                formCadastro.reset();
+
 
                 setTimeout(() => {
 
@@ -306,13 +358,23 @@ if (formCadastro) {
 
                 }, 1200);
 
+
             } catch (erro) {
 
-                console.error(erro);
+                console.error(
+                    "Erro no cadastro:",
+                    erro
+                );
 
                 mostrarMensagem(
                     "Não foi possível conectar ao servidor."
                 );
+
+            } finally {
+
+                botao.disabled = false;
+                botao.textContent =
+                    textoOriginal;
             }
         }
     );

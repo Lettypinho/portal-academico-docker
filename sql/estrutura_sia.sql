@@ -201,27 +201,37 @@ CREATE TABLE usuario (
         REFERENCES universidade(id),
 
     CONSTRAINT chk_usuario_perfil
-        CHECK (
-            perfil IN (
-                'super_admin',
-                'admin_universidade',
-                'gestor',
-                'consulta'
-            )
-        ),
+    CHECK (
+        perfil IN (
+            'publico',
+            'consulta_institucional',
+            'gestor',
+            'admin_universidade',
+            'super_admin'
+        )
+    ),
 
     CONSTRAINT chk_usuario_universidade
-        CHECK (
-            (
-                perfil = 'super_admin'
-                AND universidade_id IS NULL
+    CHECK (
+        (
+            perfil IN (
+                'publico',
+                'super_admin'
             )
-            OR
-            (
-                perfil <> 'super_admin'
-                AND universidade_id IS NOT NULL
-            )
+            AND universidade_id IS NULL
         )
+
+        OR
+
+        (
+            perfil IN (
+                'consulta_institucional',
+                'gestor',
+                'admin_universidade'
+            )
+            AND universidade_id IS NOT NULL
+        )
+    )
 );
 
 
