@@ -181,10 +181,41 @@ if (formLogin) {
 
                 setTimeout(() => {
 
-                    window.location.href =
-                        "/index.html";
+    const perfil =
+        dados.usuario.perfil;
 
-                }, 500);
+    if (perfil === "publico") {
+
+        window.location.href =
+            "/explorar.html";
+
+        return;
+    }
+
+    if (
+        perfil === "consulta_institucional" ||
+        perfil === "gestor" ||
+        perfil === "admin_universidade"
+    ) {
+
+        window.location.href =
+            "/dashboard.html";
+
+        return;
+    }
+
+    if (perfil === "super_admin") {
+
+        window.location.href =
+            "/admin.html";
+
+        return;
+    }
+
+    window.location.href =
+        "/login.html";
+
+}, 500);
 
             } catch (erro) {
 
