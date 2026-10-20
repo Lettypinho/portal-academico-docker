@@ -2,16 +2,12 @@
 -- SIA - Migração dos perfis de usuários
 -- =========================================================
 
-
--- Perfis antigos "consulta" passam a ser
--- "consulta_institucional"
-
-UPDATE usuario
-SET perfil = 'consulta_institucional'
-WHERE perfil = 'consulta';
+BEGIN;
 
 
--- Remove as constraints antigas
+-- =========================================================
+-- 1. REMOVER CONSTRAINTS ANTIGAS
+-- =========================================================
 
 ALTER TABLE usuario
 DROP CONSTRAINT IF EXISTS chk_usuario_perfil;
@@ -20,7 +16,18 @@ ALTER TABLE usuario
 DROP CONSTRAINT IF EXISTS chk_usuario_universidade;
 
 
--- Novos perfis
+-- =========================================================
+-- 2. ATUALIZAR PERFIS ANTIGOS
+-- =========================================================
+
+UPDATE usuario
+SET perfil = 'consulta_institucional'
+WHERE perfil = 'consulta';
+
+
+-- =========================================================
+-- 3. CRIAR NOVA REGRA DE PERFIS
+-- =========================================================
 
 ALTER TABLE usuario
 ADD CONSTRAINT chk_usuario_perfil
@@ -35,7 +42,9 @@ CHECK (
 );
 
 
--- Regras de vínculo com universidade
+-- =========================================================
+-- 4. CRIAR NOVA REGRA DE UNIVERSIDADE
+-- =========================================================
 
 ALTER TABLE usuario
 ADD CONSTRAINT chk_usuario_universidade
@@ -60,3 +69,6 @@ CHECK (
         AND universidade_id IS NOT NULL
     )
 );
+
+
+COMMIT;
