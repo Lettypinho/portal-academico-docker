@@ -6,10 +6,10 @@ COPY package*.json ./
 
 RUN npm ci --omit=dev
 
-COPY server.js .
-COPY seed-admin.js .
+COPY src ./src
 COPY public ./public
+COPY seed-admin.js .
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "src/server.js"]
