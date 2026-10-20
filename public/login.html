@@ -1,93 +1,104 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Login | Portal Acadêmico</title>
+    <title>Login | SIA</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
-<body class="login-page">
+<body class="auth-page">
 
-    <div class="login-container">
+    <main class="auth-container">
 
-        <h1>Portal Acadêmico</h1>
+        <section class="auth-brand">
+            <div class="brand-logo">SIA</div>
 
-        <p>Entre para acessar o sistema</p>
+            <h1>
+                Sistema de Indicadores Acadêmicos
+            </h1>
 
-        <form id="form-login">
+            <p>
+                Dados acadêmicos transformados em indicadores
+                para melhores decisões.
+            </p>
+        </section>
 
-            <label>E-mail</label>
+        <section class="auth-card">
 
-            <input
-                type="email"
-                id="login-email"
-                required
-            >
+            <h2>Entrar</h2>
 
-            <label>Senha</label>
+            <p class="auth-subtitle">
+                Acesse sua conta para continuar.
+            </p>
 
-            <input
-                type="password"
-                id="login-senha"
-                required
-            >
+            <form id="form-login">
 
-            <button type="submit">
-                Entrar
-            </button>
+                <div class="form-group">
+                    <label for="email">
+                        E-mail
+                    </label>
 
-            <p id="login-erro"></p>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="seu@email.com"
+                        required
+                    >
+                </div>
 
-        </form>
+                <div class="form-group">
+                    <label for="senha">
+                        Senha
+                    </label>
 
-    </div>
+                    <div class="password-container">
+                        <input
+                            type="password"
+                            id="senha"
+                            placeholder="Digite sua senha"
+                            required
+                        >
 
-    <script>
-        document
-            .getElementById("form-login")
-            .addEventListener("submit", async (event) => {
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            data-target="senha"
+                        >
+                            Mostrar
+                        </button>
+                    </div>
+                </div>
 
-                event.preventDefault();
+                <div
+                    id="mensagem"
+                    class="form-message"
+                ></div>
 
-                const email =
-                    document.getElementById("login-email").value;
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    Entrar
+                </button>
 
-                const senha =
-                    document.getElementById("login-senha").value;
+            </form>
 
-                const resposta = await fetch("/api/login", {
-                    method: "POST",
+            <p class="auth-footer">
+                Ainda não possui uma conta?
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                <a href="/cadastro.html">
+                    Criar conta
+                </a>
+            </p>
 
-                    body: JSON.stringify({
-                        email,
-                        senha
-                    })
-                });
+        </section>
 
-                const dados = await resposta.json();
+    </main>
 
-                if (!resposta.ok) {
-                    document.getElementById("login-erro")
-                        .textContent = dados.erro;
-
-                    return;
-                }
-
-                window.location.href = "/index.html";
-            });
-    </script>
+    <script src="/js/auth.js"></script>
 
 </body>
-
 </html>

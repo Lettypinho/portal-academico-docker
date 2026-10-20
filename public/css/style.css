@@ -1,0 +1,490 @@
+/* =========================================================
+   SIA - Sistema de Indicadores Acadêmicos
+   Estilos principais
+   ========================================================= */
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    color: #1f2937;
+    background: #f4f7fb;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+
+/* =========================================================
+   PÁGINAS DE AUTENTICAÇÃO
+   ========================================================= */
+
+.auth-page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 32px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #172554 45%,
+            #1d4ed8 100%
+        );
+}
+
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+
+.auth-container {
+    width: 100%;
+    max-width: 1050px;
+    min-height: 620px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    background: #ffffff;
+
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 25px 60px
+        rgba(0, 0, 0, 0.25);
+}
+
+
+/* =========================================================
+   MARCA / APRESENTAÇÃO DO SIA
+   ========================================================= */
+
+.auth-brand {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 64px;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0f172a,
+            #172554,
+            #1e3a8a
+        );
+}
+
+.auth-brand::after {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    right: -120px;
+    bottom: -120px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.05);
+}
+
+.brand-logo {
+    width: 82px;
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 32px;
+
+    border-radius: 20px;
+
+    background: #2563eb;
+
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    box-shadow:
+        0 15px 30px
+        rgba(37, 99, 235, 0.35);
+}
+
+.auth-brand h1 {
+    max-width: 440px;
+
+    margin-bottom: 20px;
+
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 750;
+}
+
+.auth-brand p {
+    max-width: 430px;
+
+    color: #cbd5e1;
+
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.auth-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 64px;
+}
+
+.auth-card h2 {
+    margin-bottom: 8px;
+
+    color: #0f172a;
+
+    font-size: 30px;
+    font-weight: 750;
+}
+
+.auth-subtitle {
+    margin-bottom: 34px;
+
+    color: #64748b;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FORMULÁRIOS
+   ========================================================= */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    outline: none;
+
+    color: #0f172a;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s,
+        background 0.2s;
+}
+
+.form-group input::placeholder {
+    color: #94a3b8;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   SENHA
+   ========================================================= */
+
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    padding-right: 82px;
+}
+
+.toggle-password {
+    position: absolute;
+
+    top: 50%;
+    right: 10px;
+
+    transform: translateY(-50%);
+
+    padding: 6px 8px;
+
+    border: none;
+
+    color: #2563eb;
+    background: transparent;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.toggle-password:hover {
+    color: #1d4ed8;
+}
+
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+.btn-primary {
+    width: 100%;
+
+    margin-top: 8px;
+
+    padding: 14px 20px;
+
+    border: none;
+    border-radius: 9px;
+
+    color: #ffffff;
+    background: #2563eb;
+
+    font-weight: 700;
+
+    transition:
+        transform 0.15s,
+        background 0.2s,
+        box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+
+    box-shadow:
+        0 8px 20px
+        rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+
+/* =========================================================
+   MENSAGENS
+   ========================================================= */
+
+.form-message {
+    min-height: 22px;
+
+    margin: 5px 0 8px;
+
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.form-message.erro {
+    padding: 10px 12px;
+
+    border-radius: 7px;
+
+    color: #b91c1c;
+    background: #fef2f2;
+}
+
+.form-message.sucesso {
+    padding: 10px 12px;
+
+    border-radius: 7px;
+
+    color: #166534;
+    background: #f0fdf4;
+}
+
+.form-message:empty {
+    padding: 0;
+    margin-top: 0;
+}
+
+
+/* =========================================================
+   RODAPÉ DA AUTENTICAÇÃO
+   ========================================================= */
+
+.auth-footer {
+    margin-top: 28px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+.auth-footer a {
+    color: #2563eb;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .auth-page {
+        padding: 20px;
+    }
+
+    .auth-container {
+        max-width: 520px;
+
+        grid-template-columns: 1fr;
+    }
+
+    .auth-brand {
+        padding: 38px 34px;
+    }
+
+    .auth-brand h1 {
+        font-size: 29px;
+    }
+
+    .auth-brand p {
+        font-size: 15px;
+    }
+
+    .brand-logo {
+        width: 65px;
+        height: 65px;
+
+        margin-bottom: 22px;
+
+        font-size: 23px;
+    }
+
+    .auth-card {
+        padding: 42px 34px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .auth-page {
+        padding: 0;
+
+        align-items: stretch;
+    }
+
+    .auth-container {
+        min-height: 100vh;
+
+        border-radius: 0;
+    }
+
+    .auth-brand {
+        padding: 30px 24px;
+    }
+
+    .auth-brand h1 {
+        font-size: 25px;
+    }
+
+    .auth-brand p {
+        font-size: 14px;
+    }
+
+    .brand-logo {
+        width: 58px;
+        height: 58px;
+
+        margin-bottom: 18px;
+
+        border-radius: 15px;
+
+        font-size: 20px;
+    }
+
+    .auth-card {
+        padding: 36px 24px;
+    }
+
+    .auth-card h2 {
+        font-size: 26px;
+    }
+}
