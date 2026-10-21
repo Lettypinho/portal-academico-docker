@@ -3,18 +3,928 @@
 
 <head>
     <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Administração | SIA</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=6"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/admin.css?v=2"
+    >
 </head>
 
-<body>
+<body class="admin-page">
 
-    <h1>
-        Administração do SIA
-    </h1>
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
 
-    <p>
-        Painel do Super Administrador em desenvolvimento.
-    </p>
+    <aside class="admin-sidebar">
+
+        <div class="admin-brand">
+
+            <img
+                src="/assets/logo-sia.png"
+                alt="SIA"
+                class="admin-logo"
+            >
+
+            <span>
+                Administração da plataforma
+            </span>
+
+        </div>
+
+
+        <nav class="admin-menu">
+
+            <button
+                class="admin-menu-item active"
+                data-section="visao-geral"
+            >
+                <span>◫</span>
+                Visão geral
+            </button>
+
+
+            <button
+                class="admin-menu-item"
+                data-section="universidades"
+            >
+                <span>▦</span>
+                Instituições
+            </button>
+
+
+            <button
+                class="admin-menu-item"
+                data-section="usuarios"
+            >
+                <span>◎</span>
+                Usuários
+            </button>
+
+        </nav>
+
+
+        <div class="admin-sidebar-footer">
+
+            <div class="admin-user-info">
+
+                <strong id="admin-nome">
+                    Administrador
+                </strong>
+
+                <span>
+                    Super administrador
+                </span>
+
+            </div>
+
+
+            <button
+                id="btn-admin-logout"
+                class="admin-logout"
+            >
+                Sair
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTEÚDO
+         ===================================================== -->
+
+    <div class="admin-layout">
+
+        <header class="admin-header">
+
+            <div>
+
+                <span class="admin-eyebrow">
+                    SIA
+                </span>
+
+                <h1>
+                    Administração
+                </h1>
+
+                <p>
+                    Gerencie instituições de ensino superior,
+                    usuários e acessos da plataforma.
+                </p>
+
+            </div>
+
+
+            <div class="admin-security-badge">
+                🔐 Super administrador
+            </div>
+
+        </header>
+
+
+        <main class="admin-main">
+
+            <!-- =============================================
+                 VISÃO GERAL
+                 ============================================= -->
+
+            <section
+                id="visao-geral"
+                class="admin-section active"
+            >
+
+                <div class="admin-stats-grid">
+
+                    <article class="admin-stat-card">
+
+                        <span class="admin-stat-icon purple">
+                            ▦
+                        </span>
+
+                        <div>
+                            <span>Instituições</span>
+
+                            <strong id="stat-universidades">
+                                -
+                            </strong>
+
+                            <small id="stat-universidades-ativas">
+                                -
+                            </small>
+                        </div>
+
+                    </article>
+
+
+                    <article class="admin-stat-card">
+
+                        <span class="admin-stat-icon violet">
+                            ◎
+                        </span>
+
+                        <div>
+                            <span>Usuários</span>
+
+                            <strong id="stat-usuarios">
+                                -
+                            </strong>
+
+                            <small>
+                                contas cadastradas
+                            </small>
+                        </div>
+
+                    </article>
+
+
+                    <article class="admin-stat-card">
+
+                        <span class="admin-stat-icon blue">
+                            ◉
+                        </span>
+
+                        <div>
+                            <span>Acessos institucionais</span>
+
+                            <strong id="stat-institucionais">
+                                -
+                            </strong>
+
+                            <small>
+                                usuários vinculados a IES
+                            </small>
+                        </div>
+
+                    </article>
+
+
+                    <article class="admin-stat-card">
+
+                        <span class="admin-stat-icon green">
+                            ▤
+                        </span>
+
+                        <div>
+                            <span>Cursos</span>
+
+                            <strong id="stat-cursos">
+                                -
+                            </strong>
+
+                            <small>
+                                cursos cadastrados
+                            </small>
+                        </div>
+
+                    </article>
+
+
+                    <article class="admin-stat-card">
+
+                        <span class="admin-stat-icon orange">
+                            ◌
+                        </span>
+
+                        <div>
+                            <span>Alunos</span>
+
+                            <strong id="stat-alunos">
+                                -
+                            </strong>
+
+                            <small>
+                                registros institucionais
+                            </small>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div class="admin-dashboard-grid">
+
+                    <article class="admin-panel">
+
+                        <div class="admin-panel-header">
+
+                            <div>
+
+                                <span class="admin-panel-label">
+                                    Instituições
+                                </span>
+
+                                <h2>
+                                    IES recentes
+                                </h2>
+
+                            </div>
+
+                            <button
+                                class="admin-link-button"
+                                data-go-section="universidades"
+                            >
+                                Ver todas
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="universidades-recentes"
+                            class="admin-simple-list"
+                        >
+                            Carregando...
+                        </div>
+
+                    </article>
+
+
+                    <article class="admin-panel">
+
+                        <div class="admin-panel-header">
+
+                            <div>
+
+                                <span class="admin-panel-label">
+                                    Contas
+                                </span>
+
+                                <h2>
+                                    Usuários recentes
+                                </h2>
+
+                            </div>
+
+                            <button
+                                class="admin-link-button"
+                                data-go-section="usuarios"
+                            >
+                                Ver todos
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="usuarios-recentes"
+                            class="admin-simple-list"
+                        >
+                            Carregando...
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 INSTITUIÇÕES
+                 ============================================= -->
+
+            <section
+                id="universidades"
+                class="admin-section"
+            >
+
+                <div class="admin-section-header">
+
+                    <div>
+
+                        <span class="admin-eyebrow">
+                            Instituições de Ensino Superior
+                        </span>
+
+                        <h2>
+                            Instituições
+                        </h2>
+
+                        <p>
+                            Gerencie as IES disponíveis
+                            na plataforma.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        id="btn-nova-universidade"
+                        class="admin-primary-button"
+                    >
+                        + Nova instituição
+                    </button>
+
+                </div>
+
+
+                <!-- FORMULÁRIO -->
+
+                <div
+                    id="form-universidade-container"
+                    class="admin-form-panel hidden"
+                >
+
+                    <div class="admin-panel-header">
+
+                        <div>
+                            <span class="admin-panel-label">
+                                Cadastro
+                            </span>
+
+                            <h2>
+                                Nova instituição
+                            </h2>
+                        </div>
+
+                        <button
+                            id="btn-fechar-universidade"
+                            class="admin-close-button"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+
+                    <form id="form-universidade">
+
+                        <div class="admin-form-grid">
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-codigo">
+                                    Código da IES
+                                </label>
+
+                                <input
+                                    id="universidade-codigo"
+                                    type="text"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-nome">
+                                    Nome da instituição
+                                </label>
+
+                                <input
+                                    id="universidade-nome"
+                                    type="text"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-sigla">
+                                    Sigla
+                                </label>
+
+                                <input
+                                    id="universidade-sigla"
+                                    type="text"
+                                >
+
+                            </div>
+
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-organizacao">
+                                    Organização acadêmica
+                                </label>
+
+                                <select id="universidade-organizacao">
+
+                                    <option value="">
+                                        Selecione
+                                    </option>
+
+                                    <option value="Universidade">
+                                        Universidade
+                                    </option>
+
+                                    <option value="Centro Universitário">
+                                        Centro Universitário
+                                    </option>
+
+                                    <option value="Faculdade">
+                                        Faculdade
+                                    </option>
+
+                                    <option value="Instituto Federal">
+                                        Instituto Federal
+                                    </option>
+
+                                    <option value="Centro Federal de Educação Tecnológica">
+                                        Cefet
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-categoria">
+                                    Categoria administrativa
+                                </label>
+
+                                <select id="universidade-categoria">
+
+                                    <option value="">
+                                        Selecione
+                                    </option>
+
+                                    <option value="Pública Federal">
+                                        Pública Federal
+                                    </option>
+
+                                    <option value="Pública Estadual">
+                                        Pública Estadual
+                                    </option>
+
+                                    <option value="Pública Municipal">
+                                        Pública Municipal
+                                    </option>
+
+                                    <option value="Privada com fins lucrativos">
+                                        Privada com fins lucrativos
+                                    </option>
+
+                                    <option value="Privada sem fins lucrativos">
+                                        Privada sem fins lucrativos
+                                    </option>
+
+                                    <option value="Especial">
+                                        Especial
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-cidade">
+                                    Cidade
+                                </label>
+
+                                <input
+                                    id="universidade-cidade"
+                                    type="text"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="admin-form-group">
+
+                                <label for="universidade-estado">
+                                    Estado
+                                </label>
+
+                                <input
+                                    id="universidade-estado"
+                                    type="text"
+                                    maxlength="2"
+                                    placeholder="AL"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="mensagem-universidade"
+                            class="admin-message"
+                        ></div>
+
+
+                        <div class="admin-form-actions">
+
+                            <button
+                                type="button"
+                                id="btn-cancelar-universidade"
+                                class="admin-secondary-button"
+                            >
+                                Cancelar
+                            </button>
+
+
+                            <button
+                                type="submit"
+                                class="admin-primary-button"
+                            >
+                                Cadastrar instituição
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="admin-toolbar">
+
+                    <input
+                        type="text"
+                        id="busca-universidades"
+                        placeholder="Pesquisar instituição, sigla, cidade, estado ou tipo..."
+                    >
+
+                </div>
+
+
+                <div class="admin-panel">
+
+                    <div class="admin-table-container">
+
+                        <table class="admin-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Instituição</th>
+                                    <th>Tipo</th>
+                                    <th>Categoria</th>
+                                    <th>Localização</th>
+                                    <th>Cursos</th>
+                                    <th>Usuários</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tabela-universidades">
+
+                                <tr>
+                                    <td colspan="8">
+                                        Carregando...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 USUÁRIOS
+                 ============================================= -->
+
+            <section
+                id="usuarios"
+                class="admin-section"
+            >
+
+                <div class="admin-section-header">
+
+                    <div>
+
+                        <span class="admin-eyebrow">
+                            Controle de acesso
+                        </span>
+
+                        <h2>
+                            Usuários
+                        </h2>
+
+                        <p>
+                            Consulte contas e gerencie
+                            acessos institucionais.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-toolbar admin-toolbar-users">
+
+                    <input
+                        type="text"
+                        id="busca-usuarios"
+                        placeholder="Pesquisar por nome, e-mail ou instituição..."
+                    >
+
+
+                    <select id="filtro-perfil">
+
+                        <option value="">
+                            Todos os perfis
+                        </option>
+
+                        <option value="publico">
+                            Público
+                        </option>
+
+                        <option value="consulta_institucional">
+                            Consulta institucional
+                        </option>
+
+                        <option value="gestor">
+                            Gestor
+                        </option>
+
+                        <option value="admin_universidade">
+                            Administrador da instituição
+                        </option>
+
+                        <option value="super_admin">
+                            Super administrador
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="admin-panel">
+
+                    <div class="admin-table-container">
+
+                        <table class="admin-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Perfil</th>
+                                    <th>Instituição</th>
+                                    <th>Status</th>
+                                    <th>Cadastrado em</th>
+                                    <th>Ação</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tabela-usuarios">
+
+                                <tr>
+                                    <td colspan="6">
+                                        Carregando...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         MODAL USUÁRIO
+         ===================================================== -->
+
+    <div
+        id="modal-usuario"
+        class="admin-modal hidden"
+    >
+
+        <div class="admin-modal-backdrop"></div>
+
+
+        <div class="admin-modal-card">
+
+            <div class="admin-panel-header">
+
+                <div>
+
+                    <span class="admin-panel-label">
+                        Controle de acesso
+                    </span>
+
+                    <h2>
+                        Editar usuário
+                    </h2>
+
+                </div>
+
+
+                <button
+                    id="btn-fechar-modal"
+                    class="admin-close-button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="admin-user-preview">
+
+                <strong id="modal-usuario-nome">
+                    -
+                </strong>
+
+                <span id="modal-usuario-email">
+                    -
+                </span>
+
+            </div>
+
+
+            <form id="form-editar-usuario">
+
+                <input
+                    type="hidden"
+                    id="modal-usuario-id"
+                >
+
+
+                <div class="admin-form-group">
+
+                    <label for="modal-perfil">
+                        Perfil
+                    </label>
+
+                    <select id="modal-perfil">
+
+                        <option value="publico">
+                            Público
+                        </option>
+
+                        <option value="consulta_institucional">
+                            Consulta institucional
+                        </option>
+
+                        <option value="gestor">
+                            Gestor
+                        </option>
+
+                        <option value="admin_universidade">
+                            Administrador da instituição
+                        </option>
+
+                        <option value="super_admin">
+                            Super administrador
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    id="grupo-modal-universidade"
+                    class="admin-form-group"
+                >
+
+                    <label for="modal-universidade">
+                        Instituição
+                    </label>
+
+                    <select id="modal-universidade">
+
+                        <option value="">
+                            Selecione
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="admin-form-group">
+
+                    <label for="modal-ativo">
+                        Status da conta
+                    </label>
+
+                    <select id="modal-ativo">
+
+                        <option value="true">
+                            Ativo
+                        </option>
+
+                        <option value="false">
+                            Desativado
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    id="mensagem-editar-usuario"
+                    class="admin-message"
+                ></div>
+
+
+                <div class="admin-form-actions">
+
+                    <button
+                        type="button"
+                        id="btn-cancelar-modal"
+                        class="admin-secondary-button"
+                    >
+                        Cancelar
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="admin-primary-button"
+                    >
+                        Salvar alterações
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="/js/admin.js?v=2"></script>
 
 </body>
 

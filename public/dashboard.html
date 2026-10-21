@@ -2,19 +2,882 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
-    <title>Dashboard | SIA</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Dashboard Institucional | SIA</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=6"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/css/dashboard.css?v=3"
+    >
+
 </head>
 
-<body>
+<body class="dashboard-page">
 
-    <h1>
-        Dashboard Institucional
-    </h1>
 
-    <p>
-        Área institucional em desenvolvimento.
-    </p>
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside class="dashboard-sidebar">
+
+        <div class="dashboard-brand">
+
+            <img
+                src="/assets/logo-sia.png"
+                alt="SIA"
+                class="dashboard-logo"
+            >
+
+            <span>
+                Área institucional
+            </span>
+
+        </div>
+
+
+        <div class="dashboard-institution-box">
+
+            <span class="dashboard-institution-label">
+                Instituição vinculada
+            </span>
+
+            <strong id="sidebar-instituicao">
+                Carregando...
+            </strong>
+
+            <small id="sidebar-instituicao-codigo">
+                -
+            </small>
+
+        </div>
+
+
+        <nav class="dashboard-nav">
+
+            <button
+                class="dashboard-nav-item active"
+                data-section="visao-geral"
+            >
+                <span>◫</span>
+                Visão geral
+            </button>
+
+
+            <button
+                class="dashboard-nav-item"
+                data-section="cursos"
+            >
+                <span>▤</span>
+                Cursos
+            </button>
+
+
+            <button
+                class="dashboard-nav-item"
+                data-section="disciplinas"
+            >
+                <span>▦</span>
+                Disciplinas
+            </button>
+
+
+            <button
+                class="dashboard-nav-item"
+                data-section="alunos"
+            >
+                <span>◎</span>
+                Alunos
+            </button>
+
+        </nav>
+
+
+        <div class="dashboard-sidebar-footer">
+
+            <div class="dashboard-user">
+
+                <strong id="dashboard-usuario-nome">
+                    Usuário
+                </strong>
+
+                <span id="dashboard-usuario-perfil">
+                    -
+                </span>
+
+            </div>
+
+
+            <button
+                id="btn-dashboard-logout"
+                class="dashboard-logout"
+            >
+                Sair
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTEÚDO
+         ===================================================== -->
+
+    <div class="dashboard-layout">
+
+
+        <!-- =================================================
+             CABEÇALHO
+             ================================================= -->
+
+        <header class="dashboard-header">
+
+            <div>
+
+                <span class="dashboard-eyebrow">
+                    Indicadores institucionais
+                </span>
+
+                <h1 id="dashboard-instituicao-nome">
+                    Carregando instituição...
+                </h1>
+
+                <p id="dashboard-instituicao-detalhes">
+                    Dados acadêmicos da instituição vinculada.
+                </p>
+
+            </div>
+
+
+            <div class="dashboard-header-actions">
+
+                <div class="dashboard-period">
+
+                    <div class="dashboard-form-group">
+
+                        <label for="dashboard-ano">
+                            Ano
+                        </label>
+
+                        <select id="dashboard-ano">
+
+                            <option value="2026">
+                                2026
+                            </option>
+
+                            <option value="2025">
+                                2025
+                            </option>
+
+                            <option value="2024">
+                                2024
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="dashboard-form-group">
+
+                        <label for="dashboard-semestre">
+                            Semestre
+                        </label>
+
+                        <select id="dashboard-semestre">
+
+                            <option value="1">
+                                1º
+                            </option>
+
+                            <option value="2">
+                                2º
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <span class="dashboard-private-badge">
+                    🔒 Dados institucionais
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             AVISO DOS DADOS
+             ================================================= -->
+
+        <div class="dashboard-data-notice">
+
+            <div class="dashboard-data-notice-icon">
+                i
+            </div>
+
+            <div>
+
+                <strong>
+                    Sobre os dados exibidos
+                </strong>
+
+                <p>
+                    O catálogo de instituições e cursos pode
+                    utilizar dados do Censo da Educação Superior
+                    do Inep. Indicadores acadêmicos utilizados
+                    nesta versão de demonstração não representam
+                    resultados oficiais das instituições.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <main class="dashboard-main">
+
+
+            <!-- =============================================
+                 VISÃO GERAL
+                 ============================================= -->
+
+            <section
+                id="visao-geral"
+                class="dashboard-section active"
+            >
+
+                <div class="dashboard-stats-grid">
+
+                    <article class="dashboard-stat-card">
+
+                        <span class="dashboard-stat-label">
+                            Cursos
+                        </span>
+
+                        <strong id="stat-total-cursos">
+                            -
+                        </strong>
+
+                        <small>
+                            cadastrados na instituição
+                        </small>
+
+                    </article>
+
+
+                    <article class="dashboard-stat-card">
+
+                        <span class="dashboard-stat-label">
+                            Disciplinas
+                        </span>
+
+                        <strong id="stat-total-disciplinas">
+                            -
+                        </strong>
+
+                        <small>
+                            registros acadêmicos
+                        </small>
+
+                    </article>
+
+
+                    <article class="dashboard-stat-card">
+
+                        <span class="dashboard-stat-label">
+                            Alunos
+                        </span>
+
+                        <strong id="stat-total-alunos">
+                            -
+                        </strong>
+
+                        <small>
+                            registros institucionais
+                        </small>
+
+                    </article>
+
+
+                    <article class="dashboard-stat-card highlight">
+
+                        <span class="dashboard-stat-label">
+                            Média geral
+                        </span>
+
+                        <strong id="stat-media-geral">
+                            -
+                        </strong>
+
+                        <small id="stat-periodo-media">
+                            período selecionado
+                        </small>
+
+                    </article>
+
+
+                    <article class="dashboard-stat-card">
+
+                        <span class="dashboard-stat-label">
+                            Aprovação
+                        </span>
+
+                        <strong id="stat-aprovacao">
+                            -
+                        </strong>
+
+                        <small>
+                            no período selecionado
+                        </small>
+
+                    </article>
+
+
+                    <article class="dashboard-stat-card">
+
+                        <span class="dashboard-stat-label">
+                            Frequência média
+                        </span>
+
+                        <strong id="stat-frequencia">
+                            -
+                        </strong>
+
+                        <small>
+                            no período selecionado
+                        </small>
+
+                    </article>
+
+                </div>
+
+
+                <div class="dashboard-grid-two">
+
+                    <!-- SITUAÇÃO DOS ALUNOS -->
+
+                    <article class="dashboard-panel">
+
+                        <div class="dashboard-panel-header">
+
+                            <div>
+
+                                <span class="dashboard-panel-label">
+                                    Alunos
+                                </span>
+
+                                <h2>
+                                    Situação atual
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="student-progress-list">
+
+                            <div class="student-progress-item">
+
+                                <div class="student-progress-header">
+
+                                    <span>
+                                        Ativos
+                                    </span>
+
+                                    <strong id="alunos-ativos">
+                                        -
+                                    </strong>
+
+                                </div>
+
+                                <div class="student-progress-track">
+                                    <span
+                                        id="barra-ativos"
+                                        class="student-progress-bar"
+                                    ></span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="student-progress-item">
+
+                                <div class="student-progress-header">
+
+                                    <span>
+                                        Trancados
+                                    </span>
+
+                                    <strong id="alunos-trancados">
+                                        -
+                                    </strong>
+
+                                </div>
+
+                                <div class="student-progress-track">
+                                    <span
+                                        id="barra-trancados"
+                                        class="student-progress-bar"
+                                    ></span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="student-progress-item">
+
+                                <div class="student-progress-header">
+
+                                    <span>
+                                        Formados
+                                    </span>
+
+                                    <strong id="alunos-formados">
+                                        -
+                                    </strong>
+
+                                </div>
+
+                                <div class="student-progress-track">
+                                    <span
+                                        id="barra-formados"
+                                        class="student-progress-bar"
+                                    ></span>
+                                </div>
+
+                            </div>
+
+
+                            <div class="student-progress-item">
+
+                                <div class="student-progress-header">
+
+                                    <span>
+                                        Evadidos
+                                    </span>
+
+                                    <strong id="alunos-evadidos">
+                                        -
+                                    </strong>
+
+                                </div>
+
+                                <div class="student-progress-track">
+                                    <span
+                                        id="barra-evadidos"
+                                        class="student-progress-bar"
+                                    ></span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- DESEMPENHO -->
+
+                    <article class="dashboard-panel">
+
+                        <div class="dashboard-panel-header">
+
+                            <div>
+
+                                <span class="dashboard-panel-label">
+                                    Desempenho
+                                </span>
+
+                                <h2>
+                                    Resumo do período
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-performance">
+
+                            <div class="performance-item">
+
+                                <span>
+                                    Alunos avaliados
+                                </span>
+
+                                <strong id="indicador-alunos-avaliados">
+                                    -
+                                </strong>
+
+                            </div>
+
+
+                            <div class="performance-item">
+
+                                <span>
+                                    Cursos com resultados
+                                </span>
+
+                                <strong id="indicador-cursos-resultados">
+                                    -
+                                </strong>
+
+                            </div>
+
+
+                            <div class="performance-item">
+
+                                <span>
+                                    Aprovação
+                                </span>
+
+                                <strong id="indicador-aprovacao">
+                                    -
+                                </strong>
+
+                            </div>
+
+
+                            <div class="performance-item">
+
+                                <span>
+                                    Reprovação
+                                </span>
+
+                                <strong id="indicador-reprovacao">
+                                    -
+                                </strong>
+
+                            </div>
+
+
+                            <div class="performance-item">
+
+                                <span>
+                                    Frequência
+                                </span>
+
+                                <strong id="indicador-frequencia">
+                                    -
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 CURSOS
+                 ============================================= -->
+
+            <section
+                id="cursos"
+                class="dashboard-section"
+            >
+
+                <div class="dashboard-section-header">
+
+                    <div>
+
+                        <span class="dashboard-eyebrow">
+                            Graduação
+                        </span>
+
+                        <h2>
+                            Cursos da instituição
+                        </h2>
+
+                        <p>
+                            Bacharelados, licenciaturas e
+                            cursos superiores de tecnologia.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-toolbar">
+
+                    <input
+                        type="text"
+                        id="busca-dashboard-cursos"
+                        placeholder="Pesquisar curso, grau ou modalidade..."
+                    >
+
+                </div>
+
+
+                <div class="dashboard-panel">
+
+                    <div class="dashboard-table-container">
+
+                        <table class="dashboard-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Curso</th>
+                                    <th>Grau</th>
+                                    <th>Modalidade</th>
+                                    <th>Carga/duração</th>
+                                    <th>Média</th>
+                                    <th>Aprovação</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tabela-dashboard-cursos">
+
+                                <tr>
+                                    <td colspan="6">
+                                        Carregando...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 DISCIPLINAS
+                 ============================================= -->
+
+            <section
+                id="disciplinas"
+                class="dashboard-section"
+            >
+
+                <div class="dashboard-section-header">
+
+                    <div>
+
+                        <span class="dashboard-eyebrow">
+                            Indicadores acadêmicos
+                        </span>
+
+                        <h2>
+                            Disciplinas
+                        </h2>
+
+                        <p>
+                            Resultados agregados das disciplinas
+                            no período selecionado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-panel">
+
+                    <div class="dashboard-table-container">
+
+                        <table class="dashboard-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Disciplina</th>
+                                    <th>Curso</th>
+                                    <th>Média</th>
+                                    <th>Aprovação</th>
+                                    <th>Reprovação</th>
+                                    <th>Frequência</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tabela-dashboard-disciplinas">
+
+                                <tr>
+                                    <td colspan="6">
+                                        Carregando...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 ALUNOS
+                 ============================================= -->
+
+            <section
+                id="alunos"
+                class="dashboard-section"
+            >
+
+                <div class="dashboard-section-header">
+
+                    <div>
+
+                        <span class="dashboard-eyebrow">
+                            Visão institucional
+                        </span>
+
+                        <h2>
+                            Situação dos alunos
+                        </h2>
+
+                        <p>
+                            Informações agregadas. Dados
+                            pessoais dos estudantes não são
+                            exibidos nesta visão.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-student-grid">
+
+                    <article class="dashboard-student-card">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <strong id="card-alunos-total">
+                            -
+                        </strong>
+
+                    </article>
+
+
+                    <article class="dashboard-student-card">
+
+                        <span>
+                            Ativos
+                        </span>
+
+                        <strong id="card-alunos-ativos">
+                            -
+                        </strong>
+
+                    </article>
+
+
+                    <article class="dashboard-student-card">
+
+                        <span>
+                            Trancados
+                        </span>
+
+                        <strong id="card-alunos-trancados">
+                            -
+                        </strong>
+
+                    </article>
+
+
+                    <article class="dashboard-student-card">
+
+                        <span>
+                            Formados
+                        </span>
+
+                        <strong id="card-alunos-formados">
+                            -
+                        </strong>
+
+                    </article>
+
+
+                    <article class="dashboard-student-card">
+
+                        <span>
+                            Evadidos
+                        </span>
+
+                        <strong id="card-alunos-evadidos">
+                            -
+                        </strong>
+
+                    </article>
+
+
+                    <article class="dashboard-student-card">
+
+                        <span>
+                            Taxa atual de evasão
+                        </span>
+
+                        <strong id="card-taxa-evasao">
+                            -
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+                <div class="dashboard-privacy-notice">
+
+                    <strong>
+                        Privacidade
+                    </strong>
+
+                    <p>
+                        O dashboard utiliza informações
+                        agregadas para apoiar a gestão.
+                        Matrículas, e-mails, notas individuais
+                        e demais dados pessoais não são
+                        apresentados nesta tela.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="/js/dashboard.js?v=3"></script>
 
 </body>
 

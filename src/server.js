@@ -1,31 +1,80 @@
-const express = require("express");
-const session = require("express-session");
-const path = require("path");
+const express =
+    require("express");
 
-const universidadesRoutes = require("./routes/universidades.routes");
-const authRoutes = require("./routes/auth.routes");
-const cursosRoutes =  require("./routes/cursos.routes");
-const indicadoresRoutes = require("./routes/indicadores.routes");
+const session =
+    require("express-session");
 
-const app = express();
+const path =
+    require("path");
 
-const PORT = process.env.PORT || 3000;
+
+const universidadesRoutes =
+    require(
+        "./routes/universidades.routes"
+    );
+
+const authRoutes =
+    require(
+        "./routes/auth.routes"
+    );
+
+const cursosRoutes =
+    require(
+        "./routes/cursos.routes"
+    );
+
+const indicadoresRoutes =
+    require(
+        "./routes/indicadores.routes"
+    );
+
+const adminRoutes =
+    require(
+        "./routes/admin.routes"
+    );
+
+
+const app =
+    express();
+
+
+const PORT =
+    process.env.PORT ||
+    3000;
 
 
 // =========================================================
 // MIDDLEWARES
 // =========================================================
 
-app.use(express.json());
+app.use(
+    express.json()
+);
+
 
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "segredo-apenas-desenvolvimento",
-        resave: false,
-        saveUninitialized: false,
+
+        secret:
+            process.env
+                .SESSION_SECRET ||
+            "segredo-apenas-desenvolvimento",
+
+        resave:
+            false,
+
+        saveUninitialized:
+            false,
+
         cookie: {
-            httpOnly: true,
-            maxAge: 1000 * 60 * 60
+
+            httpOnly:
+                true,
+
+            maxAge:
+                1000 *
+                60 *
+                60
         }
     })
 );
@@ -37,7 +86,10 @@ app.use(
 
 app.use(
     express.static(
-        path.join(__dirname, "../public")
+        path.join(
+            __dirname,
+            "../public"
+        )
     )
 );
 
@@ -51,37 +103,61 @@ app.use(
     authRoutes
 );
 
+
 app.use(
     "/api/universidades",
     universidadesRoutes
 );
+
 
 app.use(
     "/api/cursos",
     cursosRoutes
 );
 
+
 app.use(
     "/api/indicadores",
     indicadoresRoutes
 );
 
+
+app.use(
+    "/api/admin",
+    adminRoutes
+);
+
+
 // =========================================================
 // TESTE DA API
 // =========================================================
 
-app.get("/api/status", (req, res) => {
-    res.json({
-        sistema: "SIA",
-        status: "online"
-    });
-});
+app.get(
+    "/api/status",
+    (req, res) => {
+
+        res.json({
+            sistema:
+                "SIA",
+
+            status:
+                "online"
+        });
+    }
+);
 
 
 // =========================================================
 // SERVIDOR
 // =========================================================
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`SIA rodando na porta ${PORT}`);
-});
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
+
+        console.log(
+            `SIA rodando na porta ${PORT}`
+        );
+    }
+);

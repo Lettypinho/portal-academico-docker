@@ -14,7 +14,7 @@
 
     <link
         rel="stylesheet"
-        href="/css/style.css?v=3"
+        href="/css/style.css?v=5"
     >
 
 </head>
@@ -38,6 +38,7 @@
                 >
 
             </div>
+
 
             <div class="topbar-description">
 
@@ -68,6 +69,7 @@
 
             </div>
 
+
             <button
                 id="btn-logout"
                 class="btn-logout"
@@ -93,12 +95,14 @@
             Início
         </button>
 
+
         <button
             class="nav-item"
             data-section="universidades"
         >
-            Universidades
+            Instituições
         </button>
+
 
         <button
             class="nav-item"
@@ -106,6 +110,7 @@
         >
             Cursos
         </button>
+
 
         <button
             class="nav-item"
@@ -141,17 +146,20 @@
                         Inteligência acadêmica
                     </span>
 
+
                     <h1>
-                        Compare cursos e conheça
-                        o desempenho das instituições.
+                        Conheça instituições e compare
+                        indicadores acadêmicos.
                     </h1>
 
+
                     <p>
-                        Explore indicadores acadêmicos,
-                        pesquise universidades e compare
-                        cursos equivalentes de diferentes
-                        instituições de ensino.
+                        Consulte instituições de ensino superior
+                        e cursos de graduação em todo o Brasil.
+                        Explore bacharelados, licenciaturas e
+                        cursos superiores de tecnologia.
                     </p>
+
 
                     <button
                         class="btn-primary btn-auto"
@@ -162,17 +170,21 @@
 
                 </div>
 
+
                 <div class="hero-decoration">
 
                     <div class="hero-stat">
 
-                        <strong>Dados</strong>
+                        <strong>
+                            Dados
+                        </strong>
 
                         <span>
                             transformados em indicadores
                         </span>
 
                     </div>
+
 
                     <div class="hero-chart">
 
@@ -193,16 +205,19 @@
                 <div>
 
                     <span class="section-eyebrow">
-                        Instituições
+                        Instituições de Ensino Superior
                     </span>
 
+
                     <h2>
-                        Universidades participantes
+                        Explore as IES brasileiras
                     </h2>
 
+
                     <p>
-                        Conheça algumas das instituições
-                        disponíveis atualmente no SIA.
+                        Consulte instituições cadastradas
+                        a partir da base oficial do Censo
+                        da Educação Superior.
                     </p>
 
                 </div>
@@ -221,7 +236,7 @@
 
 
         <!-- =================================================
-             UNIVERSIDADES
+             INSTITUIÇÕES
              ================================================= -->
 
         <section
@@ -234,16 +249,19 @@
                 <div>
 
                     <span class="section-eyebrow">
-                        Instituições
+                        Instituições de Ensino Superior
                     </span>
 
+
                     <h2>
-                        Universidades
+                        Instituições
                     </h2>
 
+
                     <p>
-                        Consulte as instituições participantes
-                        do Sistema de Indicadores Acadêmicos.
+                        Consulte universidades, institutos
+                        federais, centros universitários,
+                        faculdades e Cefets.
                     </p>
 
                 </div>
@@ -256,7 +274,7 @@
                 <input
                     type="text"
                     id="busca-universidade"
-                    placeholder="Pesquisar por nome, sigla, cidade ou estado..."
+                    placeholder="Pesquisar instituição, sigla, cidade, estado ou tipo..."
                 >
 
             </div>
@@ -287,13 +305,16 @@
                         Graduação
                     </span>
 
+
                     <h2>
-                        Cursos
+                        Cursos superiores
                     </h2>
 
+
                     <p>
-                        Pesquise cursos oferecidos pelas
-                        universidades cadastradas.
+                        Consulte bacharelados, licenciaturas
+                        e cursos superiores de tecnologia
+                        oferecidos pelas IES.
                     </p>
 
                 </div>
@@ -306,7 +327,7 @@
                 <input
                     type="text"
                     id="busca-curso"
-                    placeholder="Pesquisar curso, universidade, modalidade ou estado..."
+                    placeholder="Pesquisar curso, instituição, grau, modalidade ou estado..."
                 >
 
             </div>
@@ -337,13 +358,16 @@
                         Benchmark acadêmico
                     </span>
 
+
                     <h2>
                         Comparar cursos
                     </h2>
 
+
                     <p>
-                        Compare indicadores públicos do mesmo
-                        curso entre diferentes universidades.
+                        Compare indicadores acadêmicos
+                        disponíveis entre diferentes
+                        instituições.
                     </p>
 
                 </div>
@@ -359,6 +383,7 @@
                         Curso
                     </label>
 
+
                     <select id="curso-comparacao">
 
                         <option value="">
@@ -372,9 +397,36 @@
 
                 <div class="form-group">
 
+                    <label for="modalidade-comparacao">
+                        Modalidade
+                    </label>
+
+
+                    <select id="modalidade-comparacao">
+
+                        <option value="">
+                            Todas
+                        </option>
+
+                        <option value="Presencial">
+                            Presencial
+                        </option>
+
+                        <option value="EAD">
+                            EAD
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
                     <label for="ano-comparacao">
                         Ano
                     </label>
+
 
                     <select id="ano-comparacao">
 
@@ -392,6 +444,7 @@
                     <label for="semestre-comparacao">
                         Semestre
                     </label>
+
 
                     <select id="semestre-comparacao">
 
@@ -418,6 +471,21 @@
             </div>
 
 
+            <div class="public-data-notice">
+
+                <strong>
+                    Sobre os indicadores
+                </strong>
+
+                <span>
+                    Dados acadêmicos de demonstração são
+                    identificados como não oficiais quando
+                    utilizados para apresentação do SIA.
+                </span>
+
+            </div>
+
+
             <div
                 id="resultado-comparacao"
                 class="comparison-area"
@@ -429,14 +497,16 @@
                         SIA
                     </div>
 
+
                     <h3>
                         Selecione um curso
                     </h3>
 
+
                     <p>
                         Escolha o curso e o período para
                         visualizar a comparação entre
-                        universidades.
+                        instituições.
                     </p>
 
                 </div>
@@ -454,6 +524,7 @@
             SIA — Sistema de Indicadores Acadêmicos
         </span>
 
+
         <small>
             Dados acadêmicos transformados em
             indicadores para melhores decisões.
@@ -462,7 +533,7 @@
     </footer>
 
 
-    <script src="/js/explorar.js"></script>
+    <script src="/js/explorar.js?v=5"></script>
 
 </body>
 
