@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -14,17 +13,11 @@
 
     <link
         rel="stylesheet"
-        href="/css/style.css?v=5"
+        href="/css/style.css?v=6"
     >
-
 </head>
 
 <body class="sia-page">
-
-
-    <!-- =====================================================
-         TOPO
-         ===================================================== -->
 
     <header class="topbar">
 
@@ -39,7 +32,6 @@
 
             </div>
 
-
             <div class="topbar-description">
 
                 <strong>
@@ -47,7 +39,7 @@
                 </strong>
 
                 <span>
-                    Indicadores e comparações acadêmicas
+                    Dados oficiais e indicadores acadêmicos
                 </span>
 
             </div>
@@ -82,10 +74,6 @@
     </header>
 
 
-    <!-- =====================================================
-         NAVEGAÇÃO
-         ===================================================== -->
-
     <nav class="public-nav">
 
         <button
@@ -95,7 +83,6 @@
             Início
         </button>
 
-
         <button
             class="nav-item"
             data-section="universidades"
@@ -103,14 +90,12 @@
             Instituições
         </button>
 
-
         <button
             class="nav-item"
             data-section="cursos"
         >
             Cursos
         </button>
-
 
         <button
             class="nav-item"
@@ -121,10 +106,6 @@
 
     </nav>
 
-
-    <!-- =====================================================
-         CONTEÚDO
-         ===================================================== -->
 
     <main class="public-main">
 
@@ -146,20 +127,17 @@
                         Inteligência acadêmica
                     </span>
 
-
                     <h1>
                         Conheça instituições e compare
-                        indicadores acadêmicos.
+                        indicadores oficiais da educação superior.
                     </h1>
 
-
                     <p>
-                        Consulte instituições de ensino superior
-                        e cursos de graduação em todo o Brasil.
-                        Explore bacharelados, licenciaturas e
-                        cursos superiores de tecnologia.
+                        Consulte Instituições de Educação Superior
+                        e cursos de graduação de todo o Brasil.
+                        A área pública do SIA utiliza dados oficiais
+                        do Inep.
                     </p>
-
 
                     <button
                         class="btn-primary btn-auto"
@@ -176,11 +154,11 @@
                     <div class="hero-stat">
 
                         <strong>
-                            Dados
+                            Inep
                         </strong>
 
                         <span>
-                            transformados em indicadores
+                            dados oficiais transformados em indicadores
                         </span>
 
                     </div>
@@ -200,24 +178,29 @@
             </div>
 
 
+            <div
+                id="resumo-inep"
+                class="public-data-notice"
+            >
+                Carregando resumo da base oficial...
+            </div>
+
+
             <div class="section-header">
 
                 <div>
 
                     <span class="section-eyebrow">
-                        Instituições de Ensino Superior
+                        Instituições de Educação Superior
                     </span>
-
 
                     <h2>
                         Explore as IES brasileiras
                     </h2>
 
-
                     <p>
                         Consulte instituições cadastradas
-                        a partir da base oficial do Censo
-                        da Educação Superior.
+                        a partir do Censo da Educação Superior.
                     </p>
 
                 </div>
@@ -249,14 +232,12 @@
                 <div>
 
                     <span class="section-eyebrow">
-                        Instituições de Ensino Superior
+                        Instituições de Educação Superior
                     </span>
-
 
                     <h2>
                         Instituições
                     </h2>
-
 
                     <p>
                         Consulte universidades, institutos
@@ -305,16 +286,14 @@
                         Graduação
                     </span>
 
-
                     <h2>
                         Cursos superiores
                     </h2>
 
-
                     <p>
-                        Consulte bacharelados, licenciaturas
+                        Pesquise bacharelados, licenciaturas
                         e cursos superiores de tecnologia
-                        oferecidos pelas IES.
+                        cadastrados na base do SIA.
                     </p>
 
                 </div>
@@ -327,7 +306,7 @@
                 <input
                     type="text"
                     id="busca-curso"
-                    placeholder="Pesquisar curso, instituição, grau, modalidade ou estado..."
+                    placeholder="Digite ao menos 2 caracteres do nome do curso..."
                 >
 
             </div>
@@ -336,13 +315,28 @@
             <div
                 id="lista-cursos"
                 class="course-list"
-            ></div>
+            >
+
+                <div class="empty-state">
+
+                    <h3>
+                        Pesquise um curso
+                    </h3>
+
+                    <p>
+                        Digite ao menos 2 caracteres para consultar
+                        a base nacional.
+                    </p>
+
+                </div>
+
+            </div>
 
         </section>
 
 
         <!-- =================================================
-             COMPARAÇÃO
+             COMPARAÇÃO OFICIAL
              ================================================= -->
 
         <section
@@ -355,19 +349,16 @@
                 <div>
 
                     <span class="section-eyebrow">
-                        Benchmark acadêmico
+                        Indicadores oficiais
                     </span>
-
 
                     <h2>
                         Comparar cursos
                     </h2>
 
-
                     <p>
-                        Compare indicadores acadêmicos
-                        disponíveis entre diferentes
-                        instituições.
+                        Compare CPC, Conceito Enade, IDD e IGC
+                        entre cursos avaliados pelo Inep.
                     </p>
 
                 </div>
@@ -377,17 +368,17 @@
 
             <div class="comparison-filters">
 
+
                 <div class="form-group">
 
                     <label for="curso-comparacao">
-                        Curso
+                        Curso avaliado
                     </label>
-
 
                     <select id="curso-comparacao">
 
                         <option value="">
-                            Selecione um curso
+                            Carregando cursos...
                         </option>
 
                     </select>
@@ -400,7 +391,6 @@
                     <label for="modalidade-comparacao">
                         Modalidade
                     </label>
-
 
                     <select id="modalidade-comparacao">
 
@@ -423,15 +413,26 @@
 
                 <div class="form-group">
 
-                    <label for="ano-comparacao">
-                        Ano
+                    <label for="grau-comparacao">
+                        Grau acadêmico
                     </label>
 
+                    <select id="grau-comparacao">
 
-                    <select id="ano-comparacao">
+                        <option value="">
+                            Todos
+                        </option>
 
-                        <option value="2026">
-                            2026
+                        <option value="Bacharelado">
+                            Bacharelado
+                        </option>
+
+                        <option value="Licenciatura">
+                            Licenciatura
+                        </option>
+
+                        <option value="Tecnológico">
+                            Tecnológico
                         </option>
 
                     </select>
@@ -441,19 +442,14 @@
 
                 <div class="form-group">
 
-                    <label for="semestre-comparacao">
-                        Semestre
+                    <label for="ano-comparacao">
+                        Ano
                     </label>
 
+                    <select id="ano-comparacao">
 
-                    <select id="semestre-comparacao">
-
-                        <option value="1">
-                            1º semestre
-                        </option>
-
-                        <option value="2">
-                            2º semestre
+                        <option value="2023">
+                            2023
                         </option>
 
                     </select>
@@ -474,13 +470,14 @@
             <div class="public-data-notice">
 
                 <strong>
-                    Sobre os indicadores
+                    Fonte oficial: Inep
                 </strong>
 
                 <span>
-                    Dados acadêmicos de demonstração são
-                    identificados como não oficiais quando
-                    utilizados para apresentação do SIA.
+                    CPC, Conceito Enade, IDD e IGC apresentados
+                    nesta área são provenientes dos dados oficiais
+                    do Inep. A ausência de conceito não significa
+                    nota zero.
                 </span>
 
             </div>
@@ -497,16 +494,13 @@
                         SIA
                     </div>
 
-
                     <h3>
                         Selecione um curso
                     </h3>
 
-
                     <p>
-                        Escolha o curso e o período para
-                        visualizar a comparação entre
-                        instituições.
+                        Escolha um curso avaliado pelo Inep
+                        para comparar seus indicadores oficiais.
                     </p>
 
                 </div>
@@ -524,7 +518,6 @@
             SIA — Sistema de Indicadores Acadêmicos
         </span>
 
-
         <small>
             Dados acadêmicos transformados em
             indicadores para melhores decisões.
@@ -533,7 +526,7 @@
     </footer>
 
 
-    <script src="/js/explorar.js?v=5"></script>
+    <script src="/js/explorar.js?v=6"></script>
 
 </body>
 

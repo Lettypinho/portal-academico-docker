@@ -28,6 +28,11 @@ const indicadoresRoutes =
         "./routes/indicadores.routes"
     );
 
+const indicadoresInepRoutes =
+    require(
+        "./routes/indicadores-inep.routes"
+    );
+
 const adminRoutes =
     require(
         "./routes/admin.routes"
@@ -116,9 +121,17 @@ app.use(
 );
 
 
+// Indicadores acadêmicos internos/demonstrativos.
 app.use(
     "/api/indicadores",
     indicadoresRoutes
+);
+
+
+// Indicadores públicos oficiais do Inep.
+app.use(
+    "/api/indicadores-inep",
+    indicadoresInepRoutes
 );
 
 

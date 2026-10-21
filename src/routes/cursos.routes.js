@@ -26,9 +26,46 @@ router.get(
                 universidade_id,
                 nome,
                 modalidade,
-                grau
+                grau,
+                limite
             } = req.query;
 
+
+            // =================================================
+            // LIMITE DE RESULTADOS
+            // =================================================
+
+            let limiteConsulta =
+                Number.parseInt(
+                    limite,
+                    10
+                );
+
+
+            if (
+                !Number.isInteger(
+                    limiteConsulta
+                ) ||
+                limiteConsulta <= 0
+            ) {
+
+                limiteConsulta =
+                    nome
+                        ? 100
+                        : 500;
+            }
+
+
+            limiteConsulta =
+                Math.min(
+                    limiteConsulta,
+                    500
+                );
+
+
+            // =================================================
+            // FILTROS
+            // =================================================
 
             const parametros = [];
 
@@ -60,10 +97,13 @@ router.get(
             // NOME DO CURSO
             // ---------------------------------------------
 
-            if (nome) {
+            if (
+                nome &&
+                String(nome).trim()
+            ) {
 
                 parametros.push(
-                    `%${nome}%`
+                    `%${String(nome).trim()}%`
                 );
 
 
@@ -106,6 +146,23 @@ router.get(
                 );
             }
 
+
+            // ---------------------------------------------
+            // LIMIT
+            // ---------------------------------------------
+
+            parametros.push(
+                limiteConsulta
+            );
+
+
+            const indiceLimite =
+                parametros.length;
+
+
+            // =================================================
+            // CONSULTA
+            // =================================================
 
             const resultado =
                 await pool.query(
@@ -162,17 +219,24 @@ router.get(
 
 
                     JOIN universidade u
+
                         ON u.id =
                             c.universidade_id
 
 
                     WHERE
+
                         ${filtros.join(" AND ")}
 
 
                     ORDER BY
+
                         c.nome,
+
                         u.nome
+
+
+                    LIMIT $${indiceLimite}
                     `,
                     parametros
                 );
@@ -232,26 +296,41 @@ router.get(
                 await pool.query(
                     `
                     SELECT
+
                         id,
+
                         codigo_inep,
+
                         nome,
+
                         grau_academico,
+
                         nivel_academico,
+
                         modalidade,
+
                         duracao_semestres,
+
                         carga_horaria,
+
                         situacao_inep,
+
                         status,
+
                         ano_censo,
+
                         origem_dados
 
                     FROM curso
 
                     WHERE
+
                         universidade_id = $1
 
                     ORDER BY
+
                         nome,
+
                         modalidade
                     `,
                     [
@@ -310,6 +389,10 @@ router.post(
             } = req.body;
 
 
+            // =================================================
+            // CAMPOS OBRIGATÓRIOS
+            // =================================================
+
             if (
                 !nome ||
                 !modalidade
@@ -324,8 +407,12 @@ router.post(
             }
 
 
-            // Admin institucional não pode escolher
-            // outra instituição.
+            // =================================================
+            // ADMIN INSTITUCIONAL
+            // =================================================
+            //
+            // Não pode cadastrar curso em outra instituição.
+            // =================================================
 
             if (
                 usuario.perfil ===
@@ -337,7 +424,9 @@ router.post(
             }
 
 
-            // Super admin precisa informar instituição.
+            // =================================================
+            // SUPER ADMIN
+            // =================================================
 
             if (
                 usuario.perfil ===
@@ -354,6 +443,10 @@ router.post(
             }
 
 
+            // =================================================
+            // VALIDAR INSTITUIÇÃO
+            // =================================================
+
             const instituicao =
                 await pool.query(
                     `
@@ -363,7 +456,9 @@ router.post(
                     FROM universidade
 
                     WHERE
+
                         id = $1
+
                         AND ativo = TRUE
                     `,
                     [
@@ -373,7 +468,8 @@ router.post(
 
 
             if (
-                instituicao.rows.length === 0
+                instituicao.rows.length ===
+                0
             ) {
 
                 return res
@@ -384,6 +480,10 @@ router.post(
                     });
             }
 
+
+            // =================================================
+            // VALIDAR GRAU ACADÊMICO
+            // =================================================
 
             if (
                 grau_academico &&
@@ -405,29 +505,48 @@ router.post(
             }
 
 
+            // =================================================
+            // CADASTRAR
+            // =================================================
+
             const resultado =
                 await pool.query(
                     `
                     INSERT INTO curso
                     (
                         universidade_id,
+
                         nome,
+
                         modalidade,
+
                         duracao_semestres,
+
                         grau_academico,
+
                         nivel_academico,
+
                         carga_horaria,
+
                         origem_dados
                     )
+
                     VALUES
                     (
                         $1,
+
                         $2,
+
                         $3,
+
                         $4,
+
                         $5,
+
                         'Graduação',
+
                         $6,
+
                         'SIA'
                     )
 
@@ -459,15 +578,22 @@ router.post(
                 );
 
 
-            res.status(201).json(
-                resultado.rows[0]
-            );
+            res
+                .status(201)
+                .json(
+                    resultado.rows[0]
+                );
 
 
         } catch (erro) {
 
+            // =================================================
+            // CONFLITO / DUPLICIDADE
+            // =================================================
+
             if (
-                erro.code === "23505"
+                erro.code ===
+                "23505"
             ) {
 
                 return res
@@ -479,8 +605,13 @@ router.post(
             }
 
 
+            // =================================================
+            // CHECK CONSTRAINT
+            // =================================================
+
             if (
-                erro.code === "23514"
+                erro.code ===
+                "23514"
             ) {
 
                 return res

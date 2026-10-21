@@ -2,11 +2,11 @@ let usuarioAtual = null;
 
 let universidades = [];
 
-let cursos = [];
+let timeoutBuscaCurso = null;
 
 
 // =========================================================
-// SEGURANÇA DE TEXTO
+// SEGURANÇA
 // =========================================================
 
 function escaparHtml(valor) {
@@ -38,7 +38,85 @@ function escaparHtml(valor) {
 
 
 // =========================================================
-// USUÁRIO LOGADO
+// FORMATAÇÃO
+// =========================================================
+
+function formatarNumero(
+    valor,
+    casas = 2
+) {
+
+    if (
+        valor === null ||
+        valor === undefined ||
+        valor === ""
+    ) {
+        return "-";
+    }
+
+
+    const numero =
+        Number(valor);
+
+
+    if (
+        !Number.isFinite(
+            numero
+        )
+    ) {
+        return "-";
+    }
+
+
+    return numero
+        .toLocaleString(
+            "pt-BR",
+            {
+                minimumFractionDigits:
+                    casas,
+
+                maximumFractionDigits:
+                    casas
+            }
+        );
+}
+
+
+function formatarInteiro(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined ||
+        valor === ""
+    ) {
+        return "-";
+    }
+
+
+    const numero =
+        Number(valor);
+
+
+    if (
+        !Number.isFinite(
+            numero
+        )
+    ) {
+        return "-";
+    }
+
+
+    return numero
+        .toLocaleString(
+            "pt-BR"
+        );
+}
+
+
+// =========================================================
+// USUÁRIO
 // =========================================================
 
 async function carregarUsuario() {
@@ -67,10 +145,6 @@ async function carregarUsuario() {
         usuarioAtual =
             usuario;
 
-
-        // ---------------------------------------------
-        // REDIRECIONAMENTO POR PERFIL
-        // ---------------------------------------------
 
         if (
             usuario.perfil ===
@@ -102,12 +176,17 @@ async function carregarUsuario() {
         }
 
 
-        document
-            .getElementById(
+        const nome =
+            document.getElementById(
                 "nome-usuario"
-            )
-            .textContent =
+            );
+
+
+        if (nome) {
+
+            nome.textContent =
                 usuario.nome;
+        }
 
 
         return true;
@@ -116,6 +195,7 @@ async function carregarUsuario() {
     } catch (erro) {
 
         console.error(
+            "Erro ao carregar usuário:",
             erro
         );
 
@@ -168,7 +248,9 @@ document
 // NAVEGAÇÃO
 // =========================================================
 
-function abrirSecao(id) {
+function abrirSecao(
+    id
+) {
 
     document
         .querySelectorAll(
@@ -177,9 +259,10 @@ function abrirSecao(id) {
         .forEach(
             secao => {
 
-                secao.classList.remove(
-                    "active"
-                );
+                secao.classList
+                    .remove(
+                        "active"
+                    );
             }
         );
 
@@ -191,18 +274,26 @@ function abrirSecao(id) {
         .forEach(
             botao => {
 
-                botao.classList.remove(
-                    "active"
-                );
+                botao.classList
+                    .remove(
+                        "active"
+                    );
             }
         );
 
 
-    document
-        .getElementById(id)
-        .classList.add(
+    const secao =
+        document.getElementById(
+            id
+        );
+
+
+    if (secao) {
+
+        secao.classList.add(
             "active"
         );
+    }
 
 
     const botao =
@@ -256,6 +347,105 @@ document
 
 
 // =========================================================
+// RESUMO OFICIAL DO INEP
+// =========================================================
+
+async function carregarResumoInep() {
+
+    const container =
+        document.getElementById(
+            "resumo-inep"
+        );
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                "/api/indicadores-inep/resumo"
+            );
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                "Erro ao carregar resumo"
+            );
+        }
+
+
+        const dados =
+            await resposta.json();
+
+
+        const totalIes =
+            dados.instituicoes
+                ?.instituicoes ??
+            0;
+
+
+        const totalCursos =
+            dados.cursos
+                ?.cursos ??
+            0;
+
+
+        const ano =
+            dados.instituicoes
+                ?.ano_final ??
+            dados.cursos
+                ?.ano_final ??
+            "-";
+
+
+        container.innerHTML = `
+
+            <strong>
+                Base oficial do Inep
+            </strong>
+
+            <span>
+
+                ${formatarInteiro(
+                    totalIes
+                )}
+                instituições com IGC e
+
+                ${formatarInteiro(
+                    totalCursos
+                )}
+                cursos com indicadores de qualidade.
+
+                Ano de referência mais recente:
+                ${escaparHtml(ano)}.
+
+            </span>
+        `;
+
+
+    } catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        container.innerHTML = `
+
+            <strong>
+                Base oficial do Inep
+            </strong>
+
+            <span>
+                Os indicadores oficiais serão apresentados
+                após a importação da base do Inep.
+            </span>
+        `;
+    }
+}
+
+
+// =========================================================
 // INSTITUIÇÕES
 // =========================================================
 
@@ -300,7 +490,7 @@ async function carregarUniversidades() {
 
 
 // =========================================================
-// CARD DE INSTITUIÇÃO
+// CARD DA INSTITUIÇÃO
 // =========================================================
 
 function criarCardUniversidade(
@@ -315,7 +505,7 @@ function criarCardUniversidade(
     const organizacao =
         universidade
             .organizacao_academica ||
-        "Instituição de Ensino Superior";
+        "Instituição de Educação Superior";
 
 
     const categoria =
@@ -325,57 +515,84 @@ function criarCardUniversidade(
 
 
     return `
+
         <article class="institution-card">
 
             <div class="institution-icon">
-                ${escaparHtml(sigla)}
+
+                ${escaparHtml(
+                    sigla
+                )}
+
             </div>
+
 
             <div>
 
                 <h3>
+
                     ${escaparHtml(
                         universidade.nome
                     )}
+
                 </h3>
 
+
                 <p>
+
                     ${escaparHtml(
                         universidade.cidade
                     )}
+
                     -
+
                     ${escaparHtml(
                         universidade.estado
                     )}
+
                 </p>
+
 
                 <div class="course-meta">
 
                     <span>
+
                         ${escaparHtml(
                             organizacao
                         )}
+
                     </span>
+
 
                     ${
                         categoria
+
                             ? `
+
                                 <span>
+
                                     ${escaparHtml(
                                         categoria
                                     )}
+
                                 </span>
+
                             `
+
                             : ""
                     }
 
                 </div>
 
+
                 <span>
+
                     Código IES:
+
                     ${escaparHtml(
                         universidade.codigo
                     )}
+
                 </span>
 
             </div>
@@ -402,6 +619,7 @@ function renderizarUniversidades(
     if (!dados.length) {
 
         container.innerHTML = `
+
             <div class="empty-state">
 
                 <h3>
@@ -442,10 +660,12 @@ function renderizarResumoUniversidades() {
 
 
     if (
-        universidades.length === 0
+        universidades.length ===
+        0
     ) {
 
         container.innerHTML = `
+
             <div class="empty-state">
                 Nenhuma instituição disponível.
             </div>
@@ -455,46 +675,71 @@ function renderizarResumoUniversidades() {
     }
 
 
-    // Prioriza exemplos variados de IES para mostrar
-    // que o SIA não contém apenas universidades.
-
     const selecionadas = [];
 
 
-    const tiposDesejados = [
-        "Instituto Federal",
-        "Universidade",
-        "Centro Universitário"
-    ];
+    const ifal =
+        universidades.find(
+            universidade =>
+                universidade.sigla ===
+                "IFAL"
+        );
 
 
-    tiposDesejados.forEach(
-        tipo => {
+    if (ifal) {
 
-            const encontrada =
-                universidades.find(
-                    universidade =>
-                        universidade
-                            .organizacao_academica ===
-                        tipo &&
-                        !selecionadas.includes(
-                            universidade
-                        )
-                );
+        selecionadas.push(
+            ifal
+        );
+    }
 
 
-            if (encontrada) {
+    const universidade =
+        universidades.find(
+            item =>
 
-                selecionadas.push(
-                    encontrada
-                );
-            }
-        }
-    );
+                item
+                    .organizacao_academica ===
+                    "Universidade" &&
+
+                !selecionadas.includes(
+                    item
+                )
+        );
+
+
+    if (universidade) {
+
+        selecionadas.push(
+            universidade
+        );
+    }
+
+
+    const centro =
+        universidades.find(
+            item =>
+
+                item
+                    .organizacao_academica ===
+                    "Centro Universitário" &&
+
+                !selecionadas.includes(
+                    item
+                )
+        );
+
+
+    if (centro) {
+
+        selecionadas.push(
+            centro
+        );
+    }
 
 
     universidades.forEach(
-        universidade => {
+        item => {
 
             if (
                 selecionadas.length >= 3
@@ -505,12 +750,12 @@ function renderizarResumoUniversidades() {
 
             if (
                 !selecionadas.includes(
-                    universidade
+                    item
                 )
             ) {
 
                 selecionadas.push(
-                    universidade
+                    item
                 );
             }
         }
@@ -553,13 +798,21 @@ document
                     universidade => {
 
                         const texto = `
+
                             ${universidade.nome}
+
                             ${universidade.sigla || ""}
+
                             ${universidade.codigo || ""}
+
                             ${universidade.cidade}
+
                             ${universidade.estado}
+
                             ${universidade.organizacao_academica || ""}
+
                             ${universidade.categoria_administrativa || ""}
+
                         `
                             .toLowerCase();
 
@@ -582,75 +835,134 @@ document
 // CURSOS
 // =========================================================
 
-async function carregarCursos() {
+async function buscarCursos(
+    termo
+) {
+
+    const container =
+        document.getElementById(
+            "lista-cursos"
+        );
+
+
+    const busca =
+        String(
+            termo ||
+            ""
+        )
+            .trim();
+
+
+    if (
+        busca.length < 2
+    ) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                <h3>
+                    Pesquise um curso
+                </h3>
+
+                <p>
+                    Digite ao menos 2 caracteres.
+                </p>
+
+            </div>
+        `;
+
+
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="empty-state">
+            Pesquisando cursos...
+        </div>
+    `;
+
 
     try {
 
+        const parametros =
+            new URLSearchParams();
+
+
+        parametros.set(
+            "nome",
+            busca
+        );
+
+
         const resposta =
             await fetch(
-                "/api/cursos"
+                "/api/cursos?" +
+                parametros.toString()
             );
+
+
+        const dados =
+            await resposta.json();
 
 
         if (!resposta.ok) {
 
             throw new Error(
-                "Erro ao carregar cursos"
+                dados.erro ||
+                "Erro ao pesquisar cursos"
             );
         }
 
 
-        cursos =
-            await resposta.json();
+        const lista =
+            Array.isArray(
+                dados
+            )
+
+                ? dados
+
+                : (
+                    Array.isArray(
+                        dados.dados
+                    )
+
+                        ? dados.dados
+
+                        : []
+                );
 
 
         renderizarCursos(
-            cursos
+            lista
         );
-
-
-        preencherCursosComparacao();
 
 
     } catch (erro) {
 
         console.error(
-            "Erro ao carregar cursos:",
+            "Erro ao pesquisar cursos:",
             erro
         );
+
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                <h3>
+                    Não foi possível pesquisar
+                </h3>
+
+                <p>
+                    Tente novamente.
+                </p>
+
+            </div>
+        `;
     }
-}
-
-
-// =========================================================
-// TEXTO DE DURAÇÃO
-// =========================================================
-
-function obterDuracaoCurso(
-    curso
-) {
-
-    if (
-        curso.duracao_semestres
-    ) {
-
-        return (
-            `${curso.duracao_semestres} semestres`
-        );
-    }
-
-
-    if (
-        curso.carga_horaria
-    ) {
-
-        return (
-            `${curso.carga_horaria} h`
-        );
-    }
-
-
-    return "";
 }
 
 
@@ -671,6 +983,7 @@ function renderizarCursos(
     if (!dados.length) {
 
         container.innerHTML = `
+
             <div class="empty-state">
 
                 <h3>
@@ -678,7 +991,7 @@ function renderizarCursos(
                 </h3>
 
                 <p>
-                    Tente pesquisar outro curso ou instituição.
+                    Tente pesquisar outro curso.
                 </p>
 
             </div>
@@ -695,42 +1008,62 @@ function renderizarCursos(
                 curso => {
 
                     const duracao =
-                        obterDuracaoCurso(
-                            curso
-                        );
+                        curso.duracao_semestres
+
+                            ? `${curso.duracao_semestres} semestres`
+
+                            : (
+                                curso.carga_horaria
+
+                                    ? `${formatarInteiro(
+                                        curso.carga_horaria
+                                    )} h`
+
+                                    : ""
+                            );
 
 
                     return `
+
                         <article class="course-card">
 
                             <div>
 
                                 <h3>
+
                                     ${escaparHtml(
                                         curso.nome
                                     )}
+
                                 </h3>
 
+
                                 <p>
+
                                     ${escaparHtml(
                                         curso.universidade
                                     )}
+
                                 </p>
 
+
                                 <small>
-                                    ${
-                                        escaparHtml(
-                                            curso.universidade_sigla ||
-                                            ""
-                                        )
-                                    }
+
+                                    ${escaparHtml(
+                                        curso.universidade_sigla ||
+                                        ""
+                                    )}
+
                                     ${
                                         curso.estado
+
                                             ? ` • ${escaparHtml(
                                                 curso.estado
                                             )}`
+
                                             : ""
                                     }
+
                                 </small>
 
                             </div>
@@ -738,50 +1071,73 @@ function renderizarCursos(
 
                             <div class="course-meta">
 
+
                                 ${
                                     curso.grau_academico
+
                                         ? `
+
                                             <span>
+
                                                 ${escaparHtml(
                                                     curso.grau_academico
                                                 )}
+
                                             </span>
+
                                         `
+
                                         : ""
                                 }
 
 
                                 <span>
+
                                     ${escaparHtml(
                                         curso.modalidade
                                     )}
+
                                 </span>
 
 
                                 ${
                                     duracao
+
                                         ? `
+
                                             <span>
+
                                                 ${escaparHtml(
                                                     duracao
                                                 )}
+
                                             </span>
+
                                         `
+
                                         : ""
                                 }
 
 
                                 ${
-                                    curso.organizacao_academica
+                                    curso.codigo_inep
+
                                         ? `
+
                                             <span>
+
+                                                Código Inep:
                                                 ${escaparHtml(
-                                                    curso.organizacao_academica
+                                                    curso.codigo_inep
                                                 )}
+
                                             </span>
+
                                         `
+
                                         : ""
                                 }
+
 
                             </div>
 
@@ -794,7 +1150,7 @@ function renderizarCursos(
 
 
 // =========================================================
-// PESQUISA DE CURSOS
+// PESQUISA DE CURSOS COM DEBOUNCE
 // =========================================================
 
 document
@@ -805,49 +1161,35 @@ document
         "input",
         event => {
 
+            clearTimeout(
+                timeoutBuscaCurso
+            );
+
+
             const termo =
-                event.target.value
-                    .toLowerCase()
-                    .trim();
+                event.target.value;
 
 
-            const resultado =
-                cursos.filter(
-                    curso => {
+            timeoutBuscaCurso =
+                setTimeout(
+                    () => {
 
-                        const texto = `
-                            ${curso.nome}
-                            ${curso.universidade}
-                            ${curso.universidade_sigla || ""}
-                            ${curso.grau_academico || ""}
-                            ${curso.nivel_academico || ""}
-                            ${curso.modalidade || ""}
-                            ${curso.organizacao_academica || ""}
-                            ${curso.categoria_administrativa || ""}
-                            ${curso.estado || ""}
-                        `
-                            .toLowerCase();
-
-
-                        return texto.includes(
+                        buscarCursos(
                             termo
                         );
-                    }
+
+                    },
+                    350
                 );
-
-
-            renderizarCursos(
-                resultado
-            );
         }
     );
 
 
 // =========================================================
-// CURSOS PARA COMPARAÇÃO
+// CURSOS DISPONÍVEIS PARA COMPARAÇÃO
 // =========================================================
 
-function preencherCursosComparacao() {
+async function preencherCursosComparacao() {
 
     const select =
         document.getElementById(
@@ -855,63 +1197,83 @@ function preencherCursosComparacao() {
         );
 
 
-    const nomes =
-        [
-            ...new Set(
-                cursos
-                    .map(
-                        curso =>
-                            curso.nome
-                    )
-                    .filter(Boolean)
-            )
-        ]
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    a.localeCompare(
-                        b,
-                        "pt-BR"
-                    )
+    try {
+
+        const resposta =
+            await fetch(
+                "/api/indicadores-inep/cursos/opcoes"
             );
 
 
-    select.innerHTML = `
-        <option value="">
-            Selecione um curso
-        </option>
-    `;
+        const dados =
+            await resposta.json();
 
 
-    nomes.forEach(
-        nome => {
+        if (!resposta.ok) {
 
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-
-            option.value =
-                nome;
-
-
-            option.textContent =
-                nome;
-
-
-            select.appendChild(
-                option
+            throw new Error(
+                dados.erro ||
+                "Erro ao carregar cursos"
             );
         }
-    );
+
+
+        select.innerHTML = `
+
+            <option value="">
+                Selecione um curso
+            </option>
+        `;
+
+
+        dados.forEach(
+            item => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    item.curso;
+
+
+                option.textContent =
+                    item.grau_academico
+
+                        ? `${item.curso} — ${item.grau_academico}`
+
+                        : item.curso;
+
+
+                select.appendChild(
+                    option
+                );
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar cursos avaliados:",
+            erro
+        );
+
+
+        select.innerHTML = `
+
+            <option value="">
+                Não foi possível carregar os cursos
+            </option>
+        `;
+    }
 }
 
 
 // =========================================================
-// COMPARAÇÃO
+// COMPARAÇÃO OFICIAL
 // =========================================================
 
 async function compararCursos() {
@@ -932,18 +1294,18 @@ async function compararCursos() {
             .value;
 
 
-    const ano =
+    const grau =
         document
             .getElementById(
-                "ano-comparacao"
+                "grau-comparacao"
             )
             .value;
 
 
-    const semestre =
+    const ano =
         document
             .getElementById(
-                "semestre-comparacao"
+                "ano-comparacao"
             )
             .value;
 
@@ -957,6 +1319,7 @@ async function compararCursos() {
     if (!curso) {
 
         container.innerHTML = `
+
             <div class="empty-state">
 
                 <h3>
@@ -972,8 +1335,9 @@ async function compararCursos() {
 
 
     container.innerHTML = `
+
         <div class="empty-state">
-            Carregando comparação...
+            Carregando indicadores oficiais...
         </div>
     `;
 
@@ -983,8 +1347,7 @@ async function compararCursos() {
         const parametros =
             new URLSearchParams({
                 curso,
-                ano,
-                semestre
+                ano
             });
 
 
@@ -997,9 +1360,20 @@ async function compararCursos() {
         }
 
 
+        if (grau) {
+
+            parametros.set(
+                "grau",
+                grau
+            );
+        }
+
+
         const resposta =
             await fetch(
-                "/api/indicadores/comparacao/cursos?" +
+
+                "/api/indicadores-inep/comparacao?" +
+
                 parametros.toString()
             );
 
@@ -1030,11 +1404,17 @@ async function compararCursos() {
 
 
         container.innerHTML = `
+
             <div class="empty-state">
 
                 <h3>
                     Não foi possível carregar a comparação
                 </h3>
+
+                <p>
+                    Verifique se os indicadores oficiais do
+                    Inep foram importados para o banco.
+                </p>
 
             </div>
         `;
@@ -1050,6 +1430,55 @@ document
         "click",
         compararCursos
     );
+
+
+// =========================================================
+// INDICADOR
+// =========================================================
+
+function renderizarIndicador(
+    faixa,
+    continuo
+) {
+
+    if (
+        faixa === null ||
+        faixa === undefined ||
+        faixa === ""
+    ) {
+
+        return "-";
+    }
+
+
+    const valorContinuo =
+        (
+            continuo !== null &&
+            continuo !== undefined &&
+            continuo !== ""
+        )
+
+            ? ` (${formatarNumero(
+                continuo,
+                3
+            )})`
+
+            : "";
+
+
+    return `
+
+        <strong>
+            ${escaparHtml(
+                faixa
+            )}
+        </strong>
+
+        <small>
+            ${valorContinuo}
+        </small>
+    `;
+}
 
 
 // =========================================================
@@ -1069,6 +1498,7 @@ function renderizarComparacao(
     if (!dados.length) {
 
         container.innerHTML = `
+
             <div class="empty-state">
 
                 <h3>
@@ -1076,9 +1506,8 @@ function renderizarComparacao(
                 </h3>
 
                 <p>
-                    Não existem dados acadêmicos
-                    disponíveis para este curso no
-                    período selecionado.
+                    O curso pode não ter sido avaliado
+                    nesse ano ou não possuir conceito calculado.
                 </p>
 
             </div>
@@ -1091,16 +1520,22 @@ function renderizarComparacao(
 
     container.innerHTML = `
 
-        <div class="demo-data-warning">
+        <div class="public-data-notice">
 
             <strong>
-                Dados demonstrativos
+                Fonte: Inep
             </strong>
 
             <span>
-                Os indicadores exibidos nesta demonstração
-                não representam resultados oficiais das
-                instituições.
+
+                Indicadores oficiais de qualidade da
+                educação superior.
+
+                Ano:
+                ${escaparHtml(
+                    dados[0].ano
+                )}.
+
             </span>
 
         </div>
@@ -1108,7 +1543,9 @@ function renderizarComparacao(
 
         <div class="table-container">
 
+
             <table class="comparison-table">
+
 
                 <thead>
 
@@ -1119,19 +1556,23 @@ function renderizarComparacao(
                         </th>
 
                         <th>
-                            Média
+                            CPC
                         </th>
 
                         <th>
-                            Aprovação
+                            Enade
                         </th>
 
                         <th>
-                            Reprovação
+                            IDD
                         </th>
 
                         <th>
-                            Frequência
+                            IGC
+                        </th>
+
+                        <th>
+                            Participantes
                         </th>
 
                     </tr>
@@ -1141,61 +1582,96 @@ function renderizarComparacao(
 
                 <tbody>
 
+
                     ${
+
                         dados
                             .map(
                                 item => `
 
                                     <tr>
 
+
                                         <td>
 
                                             <strong>
+
                                                 ${escaparHtml(
                                                     item.sigla ||
-                                                    item.universidade
+                                                    item.instituicao
                                                 )}
+
                                             </strong>
 
                                             <small>
+
                                                 ${escaparHtml(
-                                                    item.universidade
+                                                    item.instituicao
                                                 )}
+
+                                                ${
+                                                    item.estado
+
+                                                        ? ` • ${escaparHtml(
+                                                            item.estado
+                                                        )}`
+
+                                                        : ""
+                                                }
+
                                             </small>
 
                                         </td>
 
 
                                         <td>
-                                            ${
-                                                item.media_geral ??
-                                                "-"
-                                            }
+
+                                            ${renderizarIndicador(
+                                                item.cpc_faixa,
+                                                item.cpc_continuo
+                                            )}
+
                                         </td>
 
 
                                         <td>
-                                            ${
-                                                item.taxa_aprovacao ??
-                                                "-"
-                                            }%
+
+                                            ${renderizarIndicador(
+                                                item.conceito_enade_faixa,
+                                                item.conceito_enade_continuo
+                                            )}
+
                                         </td>
 
 
                                         <td>
-                                            ${
-                                                item.taxa_reprovacao ??
-                                                "-"
-                                            }%
+
+                                            ${renderizarIndicador(
+                                                item.idd_faixa,
+                                                item.idd_continuo
+                                            )}
+
                                         </td>
 
 
                                         <td>
-                                            ${
-                                                item.frequencia_media ??
-                                                "-"
-                                            }%
+
+                                            ${renderizarIndicador(
+                                                item.igc_faixa,
+                                                item.igc_continuo
+                                            )}
+
                                         </td>
+
+
+                                        <td>
+
+                                            ${formatarInteiro(
+                                                item.concluintes_participantes
+                                            )}
+
+                                        </td>
+
 
                                     </tr>
                                 `
@@ -1203,9 +1679,12 @@ function renderizarComparacao(
                             .join("")
                     }
 
+
                 </tbody>
 
+
             </table>
+
 
         </div>
     `;
@@ -1223,13 +1702,19 @@ async function iniciar() {
 
 
     if (!autenticado) {
+
         return;
     }
 
 
     await Promise.all([
+
         carregarUniversidades(),
-        carregarCursos()
+
+        carregarResumoInep(),
+
+        preencherCursosComparacao()
+
     ]);
 }
 
