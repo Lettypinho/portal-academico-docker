@@ -36,7 +36,7 @@ CREATE TABLE curso (
 
     universidade_id INT NOT NULL,
 
-    nome VARCHAR(150) NOT NULL,
+    nome VARCHAR(500) NOT NULL,
 
     modalidade VARCHAR(20) NOT NULL DEFAULT 'Presencial',
 

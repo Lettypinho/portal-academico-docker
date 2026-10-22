@@ -921,7 +921,7 @@ SELECT
     dados.grau_academico,
     dados.nivel_academico,
     dados.modalidade,
-    dados.carga_horaria,
+    dados.carga_horaria::INTEGER,
     dados.situacao_inep,
     dados.ano_censo,
     'INEP'

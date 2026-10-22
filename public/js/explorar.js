@@ -3,6 +3,11 @@ let usuarioAtual = null;
 let universidades = [];
 
 let timeoutBuscaCurso = null;
+let timeoutBuscaCursoComparacao = null;
+let timeoutBuscaInstituicao = null;
+
+let mapaInstituicoesComparacao =
+    new Map();
 
 
 // =========================================================
@@ -112,6 +117,49 @@ function formatarInteiro(
         .toLocaleString(
             "pt-BR"
         );
+}
+
+
+function formatarPercentual(
+    valor,
+    casas = 1
+) {
+
+    if (
+        valor === null ||
+        valor === undefined ||
+        valor === ""
+    ) {
+        return "-";
+    }
+
+
+    const numero =
+        Number(valor);
+
+
+    if (
+        !Number.isFinite(
+            numero
+        )
+    ) {
+        return "-";
+    }
+
+
+    return (
+        numero.toLocaleString(
+            "pt-BR",
+            {
+                minimumFractionDigits:
+                    casas,
+
+                maximumFractionDigits:
+                    casas
+            }
+        ) +
+        "%"
+    );
 }
 
 
@@ -347,7 +395,7 @@ document
 
 
 // =========================================================
-// RESUMO OFICIAL DO INEP
+// RESUMO INEP
 // =========================================================
 
 async function carregarResumoInep() {
@@ -366,16 +414,17 @@ async function carregarResumoInep() {
             );
 
 
+        const dados =
+            await resposta.json();
+
+
         if (!resposta.ok) {
 
             throw new Error(
+                dados.erro ||
                 "Erro ao carregar resumo"
             );
         }
-
-
-        const dados =
-            await resposta.json();
 
 
         const totalIes =
@@ -384,16 +433,20 @@ async function carregarResumoInep() {
             0;
 
 
-        const totalCursos =
+        const totalQualidade =
             dados.cursos
                 ?.cursos ??
             0;
 
 
-        const ano =
-            dados.instituicoes
-                ?.ano_final ??
-            dados.cursos
+        const totalTrajetoria =
+            dados.trajetoria
+                ?.cursos ??
+            0;
+
+
+        const anoTrajetoria =
+            dados.trajetoria
                 ?.ano_final ??
             "-";
 
@@ -409,15 +462,22 @@ async function carregarResumoInep() {
                 ${formatarInteiro(
                     totalIes
                 )}
-                instituições com IGC e
+                instituições com IGC,
 
                 ${formatarInteiro(
-                    totalCursos
+                    totalQualidade
                 )}
-                cursos com indicadores de qualidade.
+                cursos com indicadores de qualidade e
 
-                Ano de referência mais recente:
-                ${escaparHtml(ano)}.
+                ${formatarInteiro(
+                    totalTrajetoria
+                )}
+                cursos com indicadores de trajetória.
+
+                Trajetória acompanhada até
+                ${escaparHtml(
+                    anoTrajetoria
+                )}.
 
             </span>
         `;
@@ -437,8 +497,8 @@ async function carregarResumoInep() {
             </strong>
 
             <span>
-                Os indicadores oficiais serão apresentados
-                após a importação da base do Inep.
+                Não foi possível carregar o resumo
+                dos indicadores oficiais.
             </span>
         `;
     }
@@ -489,10 +549,6 @@ async function carregarUniversidades() {
 }
 
 
-// =========================================================
-// CARD DA INSTITUIÇÃO
-// =========================================================
-
 function criarCardUniversidade(
     universidade
 ) {
@@ -526,7 +582,6 @@ function criarCardUniversidade(
 
             </div>
 
-
             <div>
 
                 <h3>
@@ -536,7 +591,6 @@ function criarCardUniversidade(
                     )}
 
                 </h3>
-
 
                 <p>
 
@@ -552,7 +606,6 @@ function criarCardUniversidade(
 
                 </p>
 
-
                 <div class="course-meta">
 
                     <span>
@@ -562,7 +615,6 @@ function criarCardUniversidade(
                         )}
 
                     </span>
-
 
                     ${
                         categoria
@@ -584,7 +636,6 @@ function criarCardUniversidade(
 
                 </div>
 
-
                 <span>
 
                     Código IES:
@@ -601,10 +652,6 @@ function criarCardUniversidade(
     `;
 }
 
-
-// =========================================================
-// RENDERIZAR INSTITUIÇÕES
-// =========================================================
 
 function renderizarUniversidades(
     dados
@@ -626,13 +673,8 @@ function renderizarUniversidades(
                     Nenhuma instituição encontrada
                 </h3>
 
-                <p>
-                    Tente utilizar outro termo de pesquisa.
-                </p>
-
             </div>
         `;
-
 
         return;
     }
@@ -647,10 +689,6 @@ function renderizarUniversidades(
 }
 
 
-// =========================================================
-// RESUMO DA PÁGINA INICIAL
-// =========================================================
-
 function renderizarResumoUniversidades() {
 
     const container =
@@ -659,10 +697,7 @@ function renderizarResumoUniversidades() {
         );
 
 
-    if (
-        universidades.length ===
-        0
-    ) {
+    if (!universidades.length) {
 
         container.innerHTML = `
 
@@ -680,8 +715,8 @@ function renderizarResumoUniversidades() {
 
     const ifal =
         universidades.find(
-            universidade =>
-                universidade.sigla ===
+            item =>
+                item.sigla ===
                 "IFAL"
         );
 
@@ -694,47 +729,34 @@ function renderizarResumoUniversidades() {
     }
 
 
-    const universidade =
-        universidades.find(
-            item =>
+    for (
+        const tipo
+        of [
+            "Universidade",
+            "Centro Universitário"
+        ]
+    ) {
 
+        const item =
+            universidades.find(
+                universidade =>
+
+                    universidade
+                        .organizacao_academica ===
+                        tipo &&
+
+                    !selecionadas.includes(
+                        universidade
+                    )
+            );
+
+
+        if (item) {
+
+            selecionadas.push(
                 item
-                    .organizacao_academica ===
-                    "Universidade" &&
-
-                !selecionadas.includes(
-                    item
-                )
-        );
-
-
-    if (universidade) {
-
-        selecionadas.push(
-            universidade
-        );
-    }
-
-
-    const centro =
-        universidades.find(
-            item =>
-
-                item
-                    .organizacao_academica ===
-                    "Centro Universitário" &&
-
-                !selecionadas.includes(
-                    item
-                )
-        );
-
-
-    if (centro) {
-
-        selecionadas.push(
-            centro
-        );
+            );
+        }
     }
 
 
@@ -742,13 +764,8 @@ function renderizarResumoUniversidades() {
         item => {
 
             if (
-                selecionadas.length >= 3
-            ) {
-                return;
-            }
-
-
-            if (
+                selecionadas.length <
+                    3 &&
                 !selecionadas.includes(
                     item
                 )
@@ -774,10 +791,6 @@ function renderizarResumoUniversidades() {
             .join("");
 }
 
-
-// =========================================================
-// PESQUISA DE INSTITUIÇÕES
-// =========================================================
 
 document
     .getElementById(
@@ -832,7 +845,7 @@ document
 
 
 // =========================================================
-// CURSOS
+// PESQUISA DE CURSOS
 // =========================================================
 
 async function buscarCursos(
@@ -847,14 +860,14 @@ async function buscarCursos(
 
     const busca =
         String(
-            termo ||
-            ""
+            termo || ""
         )
             .trim();
 
 
     if (
-        busca.length < 2
+        busca.length <
+        2
     ) {
 
         container.innerHTML = `
@@ -871,7 +884,6 @@ async function buscarCursos(
 
             </div>
         `;
-
 
         return;
     }
@@ -899,7 +911,9 @@ async function buscarCursos(
 
         const resposta =
             await fetch(
+
                 "/api/cursos?" +
+
                 parametros.toString()
             );
 
@@ -921,16 +935,12 @@ async function buscarCursos(
             Array.isArray(
                 dados
             )
-
                 ? dados
-
                 : (
                     Array.isArray(
                         dados.dados
                     )
-
                         ? dados.dados
-
                         : []
                 );
 
@@ -943,7 +953,6 @@ async function buscarCursos(
     } catch (erro) {
 
         console.error(
-            "Erro ao pesquisar cursos:",
             erro
         );
 
@@ -956,19 +965,11 @@ async function buscarCursos(
                     Não foi possível pesquisar
                 </h3>
 
-                <p>
-                    Tente novamente.
-                </p>
-
             </div>
         `;
     }
 }
 
-
-// =========================================================
-// RENDERIZAR CURSOS
-// =========================================================
 
 function renderizarCursos(
     dados
@@ -990,13 +991,8 @@ function renderizarCursos(
                     Nenhum curso encontrado
                 </h3>
 
-                <p>
-                    Tente pesquisar outro curso.
-                </p>
-
             </div>
         `;
-
 
         return;
     }
@@ -1037,7 +1033,6 @@ function renderizarCursos(
 
                                 </h3>
 
-
                                 <p>
 
                                     ${escaparHtml(
@@ -1045,7 +1040,6 @@ function renderizarCursos(
                                     )}
 
                                 </p>
-
 
                                 <small>
 
@@ -1068,9 +1062,7 @@ function renderizarCursos(
 
                             </div>
 
-
                             <div class="course-meta">
-
 
                                 ${
                                     curso.grau_academico
@@ -1090,7 +1082,6 @@ function renderizarCursos(
                                         : ""
                                 }
 
-
                                 <span>
 
                                     ${escaparHtml(
@@ -1098,7 +1089,6 @@ function renderizarCursos(
                                     )}
 
                                 </span>
-
 
                                 ${
                                     duracao
@@ -1118,27 +1108,6 @@ function renderizarCursos(
                                         : ""
                                 }
 
-
-                                ${
-                                    curso.codigo_inep
-
-                                        ? `
-
-                                            <span>
-
-                                                Código Inep:
-                                                ${escaparHtml(
-                                                    curso.codigo_inep
-                                                )}
-
-                                            </span>
-
-                                        `
-
-                                        : ""
-                                }
-
-
                             </div>
 
                         </article>
@@ -1148,10 +1117,6 @@ function renderizarCursos(
             .join("");
 }
 
-
-// =========================================================
-// PESQUISA DE CURSOS COM DEBOUNCE
-// =========================================================
 
 document
     .getElementById(
@@ -1166,16 +1131,12 @@ document
             );
 
 
-            const termo =
-                event.target.value;
-
-
             timeoutBuscaCurso =
                 setTimeout(
                     () => {
 
                         buscarCursos(
-                            termo
+                            event.target.value
                         );
 
                     },
@@ -1186,14 +1147,14 @@ document
 
 
 // =========================================================
-// CURSOS DISPONÍVEIS PARA COMPARAÇÃO
+// ESTADOS DA COMPARAÇÃO
 // =========================================================
 
-async function preencherCursosComparacao() {
+async function carregarEstadosComparacao() {
 
     const select =
         document.getElementById(
-            "curso-comparacao"
+            "estado-comparacao"
         );
 
 
@@ -1201,7 +1162,7 @@ async function preencherCursosComparacao() {
 
         const resposta =
             await fetch(
-                "/api/indicadores-inep/cursos/opcoes"
+                "/api/indicadores-inep/filtros/estados"
             );
 
 
@@ -1212,8 +1173,7 @@ async function preencherCursosComparacao() {
         if (!resposta.ok) {
 
             throw new Error(
-                dados.erro ||
-                "Erro ao carregar cursos"
+                dados.erro
             );
         }
 
@@ -1221,7 +1181,7 @@ async function preencherCursosComparacao() {
         select.innerHTML = `
 
             <option value="">
-                Selecione um curso
+                Todos
             </option>
         `;
 
@@ -1236,15 +1196,11 @@ async function preencherCursosComparacao() {
 
 
                 option.value =
-                    item.curso;
+                    item.estado;
 
 
                 option.textContent =
-                    item.grau_academico
-
-                        ? `${item.curso} — ${item.grau_academico}`
-
-                        : item.curso;
+                    item.estado;
 
 
                 select.appendChild(
@@ -1257,33 +1213,321 @@ async function preencherCursosComparacao() {
     } catch (erro) {
 
         console.error(
-            "Erro ao carregar cursos avaliados:",
+            "Erro ao carregar estados:",
             erro
         );
-
-
-        select.innerHTML = `
-
-            <option value="">
-                Não foi possível carregar os cursos
-            </option>
-        `;
     }
 }
 
 
 // =========================================================
-// COMPARAÇÃO OFICIAL
+// CIDADES DA COMPARAÇÃO
 // =========================================================
 
-async function compararCursos() {
+async function carregarCidadesComparacao() {
 
-    const curso =
+    const estado =
         document
             .getElementById(
-                "curso-comparacao"
+                "estado-comparacao"
             )
             .value;
+
+
+    const lista =
+        document.getElementById(
+            "opcoes-cidades-comparacao"
+        );
+
+
+    lista.innerHTML =
+        "";
+
+
+    if (!estado) {
+
+        return;
+    }
+
+
+    try {
+
+        const parametros =
+            new URLSearchParams({
+                estado
+            });
+
+
+        const resposta =
+            await fetch(
+
+                "/api/indicadores-inep/filtros/cidades?" +
+
+                parametros.toString()
+            );
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.erro
+            );
+        }
+
+
+        dados.forEach(
+            item => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    item.cidade;
+
+
+                lista.appendChild(
+                    option
+                );
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar cidades:",
+            erro
+        );
+    }
+}
+
+
+// =========================================================
+// INSTITUIÇÕES DA COMPARAÇÃO
+// =========================================================
+
+function limparInstituicaoSelecionada() {
+
+    mapaInstituicoesComparacao =
+        new Map();
+}
+
+
+async function buscarInstituicoesComparacao(
+    busca
+) {
+
+    const termo =
+        String(
+            busca || ""
+        )
+            .trim();
+
+
+    const lista =
+        document.getElementById(
+            "opcoes-instituicoes-comparacao"
+        );
+
+
+    lista.innerHTML =
+        "";
+
+
+    limparInstituicaoSelecionada();
+
+
+    if (
+        termo.length <
+        2
+    ) {
+
+        return;
+    }
+
+
+    const estado =
+        document
+            .getElementById(
+                "estado-comparacao"
+            )
+            .value;
+
+
+    const cidade =
+        document
+            .getElementById(
+                "cidade-comparacao"
+            )
+            .value
+            .trim();
+
+
+    try {
+
+        const parametros =
+            new URLSearchParams({
+                busca:
+                    termo
+            });
+
+
+        if (estado) {
+
+            parametros.set(
+                "estado",
+                estado
+            );
+        }
+
+
+        if (cidade) {
+
+            parametros.set(
+                "cidade",
+                cidade
+            );
+        }
+
+
+        const resposta =
+            await fetch(
+
+                "/api/indicadores-inep/filtros/instituicoes?" +
+
+                parametros.toString()
+            );
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.erro
+            );
+        }
+
+
+        dados.forEach(
+            item => {
+
+                const rotulo =
+                    item.sigla
+
+                        ? `${item.nome} (${item.sigla})`
+
+                        : item.nome;
+
+
+                mapaInstituicoesComparacao
+                    .set(
+                        rotulo,
+                        item.id
+                    );
+
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    rotulo;
+
+
+                lista.appendChild(
+                    option
+                );
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao pesquisar instituições:",
+            erro
+        );
+    }
+}
+
+
+// =========================================================
+// CURSOS DA COMPARAÇÃO
+// =========================================================
+
+async function buscarCursosComparacao(
+    busca
+) {
+
+    const termo =
+        String(
+            busca || ""
+        )
+            .trim();
+
+
+    const lista =
+        document.getElementById(
+            "opcoes-cursos-comparacao"
+        );
+
+
+    lista.innerHTML =
+        "";
+
+
+    if (
+        termo.length <
+        2
+    ) {
+
+        return;
+    }
+
+
+    const estado =
+        document
+            .getElementById(
+                "estado-comparacao"
+            )
+            .value;
+
+
+    const cidade =
+        document
+            .getElementById(
+                "cidade-comparacao"
+            )
+            .value
+            .trim();
+
+
+    const instituicaoTexto =
+        document
+            .getElementById(
+                "instituicao-comparacao"
+            )
+            .value
+            .trim();
+
+
+    const universidadeId =
+        mapaInstituicoesComparacao
+            .get(
+                instituicaoTexto
+            );
 
 
     const modalidade =
@@ -1302,10 +1546,346 @@ async function compararCursos() {
             .value;
 
 
-    const ano =
+    const parametros =
+        new URLSearchParams({
+            busca:
+                termo
+        });
+
+
+    if (estado) {
+
+        parametros.set(
+            "estado",
+            estado
+        );
+    }
+
+
+    if (cidade) {
+
+        parametros.set(
+            "cidade",
+            cidade
+        );
+    }
+
+
+    if (universidadeId) {
+
+        parametros.set(
+            "universidade_id",
+            universidadeId
+        );
+    }
+
+
+    if (modalidade) {
+
+        parametros.set(
+            "modalidade",
+            modalidade
+        );
+    }
+
+
+    if (grau) {
+
+        parametros.set(
+            "grau",
+            grau
+        );
+    }
+
+
+    try {
+
+        const resposta =
+            await fetch(
+
+                "/api/indicadores-inep/cursos/opcoes?" +
+
+                parametros.toString()
+            );
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.erro
+            );
+        }
+
+
+        dados.forEach(
+            item => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    item.curso;
+
+
+                option.label =
+                    item.grau_academico ||
+                    "";
+
+
+                lista.appendChild(
+                    option
+                );
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao pesquisar cursos para comparação:",
+            erro
+        );
+    }
+}
+
+
+// =========================================================
+// EVENTOS DOS FILTROS
+// =========================================================
+
+document
+    .getElementById(
+        "estado-comparacao"
+    )
+    .addEventListener(
+        "change",
+        async () => {
+
+            document
+                .getElementById(
+                    "cidade-comparacao"
+                )
+                .value =
+                "";
+
+
+            document
+                .getElementById(
+                    "instituicao-comparacao"
+                )
+                .value =
+                "";
+
+
+            limparInstituicaoSelecionada();
+
+
+            await carregarCidadesComparacao();
+
+
+            const curso =
+                document
+                    .getElementById(
+                        "curso-comparacao"
+                    )
+                    .value;
+
+
+            if (
+                curso.trim().length >=
+                2
+            ) {
+
+                buscarCursosComparacao(
+                    curso
+                );
+            }
+        }
+    );
+
+
+document
+    .getElementById(
+        "cidade-comparacao"
+    )
+    .addEventListener(
+        "input",
+        () => {
+
+            document
+                .getElementById(
+                    "instituicao-comparacao"
+                )
+                .value =
+                "";
+
+
+            limparInstituicaoSelecionada();
+        }
+    );
+
+
+document
+    .getElementById(
+        "instituicao-comparacao"
+    )
+    .addEventListener(
+        "input",
+        event => {
+
+            clearTimeout(
+                timeoutBuscaInstituicao
+            );
+
+
+            timeoutBuscaInstituicao =
+                setTimeout(
+                    () => {
+
+                        buscarInstituicoesComparacao(
+                            event.target.value
+                        );
+
+                    },
+                    300
+                );
+        }
+    );
+
+
+document
+    .getElementById(
+        "curso-comparacao"
+    )
+    .addEventListener(
+        "input",
+        event => {
+
+            clearTimeout(
+                timeoutBuscaCursoComparacao
+            );
+
+
+            timeoutBuscaCursoComparacao =
+                setTimeout(
+                    () => {
+
+                        buscarCursosComparacao(
+                            event.target.value
+                        );
+
+                    },
+                    300
+                );
+        }
+    );
+
+
+[
+    "modalidade-comparacao",
+    "grau-comparacao"
+]
+    .forEach(
+        id => {
+
+            document
+                .getElementById(
+                    id
+                )
+                .addEventListener(
+                    "change",
+                    () => {
+
+                        const curso =
+                            document
+                                .getElementById(
+                                    "curso-comparacao"
+                                )
+                                .value;
+
+
+                        if (
+                            curso.trim().length >=
+                            2
+                        ) {
+
+                            buscarCursosComparacao(
+                                curso
+                            );
+                        }
+                    }
+                );
+        }
+    );
+
+
+// =========================================================
+// COMPARAÇÃO
+// =========================================================
+
+async function compararCursos() {
+
+    const curso =
         document
             .getElementById(
-                "ano-comparacao"
+                "curso-comparacao"
+            )
+            .value
+            .trim();
+
+
+    const estado =
+        document
+            .getElementById(
+                "estado-comparacao"
+            )
+            .value;
+
+
+    const cidade =
+        document
+            .getElementById(
+                "cidade-comparacao"
+            )
+            .value
+            .trim();
+
+
+    const instituicaoTexto =
+        document
+            .getElementById(
+                "instituicao-comparacao"
+            )
+            .value
+            .trim();
+
+
+    const universidadeId =
+        mapaInstituicoesComparacao
+            .get(
+                instituicaoTexto
+            );
+
+
+    const modalidade =
+        document
+            .getElementById(
+                "modalidade-comparacao"
+            )
+            .value;
+
+
+    const grau =
+        document
+            .getElementById(
+                "grau-comparacao"
             )
             .value;
 
@@ -1323,12 +1903,11 @@ async function compararCursos() {
             <div class="empty-state">
 
                 <h3>
-                    Selecione um curso
+                    Informe um curso
                 </h3>
 
             </div>
         `;
-
 
         return;
     }
@@ -1337,37 +1916,63 @@ async function compararCursos() {
     container.innerHTML = `
 
         <div class="empty-state">
-            Carregando indicadores oficiais...
+            Comparando indicadores oficiais...
         </div>
     `;
 
 
+    const parametros =
+        new URLSearchParams({
+            curso
+        });
+
+
+    if (estado) {
+
+        parametros.set(
+            "estado",
+            estado
+        );
+    }
+
+
+    if (cidade) {
+
+        parametros.set(
+            "cidade",
+            cidade
+        );
+    }
+
+
+    if (universidadeId) {
+
+        parametros.set(
+            "universidade_id",
+            universidadeId
+        );
+    }
+
+
+    if (modalidade) {
+
+        parametros.set(
+            "modalidade",
+            modalidade
+        );
+    }
+
+
+    if (grau) {
+
+        parametros.set(
+            "grau",
+            grau
+        );
+    }
+
+
     try {
-
-        const parametros =
-            new URLSearchParams({
-                curso,
-                ano
-            });
-
-
-        if (modalidade) {
-
-            parametros.set(
-                "modalidade",
-                modalidade
-            );
-        }
-
-
-        if (grau) {
-
-            parametros.set(
-                "grau",
-                grau
-            );
-        }
-
 
         const resposta =
             await fetch(
@@ -1412,8 +2017,7 @@ async function compararCursos() {
                 </h3>
 
                 <p>
-                    Verifique se os indicadores oficiais do
-                    Inep foram importados para o banco.
+                    Verifique os filtros e tente novamente.
                 </p>
 
             </div>
@@ -1433,7 +2037,7 @@ document
 
 
 // =========================================================
-// INDICADOR
+// INDICADORES DE QUALIDADE
 // =========================================================
 
 function renderizarIndicador(
@@ -1451,7 +2055,7 @@ function renderizarIndicador(
     }
 
 
-    const valorContinuo =
+    const detalhe =
         (
             continuo !== null &&
             continuo !== undefined &&
@@ -1469,13 +2073,17 @@ function renderizarIndicador(
     return `
 
         <strong>
+
             ${escaparHtml(
                 faixa
             )}
+
         </strong>
 
         <small>
-            ${valorContinuo}
+            ${escaparHtml(
+                detalhe
+            )}
         </small>
     `;
 }
@@ -1502,20 +2110,23 @@ function renderizarComparacao(
             <div class="empty-state">
 
                 <h3>
-                    Nenhum indicador encontrado
+                    Nenhum resultado encontrado
                 </h3>
 
                 <p>
-                    O curso pode não ter sido avaliado
-                    nesse ano ou não possuir conceito calculado.
+                    Tente remover algum filtro
+                    ou pesquisar outro curso.
                 </p>
 
             </div>
         `;
 
-
         return;
     }
+
+
+    const referencia =
+        dados[0];
 
 
     container.innerHTML = `
@@ -1528,13 +2139,20 @@ function renderizarComparacao(
 
             <span>
 
-                Indicadores oficiais de qualidade da
-                educação superior.
+                Trajetória da coorte de
 
-                Ano:
                 ${escaparHtml(
-                    dados[0].ano
+                    referencia.ano_ingresso
+                )}
+
+                acompanhada até
+
+                ${escaparHtml(
+                    referencia.ano_trajetoria
                 )}.
+
+                Os indicadores de qualidade utilizam
+                o último ano disponível para cada curso.
 
             </span>
 
@@ -1543,9 +2161,7 @@ function renderizarComparacao(
 
         <div class="table-container">
 
-
             <table class="comparison-table">
-
 
                 <thead>
 
@@ -1553,6 +2169,22 @@ function renderizarComparacao(
 
                         <th>
                             Instituição
+                        </th>
+
+                        <th>
+                            Conclusão
+                        </th>
+
+                        <th>
+                            Desistência
+                        </th>
+
+                        <th>
+                            Permanência
+                        </th>
+
+                        <th>
+                            Participação Enade
                         </th>
 
                         <th>
@@ -1571,120 +2203,195 @@ function renderizarComparacao(
                             IGC
                         </th>
 
-                        <th>
-                            Participantes
-                        </th>
-
                     </tr>
 
                 </thead>
 
-
                 <tbody>
 
+                    ${dados
+                        .map(
+                            item => `
 
-                    ${
+                                <tr>
 
-                        dados
-                            .map(
-                                item => `
+                                    <td>
 
-                                    <tr>
+                                        <strong>
 
-
-                                        <td>
-
-                                            <strong>
-
-                                                ${escaparHtml(
-                                                    item.sigla ||
-                                                    item.instituicao
-                                                )}
-
-                                            </strong>
-
-                                            <small>
-
-                                                ${escaparHtml(
-                                                    item.instituicao
-                                                )}
-
-                                                ${
-                                                    item.estado
-
-                                                        ? ` • ${escaparHtml(
-                                                            item.estado
-                                                        )}`
-
-                                                        : ""
-                                                }
-
-                                            </small>
-
-                                        </td>
-
-
-                                        <td>
-
-                                            ${renderizarIndicador(
-                                                item.cpc_faixa,
-                                                item.cpc_continuo
+                                            ${escaparHtml(
+                                                item.sigla ||
+                                                item.instituicao
                                             )}
 
-                                        </td>
+                                        </strong>
 
+                                        <small>
 
-                                        <td>
-
-                                            ${renderizarIndicador(
-                                                item.conceito_enade_faixa,
-                                                item.conceito_enade_continuo
+                                            ${escaparHtml(
+                                                item.instituicao
                                             )}
 
-                                        </td>
+                                            ${
+                                                item.cidade
+
+                                                    ? ` • ${escaparHtml(
+                                                        item.cidade
+                                                    )}`
+
+                                                    : ""
+                                            }
+
+                                            ${
+                                                item.estado
+
+                                                    ? `/${escaparHtml(
+                                                        item.estado
+                                                    )}`
+
+                                                    : ""
+                                            }
+
+                                            ${
+                                                item.codigo_inep
+
+                                                    ? ` • Curso Inep ${escaparHtml(
+                                                        item.codigo_inep
+                                                    )}`
+
+                                                    : ""
+                                            }
+
+                                        </small>
+
+                                    </td>
 
 
-                                        <td>
+                                    <td>
 
-                                            ${renderizarIndicador(
-                                                item.idd_faixa,
-                                                item.idd_continuo
+                                        <strong>
+
+                                            ${formatarPercentual(
+                                                item.taxa_conclusao_acumulada
                                             )}
 
-                                        </td>
+                                        </strong>
+
+                                        <small>
+                                            acumulada
+                                        </small>
+
+                                    </td>
 
 
-                                        <td>
+                                    <td>
 
-                                            ${renderizarIndicador(
-                                                item.igc_faixa,
-                                                item.igc_continuo
+                                        <strong>
+
+                                            ${formatarPercentual(
+                                                item.taxa_desistencia_acumulada
                                             )}
 
-                                        </td>
+                                        </strong>
+
+                                        <small>
+                                            acumulada
+                                        </small>
+
+                                    </td>
 
 
-                                        <td>
+                                    <td>
+
+                                        <strong>
+
+                                            ${formatarPercentual(
+                                                item.taxa_permanencia
+                                            )}
+
+                                        </strong>
+
+                                        <small>
+                                            ainda vinculados
+                                        </small>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong>
+
+                                            ${formatarPercentual(
+                                                item.taxa_participacao_enade
+                                            )}
+
+                                        </strong>
+
+                                        <small>
 
                                             ${formatarInteiro(
                                                 item.concluintes_participantes
                                             )}
 
-                                        </td>
+                                            /
+
+                                            ${formatarInteiro(
+                                                item.concluintes_inscritos
+                                            )}
+
+                                        </small>
+
+                                    </td>
 
 
-                                    </tr>
-                                `
-                            )
-                            .join("")
-                    }
+                                    <td>
 
+                                        ${renderizarIndicador(
+                                            item.cpc_faixa,
+                                            item.cpc_continuo
+                                        )}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        ${renderizarIndicador(
+                                            item.conceito_enade_faixa,
+                                            item.conceito_enade_continuo
+                                        )}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        ${renderizarIndicador(
+                                            item.idd_faixa,
+                                            item.idd_continuo
+                                        )}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        ${renderizarIndicador(
+                                            item.igc_faixa,
+                                            item.igc_continuo
+                                        )}
+
+                                    </td>
+
+                                </tr>
+                            `
+                        )
+                        .join("")}
 
                 </tbody>
 
-
             </table>
-
 
         </div>
     `;
@@ -1713,7 +2420,7 @@ async function iniciar() {
 
         carregarResumoInep(),
 
-        preencherCursosComparacao()
+        carregarEstadosComparacao()
 
     ]);
 }

@@ -13,7 +13,7 @@
 
     <link
         rel="stylesheet"
-        href="/css/style.css?v=6"
+        href="/css/style.css?v=7"
     >
 </head>
 
@@ -46,7 +46,6 @@
 
         </div>
 
-
         <div class="topbar-user">
 
             <div class="user-info">
@@ -60,7 +59,6 @@
                 </small>
 
             </div>
-
 
             <button
                 id="btn-logout"
@@ -109,7 +107,6 @@
 
     <main class="public-main">
 
-
         <!-- =================================================
              INÍCIO
              ================================================= -->
@@ -129,14 +126,13 @@
 
                     <h1>
                         Conheça instituições e compare
-                        indicadores oficiais da educação superior.
+                        indicadores da educação superior.
                     </h1>
 
                     <p>
-                        Consulte Instituições de Educação Superior
-                        e cursos de graduação de todo o Brasil.
-                        A área pública do SIA utiliza dados oficiais
-                        do Inep.
+                        Consulte Instituições de Educação Superior,
+                        cursos de graduação, trajetória dos estudantes
+                        e indicadores oficiais do Inep.
                     </p>
 
                     <button
@@ -240,9 +236,8 @@
                     </h2>
 
                     <p>
-                        Consulte universidades, institutos
-                        federais, centros universitários,
-                        faculdades e Cefets.
+                        Consulte universidades, institutos federais,
+                        centros universitários, faculdades e Cefets.
                     </p>
 
                 </div>
@@ -291,9 +286,9 @@
                     </h2>
 
                     <p>
-                        Pesquise bacharelados, licenciaturas
-                        e cursos superiores de tecnologia
-                        cadastrados na base do SIA.
+                        Pesquise bacharelados, licenciaturas e
+                        cursos superiores de tecnologia cadastrados
+                        na base nacional.
                     </p>
 
                 </div>
@@ -336,7 +331,7 @@
 
 
         <!-- =================================================
-             COMPARAÇÃO OFICIAL
+             COMPARAÇÃO
              ================================================= -->
 
         <section
@@ -357,8 +352,9 @@
                     </h2>
 
                     <p>
-                        Compare CPC, Conceito Enade, IDD e IGC
-                        entre cursos avaliados pelo Inep.
+                        Compare conclusão, desistência, permanência,
+                        participação no Enade e indicadores de qualidade
+                        entre cursos e instituições brasileiras.
                     </p>
 
                 </div>
@@ -368,23 +364,95 @@
 
             <div class="comparison-filters">
 
+                <!-- CURSO -->
 
                 <div class="form-group">
 
                     <label for="curso-comparacao">
-                        Curso avaliado
+                        Curso
                     </label>
 
-                    <select id="curso-comparacao">
+                    <input
+                        type="text"
+                        id="curso-comparacao"
+                        list="opcoes-cursos-comparacao"
+                        autocomplete="off"
+                        placeholder="Digite ao menos 2 caracteres..."
+                    >
+
+                    <datalist
+                        id="opcoes-cursos-comparacao"
+                    ></datalist>
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="form-group">
+
+                    <label for="estado-comparacao">
+                        Estado
+                    </label>
+
+                    <select id="estado-comparacao">
 
                         <option value="">
-                            Carregando cursos...
+                            Todos
                         </option>
 
                     </select>
 
                 </div>
 
+
+                <!-- CIDADE -->
+
+                <div class="form-group">
+
+                    <label for="cidade-comparacao">
+                        Cidade da IES
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cidade-comparacao"
+                        list="opcoes-cidades-comparacao"
+                        autocomplete="off"
+                        placeholder="Todas as cidades"
+                    >
+
+                    <datalist
+                        id="opcoes-cidades-comparacao"
+                    ></datalist>
+
+                </div>
+
+
+                <!-- INSTITUIÇÃO -->
+
+                <div class="form-group">
+
+                    <label for="instituicao-comparacao">
+                        Instituição
+                    </label>
+
+                    <input
+                        type="text"
+                        id="instituicao-comparacao"
+                        list="opcoes-instituicoes-comparacao"
+                        autocomplete="off"
+                        placeholder="Todas as instituições"
+                    >
+
+                    <datalist
+                        id="opcoes-instituicoes-comparacao"
+                    ></datalist>
+
+                </div>
+
+
+                <!-- MODALIDADE -->
 
                 <div class="form-group">
 
@@ -410,6 +478,8 @@
 
                 </div>
 
+
+                <!-- GRAU -->
 
                 <div class="form-group">
 
@@ -440,23 +510,6 @@
                 </div>
 
 
-                <div class="form-group">
-
-                    <label for="ano-comparacao">
-                        Ano
-                    </label>
-
-                    <select id="ano-comparacao">
-
-                        <option value="2023">
-                            2023
-                        </option>
-
-                    </select>
-
-                </div>
-
-
                 <button
                     id="btn-comparar"
                     class="btn-primary btn-auto"
@@ -474,10 +527,12 @@
                 </strong>
 
                 <span>
-                    CPC, Conceito Enade, IDD e IGC apresentados
-                    nesta área são provenientes dos dados oficiais
-                    do Inep. A ausência de conceito não significa
-                    nota zero.
+                    Conclusão, desistência e permanência são
+                    indicadores de trajetória da coorte de 2015.
+                    Participação no Enade é calculada a partir
+                    dos concluintes inscritos e participantes.
+                    CPC, Enade, IDD e IGC são apresentados
+                    como indicadores complementares.
                 </span>
 
             </div>
@@ -495,12 +550,12 @@
                     </div>
 
                     <h3>
-                        Selecione um curso
+                        Pesquise um curso
                     </h3>
 
                     <p>
-                        Escolha um curso avaliado pelo Inep
-                        para comparar seus indicadores oficiais.
+                        Digite o nome do curso e utilize os filtros
+                        para comparar as instituições.
                     </p>
 
                 </div>
@@ -519,14 +574,14 @@
         </span>
 
         <small>
-            Dados acadêmicos transformados em
-            indicadores para melhores decisões.
+            Dados acadêmicos transformados em indicadores
+            para melhores decisões.
         </small>
 
     </footer>
 
 
-    <script src="/js/explorar.js?v=6"></script>
+    <script src="/js/explorar.js?v=7"></script>
 
 </body>
 
