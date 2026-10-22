@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,13 +12,23 @@
 
     <title>Explorar | SIA</title>
 
+
     <link
         rel="stylesheet"
-        href="/css/style.css?v=7"
+        href="/css/style.css?v=8"
     >
+
+
+    <link
+        rel="stylesheet"
+        href="/css/cursos-filtros.css?v=1"
+    >
+
 </head>
 
+
 <body class="sia-page">
+
 
     <header class="topbar">
 
@@ -31,6 +42,7 @@
                 >
 
             </div>
+
 
             <div class="topbar-description">
 
@@ -46,6 +58,7 @@
 
         </div>
 
+
         <div class="topbar-user">
 
             <div class="user-info">
@@ -59,6 +72,7 @@
                 </small>
 
             </div>
+
 
             <button
                 id="btn-logout"
@@ -81,6 +95,7 @@
             Início
         </button>
 
+
         <button
             class="nav-item"
             data-section="universidades"
@@ -88,12 +103,14 @@
             Instituições
         </button>
 
+
         <button
             class="nav-item"
             data-section="cursos"
         >
             Cursos
         </button>
+
 
         <button
             class="nav-item"
@@ -106,6 +123,7 @@
 
 
     <main class="public-main">
+
 
         <!-- =================================================
              INÍCIO
@@ -124,16 +142,19 @@
                         Inteligência acadêmica
                     </span>
 
+
                     <h1>
                         Conheça instituições e compare
                         indicadores da educação superior.
                     </h1>
+
 
                     <p>
                         Consulte Instituições de Educação Superior,
                         cursos de graduação, trajetória dos estudantes
                         e indicadores oficiais do Inep.
                     </p>
+
 
                     <button
                         class="btn-primary btn-auto"
@@ -286,15 +307,20 @@
                     </h2>
 
                     <p>
-                        Pesquise bacharelados, licenciaturas e
-                        cursos superiores de tecnologia cadastrados
-                        na base nacional.
+                        Pesquise cursos em todo o Brasil utilizando
+                        filtros por estado, cidade, instituição,
+                        modalidade e grau acadêmico.
                     </p>
 
                 </div>
 
             </div>
 
+
+            <!--
+                Esta caixa é substituída por cursos-filtros.js.
+                É mantida para compatibilidade com explorar.js.
+            -->
 
             <div class="search-box">
 
@@ -319,8 +345,8 @@
                     </h3>
 
                     <p>
-                        Digite ao menos 2 caracteres para consultar
-                        a base nacional.
+                        Digite o nome do curso ou utilize
+                        os filtros disponíveis.
                     </p>
 
                 </div>
@@ -364,7 +390,6 @@
 
             <div class="comparison-filters">
 
-                <!-- CURSO -->
 
                 <div class="form-group">
 
@@ -387,8 +412,6 @@
                 </div>
 
 
-                <!-- ESTADO -->
-
                 <div class="form-group">
 
                     <label for="estado-comparacao">
@@ -405,8 +428,6 @@
 
                 </div>
 
-
-                <!-- CIDADE -->
 
                 <div class="form-group">
 
@@ -429,8 +450,6 @@
                 </div>
 
 
-                <!-- INSTITUIÇÃO -->
-
                 <div class="form-group">
 
                     <label for="instituicao-comparacao">
@@ -451,8 +470,6 @@
 
                 </div>
 
-
-                <!-- MODALIDADE -->
 
                 <div class="form-group">
 
@@ -478,8 +495,6 @@
 
                 </div>
 
-
-                <!-- GRAU -->
 
                 <div class="form-group">
 
@@ -582,6 +597,8 @@
 
 
     <script src="/js/explorar.js?v=7"></script>
+
+    <script src="/js/cursos-filtros.js?v=1"></script>
 
 </body>
 

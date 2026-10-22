@@ -27,6 +27,8 @@ router.get(
                 nome,
                 modalidade,
                 grau,
+                estado,
+                cidade,
                 limite
             } = req.query;
 
@@ -82,14 +84,28 @@ router.get(
 
             if (universidade_id) {
 
-                parametros.push(
-                    universidade_id
-                );
+                const universidadeId =
+                    Number.parseInt(
+                        universidade_id,
+                        10
+                    );
 
 
-                filtros.push(
-                    `c.universidade_id = $${parametros.length}`
-                );
+                if (
+                    Number.isInteger(
+                        universidadeId
+                    )
+                ) {
+
+                    parametros.push(
+                        universidadeId
+                    );
+
+
+                    filtros.push(
+                        `c.universidade_id = $${parametros.length}`
+                    );
+                }
             }
 
 
@@ -114,13 +130,58 @@ router.get(
 
 
             // ---------------------------------------------
+            // ESTADO
+            // ---------------------------------------------
+
+            if (
+                estado &&
+                String(estado).trim()
+            ) {
+
+                parametros.push(
+                    String(estado)
+                        .trim()
+                        .toUpperCase()
+                );
+
+
+                filtros.push(
+                    `u.estado = $${parametros.length}`
+                );
+            }
+
+
+            // ---------------------------------------------
+            // CIDADE
+            // ---------------------------------------------
+
+            if (
+                cidade &&
+                String(cidade).trim()
+            ) {
+
+                parametros.push(
+                    String(cidade).trim()
+                );
+
+
+                filtros.push(
+                    `LOWER(u.cidade) = LOWER($${parametros.length})`
+                );
+            }
+
+
+            // ---------------------------------------------
             // MODALIDADE
             // ---------------------------------------------
 
-            if (modalidade) {
+            if (
+                modalidade &&
+                String(modalidade).trim()
+            ) {
 
                 parametros.push(
-                    modalidade
+                    String(modalidade).trim()
                 );
 
 
@@ -134,10 +195,13 @@ router.get(
             // GRAU ACADÊMICO
             // ---------------------------------------------
 
-            if (grau) {
+            if (
+                grau &&
+                String(grau).trim()
+            ) {
 
                 parametros.push(
-                    grau
+                    String(grau).trim()
                 );
 
 
@@ -232,6 +296,10 @@ router.get(
                     ORDER BY
 
                         c.nome,
+
+                        u.estado,
+
+                        u.cidade,
 
                         u.nome
 
@@ -410,9 +478,6 @@ router.post(
             // =================================================
             // ADMIN INSTITUCIONAL
             // =================================================
-            //
-            // Não pode cadastrar curso em outra instituição.
-            // =================================================
 
             if (
                 usuario.perfil ===
@@ -587,10 +652,6 @@ router.post(
 
         } catch (erro) {
 
-            // =================================================
-            // CONFLITO / DUPLICIDADE
-            // =================================================
-
             if (
                 erro.code ===
                 "23505"
@@ -604,10 +665,6 @@ router.post(
                     });
             }
 
-
-            // =================================================
-            // CHECK CONSTRAINT
-            // =================================================
 
             if (
                 erro.code ===
