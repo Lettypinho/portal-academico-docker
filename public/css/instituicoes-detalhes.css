@@ -1,43 +1,80 @@
 /* =========================================================
-   SIA - DETALHES DE INSTITUIÇÕES
+   SIA - INSTITUIÇÕES
+   CARDS + MODAL DE DETALHES
    ========================================================= */
 
 
 /* =========================================================
-   CARDS DAS INSTITUIÇÕES
+   GRID DAS INSTITUIÇÕES
+   ========================================================= */
+
+#inicio #universidades-resumo,
+#universidades #lista-universidades {
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        22px;
+}
+
+
+/* =========================================================
+   CARD
    ========================================================= */
 
 .institution-card {
 
-    position: relative;
+    position:
+        relative;
 
-    min-height: 210px;
+    display:
+        grid;
 
-    align-items: flex-start;
+    grid-template-columns:
+        72px
+        minmax(
+            0,
+            1fr
+        )
+        132px;
 
-    gap: 20px;
+    align-items:
+        center;
+
+    column-gap:
+        20px;
+
+    min-height:
+        205px;
 
     padding:
-        28px
-        24px
-        24px;
+        26px 24px;
 
-    cursor: pointer;
+    cursor:
+        pointer;
 
-    overflow: hidden;
+    overflow:
+        hidden;
 
     border:
         1px solid
-        #e5deee;
+        #e4deec;
 
     border-radius:
-        17px;
+        18px;
 
     background:
         #ffffff;
 
     box-shadow:
-        0 8px 26px
+        0 8px 28px
         rgba(
             76,
             29,
@@ -58,10 +95,10 @@
         translateY(-4px);
 
     border-color:
-        #c4b5fd;
+        #cbb6fa;
 
     box-shadow:
-        0 18px 38px
+        0 18px 40px
         rgba(
             109,
             40,
@@ -91,23 +128,38 @@
 
 
 /* =========================================================
-   SIGLA / ÍCONE
+   SIGLA
    ========================================================= */
 
 .institution-card
 .institution-icon {
 
+    grid-column:
+        1;
+
     min-width:
-        68px;
+        72px;
 
     width:
-        68px;
+        72px;
 
     height:
-        68px;
+        72px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        8px;
 
     border-radius:
-        17px;
+        18px;
 
     color:
         var(--primary);
@@ -116,7 +168,7 @@
         linear-gradient(
             145deg,
             #faf5ff,
-            #f1e8ff
+            #efe4ff
         );
 
     font-size:
@@ -126,7 +178,7 @@
         850;
 
     line-height:
-        1.1;
+        1.12;
 
     text-align:
         center;
@@ -134,54 +186,75 @@
 
 
 /* =========================================================
-   CONTEÚDO PRINCIPAL
+   ÁREA CENTRAL
    ========================================================= */
 
-.institution-card > div:nth-child(2) {
+.institution-card
+> div:nth-child(2) {
+
+    grid-column:
+        2;
 
     min-width:
         0;
 
-    flex:
-        1;
+    width:
+        100%;
 
-    padding-right:
-        132px;
+    padding:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-start;
 }
 
 
+/* =========================================================
+   NOME
+   ========================================================= */
+
 .institution-card h3 {
 
-    max-width:
+    width:
         100%;
 
     margin:
-        1px 0 7px;
+        0 0 7px;
 
     color:
-        #21182d;
+        #181126;
 
     font-size:
-        16px;
+        17px;
 
     font-weight:
         800;
 
     line-height:
-        1.32;
+        1.3;
 
-    text-transform:
-        none;
+    letter-spacing:
+        -0.15px;
 }
 
 
+/* =========================================================
+   LOCALIZAÇÃO
+   ========================================================= */
+
 .institution-card p {
 
-    margin-bottom:
-        18px;
+    margin:
+        0 0 15px;
 
     color:
-        #786f82;
+        #71687c;
 
     font-size:
         14px;
@@ -198,11 +271,17 @@
 .institution-card
 .course-meta {
 
+    width:
+        100%;
+
     display:
         flex;
 
     justify-content:
         flex-start;
+
+    align-items:
+        center;
 
     flex-wrap:
         wrap;
@@ -210,8 +289,8 @@
     gap:
         8px;
 
-    margin-bottom:
-        18px;
+    margin:
+        0 0 17px;
 }
 
 
@@ -224,24 +303,31 @@
     align-items:
         center;
 
+    justify-content:
+        center;
+
     min-height:
         30px;
 
     padding:
-        6px 12px;
+        6px 11px;
 
     border:
         1px solid
-        #eee7f5;
+        #ede4f5;
 
     border-radius:
         999px;
 
     color:
-        #5e3774;
+        #5b3472;
 
     background:
-        #f7f1fb;
+        linear-gradient(
+            135deg,
+            #faf5ff,
+            #f4ecfb
+        );
 
     font-size:
         11px;
@@ -250,7 +336,10 @@
         700;
 
     line-height:
-        1;
+        1.05;
+
+    text-align:
+        center;
 }
 
 
@@ -265,22 +354,22 @@
     display:
         block;
 
-    margin-top:
-        auto;
-
     color:
-        #948b9e;
+        #918899;
 
     font-size:
         12px;
 
     font-weight:
         500;
+
+    line-height:
+        1.3;
 }
 
 
 /* =========================================================
-   BOTÃO VISUAL "VER DETALHES"
+   BOTÃO VER DETALHES
    ========================================================= */
 
 .institution-card::after {
@@ -288,20 +377,14 @@
     content:
         "Ver detalhes  →";
 
+    grid-column:
+        3;
+
     position:
-        absolute;
-
-    top:
-        50%;
-
-    right:
-        22px;
-
-    transform:
-        translateY(-50%);
+        static;
 
     display:
-        inline-flex;
+        flex;
 
     align-items:
         center;
@@ -309,23 +392,23 @@
     justify-content:
         center;
 
-    min-width:
-        116px;
+    width:
+        132px;
 
     min-height:
-        44px;
+        48px;
 
     margin:
         0;
 
     padding:
-        10px 16px;
+        11px 14px;
 
     border:
         none;
 
     border-radius:
-        12px;
+        13px;
 
     color:
         #ffffff;
@@ -339,12 +422,12 @@
         );
 
     box-shadow:
-        0 8px 18px
+        0 8px 20px
         rgba(
             109,
             40,
             217,
-            0.25
+            0.27
         );
 
     font-size:
@@ -352,6 +435,9 @@
 
     font-weight:
         750;
+
+    line-height:
+        1;
 
     white-space:
         nowrap;
@@ -366,19 +452,18 @@
 .institution-card:hover::after {
 
     transform:
-        translateY(-50%)
-        translateX(3px);
+        translateX(4px);
 
     filter:
         brightness(1.04);
 
     box-shadow:
-        0 11px 24px
+        0 12px 27px
         rgba(
             109,
             40,
             217,
-            0.34
+            0.36
         );
 }
 
@@ -471,6 +556,10 @@
         );
 }
 
+
+/* =========================================================
+   CABEÇALHO DO MODAL
+   ========================================================= */
 
 .ies-modal-header {
 
@@ -604,6 +693,10 @@
 }
 
 
+/* =========================================================
+   BOTÃO FECHAR
+   ========================================================= */
+
 .ies-modal-close {
 
     width:
@@ -666,7 +759,7 @@
 
 
 /* =========================================================
-   INFORMAÇÕES DA INSTITUIÇÃO
+   INFORMAÇÕES DA IES
    ========================================================= */
 
 .ies-info-grid {
@@ -741,7 +834,7 @@
 
 
 /* =========================================================
-   INDICADORES
+   SEÇÕES DO MODAL
    ========================================================= */
 
 .ies-detail-section {
@@ -776,6 +869,10 @@
         1.5;
 }
 
+
+/* =========================================================
+   INDICADORES
+   ========================================================= */
 
 .ies-indicators-grid {
 
@@ -862,7 +959,7 @@
 
 
 /* =========================================================
-   CURSOS
+   CURSOS DO MODAL
    ========================================================= */
 
 .ies-courses-list {
@@ -980,48 +1077,73 @@
    ========================================================= */
 
 @media (
-    max-width: 1000px
+    max-width: 1050px
 ) {
 
-    .institution-card
-    > div:nth-child(2) {
+    #inicio #universidades-resumo,
+    #universidades #lista-universidades {
 
-        padding-right:
-            0;
-    }
-
-
-    .institution-card::after {
-
-        position:
-            static;
-
-        transform:
-            none;
-
-        min-width:
-            auto;
-
-        margin-top:
-            16px;
-
-        width:
-            fit-content;
-    }
-
-
-    .institution-card:hover::after {
-
-        transform:
-            translateX(3px);
+        grid-template-columns:
+            1fr;
     }
 
 }
 
 
 @media (
-    max-width: 850px
+    max-width: 720px
 ) {
+
+    .institution-card {
+
+        grid-template-columns:
+            64px
+            minmax(
+                0,
+                1fr
+            );
+
+        row-gap:
+            18px;
+
+        min-height:
+            auto;
+    }
+
+
+    .institution-card
+    .institution-icon {
+
+        width:
+            64px;
+
+        min-width:
+            64px;
+
+        height:
+            64px;
+    }
+
+
+    .institution-card::after {
+
+        grid-column:
+            1 / -1;
+
+        width:
+            100%;
+
+        transform:
+            none;
+    }
+
+
+    .institution-card:hover::after {
+
+        transform:
+            none;
+    }
+
 
     .ies-info-grid,
     .ies-indicators-grid {
@@ -1052,18 +1174,8 @@
 
     .institution-card {
 
-        flex-direction:
-            column;
-
-        min-height:
-            auto;
-    }
-
-
-    .institution-card::after {
-
-        width:
-            100%;
+        padding:
+            20px;
     }
 
 
