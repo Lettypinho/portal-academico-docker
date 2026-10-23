@@ -18,6 +18,11 @@ const authRoutes =
         "./routes/auth.routes"
     );
 
+const perfilRoutes =
+    require(
+        "./routes/perfil.routes"
+    );
+
 const cursosRoutes =
     require(
         "./routes/cursos.routes"
@@ -110,6 +115,12 @@ app.use(
 
 
 app.use(
+    "/api/perfil",
+    perfilRoutes
+);
+
+
+app.use(
     "/api/universidades",
     universidadesRoutes
 );
@@ -121,14 +132,12 @@ app.use(
 );
 
 
-// Indicadores acadêmicos internos/demonstrativos.
 app.use(
     "/api/indicadores",
     indicadoresRoutes
 );
 
 
-// Indicadores públicos oficiais do Inep.
 app.use(
     "/api/indicadores-inep",
     indicadoresInepRoutes
@@ -150,6 +159,7 @@ app.get(
     (req, res) => {
 
         res.json({
+
             sistema:
                 "SIA",
 
