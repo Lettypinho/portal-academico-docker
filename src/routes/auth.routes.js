@@ -27,25 +27,43 @@ router.post("/cadastro", async (req, res) => {
 
         if (!nome || !email || !senha) {
             return res.status(400).json({
-                erro: "Preencha todos os campos obrigatórios"
+                erro:
+                    "Preencha todos os campos obrigatórios"
             });
         }
 
 
-        nome = nome.trim();
-        email = email.trim().toLowerCase();
+        nome =
+            nome.trim();
+
+        email =
+            email.trim().toLowerCase();
 
 
         if (nome.length < 3) {
             return res.status(400).json({
-                erro: "Informe um nome válido"
+                erro:
+                    "Informe um nome válido"
+            });
+        }
+
+
+        if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                email
+            )
+        ) {
+            return res.status(400).json({
+                erro:
+                    "Informe um e-mail válido"
             });
         }
 
 
         if (senha.length < 6) {
             return res.status(400).json({
-                erro: "A senha deve possuir pelo menos 6 caracteres"
+                erro:
+                    "A senha deve possuir pelo menos 6 caracteres"
             });
         }
 
@@ -65,9 +83,13 @@ router.post("/cadastro", async (req, res) => {
             );
 
 
-        if (usuarioExistente.rows.length > 0) {
+        if (
+            usuarioExistente.rows.length >
+            0
+        ) {
             return res.status(409).json({
-                erro: "E-mail já cadastrado"
+                erro:
+                    "E-mail já cadastrado"
             });
         }
 
@@ -85,13 +107,6 @@ router.post("/cadastro", async (req, res) => {
 
         // =================================================
         // CADASTRO
-        // =================================================
-        //
-        // Usuário criado pelo cadastro público:
-        //
-        // universidade_id = NULL
-        // perfil = publico
-        //
         // =================================================
 
         const resultado =
@@ -149,20 +164,23 @@ router.post("/cadastro", async (req, res) => {
 
         if (erro.code === "23505") {
             return res.status(409).json({
-                erro: "E-mail já cadastrado"
+                erro:
+                    "E-mail já cadastrado"
             });
         }
 
 
         if (erro.code === "23514") {
             return res.status(400).json({
-                erro: "Dados de cadastro inválidos"
+                erro:
+                    "Dados de cadastro inválidos"
             });
         }
 
 
         res.status(500).json({
-            erro: "Erro ao cadastrar usuário"
+            erro:
+                "Erro ao cadastrar usuário"
         });
     }
 });
@@ -187,13 +205,16 @@ router.post("/login", async (req, res) => {
 
         if (!email || !senha) {
             return res.status(400).json({
-                erro: "Informe e-mail e senha"
+                erro:
+                    "Informe e-mail e senha"
             });
         }
 
 
         email =
-            email.trim().toLowerCase();
+            email
+                .trim()
+                .toLowerCase();
 
 
         // =================================================
@@ -232,9 +253,13 @@ router.post("/login", async (req, res) => {
             );
 
 
-        if (resultado.rows.length === 0) {
+        if (
+            resultado.rows.length ===
+            0
+        ) {
             return res.status(401).json({
-                erro: "E-mail ou senha inválidos"
+                erro:
+                    "E-mail ou senha inválidos"
             });
         }
 
@@ -249,7 +274,8 @@ router.post("/login", async (req, res) => {
 
         if (!usuario.ativo) {
             return res.status(403).json({
-                erro: "Usuário desativado"
+                erro:
+                    "Usuário desativado"
             });
         }
 
@@ -257,18 +283,11 @@ router.post("/login", async (req, res) => {
         // =================================================
         // UNIVERSIDADE DESATIVADA
         // =================================================
-        //
-        // Usuário público e super_admin não possuem
-        // universidade_id.
-        //
-        // Usuários institucionais precisam pertencer a uma
-        // instituição ativa.
-        //
-        // =================================================
 
         if (
             usuario.universidade_id &&
-            usuario.universidade_ativa === false
+            usuario.universidade_ativa ===
+                false
         ) {
             return res.status(403).json({
                 erro:
@@ -290,7 +309,8 @@ router.post("/login", async (req, res) => {
 
         if (!senhaCorreta) {
             return res.status(401).json({
-                erro: "E-mail ou senha inválidos"
+                erro:
+                    "E-mail ou senha inválidos"
             });
         }
 
@@ -343,7 +363,8 @@ router.post("/login", async (req, res) => {
 
 
         res.status(500).json({
-            erro: "Erro interno no login"
+            erro:
+                "Erro interno no login"
         });
     }
 });
@@ -361,6 +382,470 @@ router.get(
         res.json(
             req.session.usuario
         );
+    }
+);
+
+
+// =========================================================
+// ATUALIZAR PERFIL DO USUÁRIO PÚBLICO
+// =========================================================
+
+router.put(
+    "/perfil",
+    exigirLogin,
+    async (req, res) => {
+
+        try {
+
+            if (
+                req.session.usuario
+                    .perfil !==
+                "publico"
+            ) {
+                return res.status(403).json({
+                    erro:
+                        "Esta função está disponível apenas para usuários públicos"
+                });
+            }
+
+
+            let {
+                nome,
+                email
+            } = req.body;
+
+
+            // =============================================
+            // CAMPOS OBRIGATÓRIOS
+            // =============================================
+
+            if (!nome || !email) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe nome e e-mail"
+                    });
+            }
+
+
+            nome =
+                String(nome)
+                    .trim();
+
+
+            email =
+                String(email)
+                    .trim()
+                    .toLowerCase();
+
+
+            // =============================================
+            // VALIDAR NOME
+            // =============================================
+
+            if (
+                nome.length <
+                3
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe um nome válido"
+                    });
+            }
+
+
+            // =============================================
+            // VALIDAR E-MAIL
+            // =============================================
+
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    email
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe um e-mail válido"
+                    });
+            }
+
+
+            const usuarioId =
+                req.session.usuario.id;
+
+
+            // =============================================
+            // VERIFICAR E-MAIL EM OUTRA CONTA
+            // =============================================
+
+            const emailExistente =
+                await pool.query(
+                    `
+                    SELECT id
+                    FROM usuario
+                    WHERE
+                        LOWER(email) = LOWER($1)
+                        AND id <> $2
+                    LIMIT 1
+                    `,
+                    [
+                        email,
+                        usuarioId
+                    ]
+                );
+
+
+            if (
+                emailExistente
+                    .rows
+                    .length >
+                0
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Este e-mail já está cadastrado em outra conta"
+                    });
+            }
+
+
+            // =============================================
+            // ATUALIZAR
+            // =============================================
+
+            const resultado =
+                await pool.query(
+                    `
+                    UPDATE usuario
+
+                    SET
+                        nome = $1,
+                        email = $2
+
+                    WHERE id = $3
+
+                    RETURNING
+                        id,
+                        nome,
+                        email,
+                        perfil
+                    `,
+                    [
+                        nome,
+                        email,
+                        usuarioId
+                    ]
+                );
+
+
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Usuário não encontrado"
+                    });
+            }
+
+
+            const usuarioAtualizado =
+                resultado.rows[0];
+
+
+            // =============================================
+            // ATUALIZAR SESSÃO
+            // =============================================
+
+            req.session.usuario.nome =
+                usuarioAtualizado.nome;
+
+
+            req.session.usuario.email =
+                usuarioAtualizado.email;
+
+
+            res.json({
+
+                mensagem:
+                    "Perfil atualizado com sucesso",
+
+                usuario: {
+                    ...req.session.usuario
+                }
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao atualizar perfil:",
+                erro
+            );
+
+
+            if (
+                erro.code ===
+                "23505"
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Este e-mail já está cadastrado"
+                    });
+            }
+
+
+            res.status(500).json({
+                erro:
+                    "Erro ao atualizar perfil"
+            });
+        }
+    }
+);
+
+
+// =========================================================
+// ALTERAR SENHA
+// =========================================================
+
+router.put(
+    "/senha",
+    exigirLogin,
+    async (req, res) => {
+
+        try {
+
+            if (
+                req.session.usuario
+                    .perfil !==
+                "publico"
+            ) {
+
+                return res.status(403).json({
+                    erro:
+                        "Esta função está disponível apenas para usuários públicos"
+                });
+            }
+
+
+            const {
+                senha_atual,
+                nova_senha,
+                confirmar_nova_senha
+            } = req.body;
+
+
+            // =============================================
+            // CAMPOS
+            // =============================================
+
+            if (
+                !senha_atual ||
+                !nova_senha ||
+                !confirmar_nova_senha
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Preencha todos os campos de senha"
+                    });
+            }
+
+
+            if (
+                nova_senha.length <
+                6
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A nova senha deve possuir pelo menos 6 caracteres"
+                    });
+            }
+
+
+            if (
+                nova_senha.length >
+                72
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A nova senha deve possuir no máximo 72 caracteres"
+                    });
+            }
+
+
+            if (
+                nova_senha !==
+                confirmar_nova_senha
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A confirmação da nova senha não confere"
+                    });
+            }
+
+
+            const usuarioId =
+                req.session.usuario.id;
+
+
+            // =============================================
+            // BUSCAR HASH ATUAL
+            // =============================================
+
+            const resultado =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        senha_hash
+
+                    FROM usuario
+
+                    WHERE id = $1
+                    `,
+                    [
+                        usuarioId
+                    ]
+                );
+
+
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Usuário não encontrado"
+                    });
+            }
+
+
+            const usuario =
+                resultado.rows[0];
+
+
+            // =============================================
+            // VALIDAR SENHA ATUAL
+            // =============================================
+
+            const senhaAtualCorreta =
+                await bcrypt.compare(
+                    senha_atual,
+                    usuario.senha_hash
+                );
+
+
+            if (
+                !senhaAtualCorreta
+            ) {
+
+                return res
+                    .status(401)
+                    .json({
+                        erro:
+                            "A senha atual está incorreta"
+                    });
+            }
+
+
+            // =============================================
+            // NÃO ACEITAR A MESMA SENHA
+            // =============================================
+
+            const mesmaSenha =
+                await bcrypt.compare(
+                    nova_senha,
+                    usuario.senha_hash
+                );
+
+
+            if (mesmaSenha) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A nova senha deve ser diferente da senha atual"
+                    });
+            }
+
+
+            // =============================================
+            // NOVO HASH
+            // =============================================
+
+            const novoHash =
+                await bcrypt.hash(
+                    nova_senha,
+                    10
+                );
+
+
+            await pool.query(
+                `
+                UPDATE usuario
+
+                SET senha_hash = $1
+
+                WHERE id = $2
+                `,
+                [
+                    novoHash,
+                    usuarioId
+                ]
+            );
+
+
+            res.json({
+                mensagem:
+                    "Senha alterada com sucesso"
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao alterar senha:",
+                erro
+            );
+
+
+            res.status(500).json({
+                erro:
+                    "Erro ao alterar senha"
+            });
+        }
     }
 );
 
@@ -384,10 +869,13 @@ router.post(
                         erro
                     );
 
-                    return res.status(500).json({
-                        erro:
-                            "Erro ao encerrar sessão"
-                    });
+
+                    return res
+                        .status(500)
+                        .json({
+                            erro:
+                                "Erro ao encerrar sessão"
+                        });
                 }
 
 
