@@ -39,6 +39,12 @@
 
     <link
         rel="stylesheet"
+        href="/css/cursos-comparacao-integrada.css?v=1"
+    >
+
+
+    <link
+        rel="stylesheet"
         href="/css/home-conteudos.css?v=1"
     >
 
@@ -47,6 +53,10 @@
 
 <body class="sia-page">
 
+
+    <!-- =====================================================
+         TOPO
+         ===================================================== -->
 
     <header class="topbar">
 
@@ -104,6 +114,10 @@
     </header>
 
 
+    <!-- =====================================================
+         MENU
+         ===================================================== -->
+
     <nav class="public-nav">
 
         <button
@@ -127,14 +141,6 @@
             data-section="cursos"
         >
             Cursos
-        </button>
-
-
-        <button
-            class="nav-item"
-            data-section="comparar"
-        >
-            Comparar
         </button>
 
     </nav>
@@ -221,6 +227,10 @@
             </div>
 
 
+            <!-- =================================================
+                 ACESSO ÀS INSTITUIÇÕES
+                 ================================================= -->
+
             <section class="home-ies-access">
 
                 <div class="home-ies-access-content">
@@ -276,6 +286,10 @@
             ></div>
 
 
+            <!-- =================================================
+                 FONTES OFICIAIS
+                 ================================================= -->
+
             <section class="home-articles">
 
                 <div class="home-articles-header">
@@ -288,14 +302,16 @@
 
 
                         <h2>
-                            Publicações e dados oficiais sobre a educação superior
+                            Publicações e dados oficiais sobre
+                            a educação superior
                         </h2>
 
 
                         <p>
-                            Acesse conteúdos publicados pelo Inep e pelo
-                            Governo Federal utilizados como referência
-                            para os dados apresentados no SIA.
+                            Acesse conteúdos publicados pelo Inep
+                            e pelo Governo Federal utilizados como
+                            referência para os dados apresentados
+                            no SIA.
                         </p>
 
                     </div>
@@ -327,9 +343,11 @@
                         Instituições de Educação Superior
                     </span>
 
+
                     <h2>
                         Instituições
                     </h2>
+
 
                     <p>
                         Consulte universidades, institutos federais,
@@ -348,6 +366,7 @@
                 <strong>
                     Compare instituições
                 </strong>
+
 
                 <span>
                     Use o botão “+ Comparar” nos cards abaixo.
@@ -395,9 +414,11 @@
                         Graduação
                     </span>
 
+
                     <h2>
                         Cursos superiores
                     </h2>
+
 
                     <p>
                         Pesquise cursos em todo o Brasil utilizando
@@ -409,6 +430,57 @@
 
             </div>
 
+
+            <!-- =============================================
+                 ATALHO PARA COMPARAÇÃO
+                 ============================================= -->
+
+            <div class="course-comparison-shortcut">
+
+                <div
+                    class="course-comparison-shortcut-content"
+                >
+
+                    <div
+                        class="course-comparison-shortcut-icon"
+                    >
+                        ↔
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Quer comparar cursos?
+                        </strong>
+
+
+                        <p>
+                            Compare indicadores de trajetória,
+                            Enade, CPC, IDD e IGC entre cursos
+                            e instituições.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="btn-ir-comparacao-cursos"
+                    class="course-comparison-shortcut-button"
+                >
+                    Ir para comparação
+                    <span>↓</span>
+                </button>
+
+            </div>
+
+
+            <!-- =============================================
+                 PESQUISA DE CURSOS
+                 ============================================= -->
 
             <div class="search-box">
 
@@ -432,6 +504,7 @@
                         Pesquise um curso
                     </h3>
 
+
                     <p>
                         Digite o nome do curso ou utilize
                         os filtros disponíveis.
@@ -441,226 +514,268 @@
 
             </div>
 
-        </section>
 
-
-        <!-- =================================================
-             COMPARAÇÃO ATUAL DE CURSOS
-             Será migrada para a aba Cursos na próxima etapa.
-             ================================================= -->
-
-        <section
-            id="comparar"
-            class="page-section"
-        >
-
-            <div class="section-header">
-
-                <div>
-
-                    <span class="section-eyebrow">
-                        Indicadores oficiais
-                    </span>
-
-                    <h2>
-                        Comparar cursos
-                    </h2>
-
-                    <p>
-                        Compare conclusão, desistência, permanência,
-                        participação no Enade e indicadores de qualidade
-                        entre cursos e instituições brasileiras.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="comparison-filters">
-
-
-                <div class="form-group">
-
-                    <label for="curso-comparacao">
-                        Curso
-                    </label>
-
-                    <input
-                        type="text"
-                        id="curso-comparacao"
-                        list="opcoes-cursos-comparacao"
-                        autocomplete="off"
-                        placeholder="Digite ao menos 2 caracteres..."
-                    >
-
-                    <datalist
-                        id="opcoes-cursos-comparacao"
-                    ></datalist>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="estado-comparacao">
-                        Estado
-                    </label>
-
-                    <select id="estado-comparacao">
-
-                        <option value="">
-                            Todos
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="cidade-comparacao">
-                        Cidade da IES
-                    </label>
-
-                    <input
-                        type="text"
-                        id="cidade-comparacao"
-                        list="opcoes-cidades-comparacao"
-                        autocomplete="off"
-                        placeholder="Todas as cidades"
-                    >
-
-                    <datalist
-                        id="opcoes-cidades-comparacao"
-                    ></datalist>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="instituicao-comparacao">
-                        Instituição
-                    </label>
-
-                    <input
-                        type="text"
-                        id="instituicao-comparacao"
-                        list="opcoes-instituicoes-comparacao"
-                        autocomplete="off"
-                        placeholder="Todas as instituições"
-                    >
-
-                    <datalist
-                        id="opcoes-instituicoes-comparacao"
-                    ></datalist>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="modalidade-comparacao">
-                        Modalidade
-                    </label>
-
-                    <select id="modalidade-comparacao">
-
-                        <option value="">
-                            Todas
-                        </option>
-
-                        <option value="Presencial">
-                            Presencial
-                        </option>
-
-                        <option value="EAD">
-                            EAD
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="grau-comparacao">
-                        Grau acadêmico
-                    </label>
-
-                    <select id="grau-comparacao">
-
-                        <option value="">
-                            Todos
-                        </option>
-
-                        <option value="Bacharelado">
-                            Bacharelado
-                        </option>
-
-                        <option value="Licenciatura">
-                            Licenciatura
-                        </option>
-
-                        <option value="Tecnológico">
-                            Tecnológico
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <button
-                    id="btn-comparar"
-                    class="btn-primary btn-auto"
-                >
-                    Comparar
-                </button>
-
-            </div>
-
-
-            <div class="public-data-notice">
-
-                <strong>
-                    Fonte oficial: Inep
-                </strong>
-
-                <span>
-                    Conclusão, desistência e permanência são
-                    indicadores de trajetória da coorte de 2015.
-                    Participação no Enade é calculada a partir
-                    dos concluintes inscritos e participantes.
-                    CPC, Enade, IDD e IGC são apresentados
-                    como indicadores complementares.
-                </span>
-
-            </div>
-
+            <!-- =================================================
+                 COMPARAÇÃO DE CURSOS INTEGRADA
+                 ================================================= -->
 
             <div
-                id="resultado-comparacao"
-                class="comparison-area"
+                id="comparacao-cursos-integrada"
+                class="course-comparison-integrated"
             >
 
-                <div class="empty-state">
+                <div
+                    class="course-comparison-integrated-header"
+                >
 
-                    <div class="empty-icon">
-                        SIA
+                    <div class="section-header">
+
+                        <div>
+
+                            <span class="section-eyebrow">
+                                Indicadores oficiais
+                            </span>
+
+
+                            <h2>
+                                Comparar cursos
+                            </h2>
+
+
+                            <p>
+                                Compare conclusão, desistência,
+                                permanência, participação no Enade
+                                e indicadores de qualidade entre
+                                cursos e instituições brasileiras.
+                            </p>
+
+                        </div>
+
                     </div>
 
-                    <h3>
-                        Pesquise um curso
-                    </h3>
 
-                    <p>
-                        Digite o nome do curso e utilize os filtros
-                        para comparar as instituições.
-                    </p>
+                    <span class="course-comparison-badge">
+                        Fonte: Inep
+                    </span>
+
+                </div>
+
+
+                <!-- =========================================
+                     FILTROS DA COMPARAÇÃO
+                     ========================================= -->
+
+                <div class="comparison-filters">
+
+
+                    <div class="form-group">
+
+                        <label for="curso-comparacao">
+                            Curso
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="curso-comparacao"
+                            list="opcoes-cursos-comparacao"
+                            autocomplete="off"
+                            placeholder="Digite ao menos 2 caracteres..."
+                        >
+
+
+                        <datalist
+                            id="opcoes-cursos-comparacao"
+                        ></datalist>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="estado-comparacao">
+                            Estado
+                        </label>
+
+
+                        <select id="estado-comparacao">
+
+                            <option value="">
+                                Todos
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="cidade-comparacao">
+                            Cidade da IES
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="cidade-comparacao"
+                            list="opcoes-cidades-comparacao"
+                            autocomplete="off"
+                            placeholder="Todas as cidades"
+                        >
+
+
+                        <datalist
+                            id="opcoes-cidades-comparacao"
+                        ></datalist>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="instituicao-comparacao">
+                            Instituição
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="instituicao-comparacao"
+                            list="opcoes-instituicoes-comparacao"
+                            autocomplete="off"
+                            placeholder="Todas as instituições"
+                        >
+
+
+                        <datalist
+                            id="opcoes-instituicoes-comparacao"
+                        ></datalist>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="modalidade-comparacao">
+                            Modalidade
+                        </label>
+
+
+                        <select id="modalidade-comparacao">
+
+                            <option value="">
+                                Todas
+                            </option>
+
+
+                            <option value="Presencial">
+                                Presencial
+                            </option>
+
+
+                            <option value="EAD">
+                                EAD
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="grau-comparacao">
+                            Grau acadêmico
+                        </label>
+
+
+                        <select id="grau-comparacao">
+
+                            <option value="">
+                                Todos
+                            </option>
+
+
+                            <option value="Bacharelado">
+                                Bacharelado
+                            </option>
+
+
+                            <option value="Licenciatura">
+                                Licenciatura
+                            </option>
+
+
+                            <option value="Tecnológico">
+                                Tecnológico
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button
+                        id="btn-comparar"
+                        class="btn-primary btn-auto"
+                    >
+                        Comparar cursos
+                    </button>
+
+                </div>
+
+
+                <!-- =========================================
+                     EXPLICAÇÃO DOS DADOS
+                     ========================================= -->
+
+                <div class="public-data-notice">
+
+                    <strong>
+                        Fonte oficial: Inep
+                    </strong>
+
+
+                    <span>
+                        Conclusão, desistência e permanência são
+                        indicadores de trajetória da coorte de 2015.
+                        Participação no Enade é calculada a partir
+                        dos concluintes inscritos e participantes.
+                        CPC, Enade, IDD e IGC são apresentados
+                        como indicadores complementares.
+                    </span>
+
+                </div>
+
+
+                <!-- =========================================
+                     RESULTADO
+                     ========================================= -->
+
+                <div
+                    id="resultado-comparacao"
+                    class="comparison-area"
+                >
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            SIA
+                        </div>
+
+
+                        <h3>
+                            Selecione um curso para comparar
+                        </h3>
+
+
+                        <p>
+                            Digite o nome do curso e utilize os
+                            filtros para comparar as instituições.
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -671,11 +786,16 @@
     </main>
 
 
+    <!-- =====================================================
+         RODAPÉ
+         ===================================================== -->
+
     <footer class="site-footer">
 
         <span>
             SIA — Sistema de Indicadores Acadêmicos
         </span>
+
 
         <small>
             Dados acadêmicos transformados em indicadores
@@ -684,6 +804,10 @@
 
     </footer>
 
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
 
     <script src="/js/explorar.js?v=7"></script>
 
@@ -694,6 +818,8 @@
     <script src="/js/instituicoes-comparacao.js?v=1"></script>
 
     <script src="/js/home-conteudos.js?v=1"></script>
+
+    <script src="/js/cursos-comparacao-integrada.js?v=1"></script>
 
 </body>
 
