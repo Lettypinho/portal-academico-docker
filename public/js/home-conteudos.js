@@ -410,6 +410,73 @@ function removerModalArtigosInternos() {
 
 
 // =========================================================
+// CARREGAR MÓDULO DE PERFIL
+// =========================================================
+
+function carregarModuloPerfilPublico() {
+
+    const cssExistente =
+        document.querySelector(
+            'link[data-modulo="perfil-publico"]'
+        );
+
+
+    if (!cssExistente) {
+
+        const link =
+            document.createElement(
+                "link"
+            );
+
+
+        link.rel =
+            "stylesheet";
+
+
+        link.href =
+            "/css/perfil-publico.css?v=1";
+
+
+        link.dataset.modulo =
+            "perfil-publico";
+
+
+        document.head.appendChild(
+            link
+        );
+    }
+
+
+    const scriptExistente =
+        document.querySelector(
+            'script[data-modulo="perfil-publico"]'
+        );
+
+
+    if (!scriptExistente) {
+
+        const script =
+            document.createElement(
+                "script"
+            );
+
+
+        script.src =
+            "/js/perfil-publico.js?v=1";
+
+
+        script.dataset.modulo =
+            "perfil-publico";
+
+
+        document.body.appendChild(
+            script
+        );
+    }
+}
+
+
+// =========================================================
 // INICIALIZAÇÃO
 // =========================================================
 
@@ -422,6 +489,8 @@ function iniciarConteudosOficiais() {
     configurarAcessoInstituicoes();
 
     removerModalArtigosInternos();
+
+    carregarModuloPerfilPublico();
 }
 
 

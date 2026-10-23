@@ -1,412 +1,897 @@
-// =========================================================
-// SIA - Sistema de Indicadores Acadêmicos
-// Autenticação
-// =========================================================
+const express = require("express");
+const bcrypt = require("bcryptjs");
 
+const pool = require("../config/database");
+const { exigirLogin } = require("../middleware/auth");
 
-// =========================================================
-// MOSTRAR / OCULTAR SENHA
-// =========================================================
-
-document
-    .querySelectorAll(".toggle-password")
-    .forEach((botao) => {
-
-        botao.addEventListener("click", () => {
-
-            const campoId =
-                botao.dataset.target;
-
-            const campo =
-                document.getElementById(campoId);
-
-            if (!campo) {
-                return;
-            }
-
-            if (campo.type === "password") {
-
-                campo.type = "text";
-                botao.textContent = "Ocultar";
-
-            } else {
-
-                campo.type = "password";
-                botao.textContent = "Mostrar";
-            }
-        });
-    });
-
-
-// =========================================================
-// EXIBIR MENSAGENS
-// =========================================================
-
-function mostrarMensagem(texto, tipo = "erro") {
-
-    const elemento =
-        document.getElementById("mensagem");
-
-    if (!elemento) {
-        return;
-    }
-
-    elemento.textContent = texto;
-
-    elemento.className =
-        `form-message ${tipo}`;
-}
-
-
-// =========================================================
-// LIMPAR MENSAGEM
-// =========================================================
-
-function limparMensagem() {
-
-    const elemento =
-        document.getElementById("mensagem");
-
-    if (!elemento) {
-        return;
-    }
-
-    elemento.textContent = "";
-    elemento.className = "form-message";
-}
-
-
-// =========================================================
-// LOGIN
-// =========================================================
-
-const formLogin =
-    document.getElementById("form-login");
-
-if (formLogin) {
-
-    formLogin.addEventListener(
-        "submit",
-        async (event) => {
-
-            event.preventDefault();
-
-            limparMensagem();
-
-            const email =
-                document
-                    .getElementById("email")
-                    .value
-                    .trim();
-
-            const senha =
-                document
-                    .getElementById("senha")
-                    .value;
-
-            if (!email || !senha) {
-
-                mostrarMensagem(
-                    "Informe e-mail e senha."
-                );
-
-                return;
-            }
-
-            const botao =
-                formLogin.querySelector(
-                    'button[type="submit"]'
-                );
-
-            const textoOriginal =
-                botao.textContent;
-
-            botao.disabled = true;
-            botao.textContent = "Entrando...";
-
-            try {
-
-                const resposta =
-                    await fetch(
-                        "/api/auth/login",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                email,
-                                senha
-                            })
-                        }
-                    );
-
-                const dados =
-                    await resposta.json();
-
-                if (!resposta.ok) {
-
-                    mostrarMensagem(
-                        dados.erro ||
-                        "Não foi possível realizar o login."
-                    );
-
-                    return;
-                }
-
-                mostrarMensagem(
-                    "Login realizado com sucesso.",
-                    "sucesso"
-                );
-
-                /*
-                 * Por enquanto todos continuam indo
-                 * para index.html.
-                 *
-                 * Depois vamos separar:
-                 *
-                 * publico
-                 * -> explorar.html
-                 *
-                 * admin_universidade / gestor /
-                 * consulta_institucional
-                 * -> dashboard.html
-                 *
-                 * super_admin
-                 * -> admin.html
-                 */
-
-                setTimeout(() => {
-
-    const perfil =
-        dados.usuario.perfil;
-
-    if (perfil === "publico") {
-
-        window.location.href =
-            "/explorar.html";
-
-        return;
-    }
-
-    if (
-        perfil === "consulta_institucional" ||
-        perfil === "gestor" ||
-        perfil === "admin_universidade"
-    ) {
-
-        window.location.href =
-            "/dashboard.html";
-
-        return;
-    }
-
-    if (perfil === "super_admin") {
-
-        window.location.href =
-            "/admin.html";
-
-        return;
-    }
-
-    window.location.href =
-        "/login.html";
-
-}, 500);
-
-            } catch (erro) {
-
-                console.error(
-                    "Erro no login:",
-                    erro
-                );
-
-                mostrarMensagem(
-                    "Não foi possível conectar ao servidor."
-                );
-
-            } finally {
-
-                botao.disabled = false;
-                botao.textContent =
-                    textoOriginal;
-            }
-        }
-    );
-}
+const router = express.Router();
 
 
 // =========================================================
 // CADASTRO DE USUÁRIO PÚBLICO
 // =========================================================
 
-const formCadastro =
-    document.getElementById(
-        "form-cadastro"
-    );
+router.post("/cadastro", async (req, res) => {
+    try {
 
-if (formCadastro) {
+        let {
+            nome,
+            email,
+            senha
+        } = req.body;
 
-    formCadastro.addEventListener(
-        "submit",
-        async (event) => {
 
-            event.preventDefault();
+        // =================================================
+        // VALIDAÇÕES
+        // =================================================
 
-            limparMensagem();
+        if (!nome || !email || !senha) {
+            return res.status(400).json({
+                erro:
+                    "Preencha todos os campos obrigatórios"
+            });
+        }
 
-            const nome =
-                document
-                    .getElementById("nome")
-                    .value
-                    .trim();
 
-            const email =
-                document
-                    .getElementById("email")
-                    .value
-                    .trim();
+        nome =
+            nome.trim();
 
-            const senha =
-                document
-                    .getElementById("senha")
-                    .value;
+        email =
+            email.trim().toLowerCase();
 
-            const confirmarSenha =
-                document
-                    .getElementById(
-                        "confirmar-senha"
+
+        if (nome.length < 3) {
+            return res.status(400).json({
+                erro:
+                    "Informe um nome válido"
+            });
+        }
+
+
+        if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                email
+            )
+        ) {
+            return res.status(400).json({
+                erro:
+                    "Informe um e-mail válido"
+            });
+        }
+
+
+        if (senha.length < 6) {
+            return res.status(400).json({
+                erro:
+                    "A senha deve possuir pelo menos 6 caracteres"
+            });
+        }
+
+
+        // =================================================
+        // VERIFICAR E-MAIL EXISTENTE
+        // =================================================
+
+        const usuarioExistente =
+            await pool.query(
+                `
+                SELECT id
+                FROM usuario
+                WHERE LOWER(email) = LOWER($1)
+                `,
+                [email]
+            );
+
+
+        if (
+            usuarioExistente.rows.length >
+            0
+        ) {
+            return res.status(409).json({
+                erro:
+                    "E-mail já cadastrado"
+            });
+        }
+
+
+        // =================================================
+        // HASH DA SENHA
+        // =================================================
+
+        const senhaHash =
+            await bcrypt.hash(
+                senha,
+                10
+            );
+
+
+        // =================================================
+        // CADASTRO
+        // =================================================
+
+        const resultado =
+            await pool.query(
+                `
+                INSERT INTO usuario
+                    (
+                        universidade_id,
+                        nome,
+                        email,
+                        senha_hash,
+                        perfil
                     )
-                    .value;
+                VALUES
+                    (
+                        NULL,
+                        $1,
+                        $2,
+                        $3,
+                        'publico'
+                    )
+
+                RETURNING
+                    id,
+                    nome,
+                    email,
+                    perfil,
+                    ativo,
+                    criado_em
+                `,
+                [
+                    nome,
+                    email,
+                    senhaHash
+                ]
+            );
 
 
-            // =================================================
-            // VALIDAÇÕES
-            // =================================================
+        res.status(201).json({
+            mensagem:
+                "Usuário cadastrado com sucesso",
+
+            usuario:
+                resultado.rows[0]
+        });
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro no cadastro:",
+            erro
+        );
+
+
+        if (erro.code === "23505") {
+            return res.status(409).json({
+                erro:
+                    "E-mail já cadastrado"
+            });
+        }
+
+
+        if (erro.code === "23514") {
+            return res.status(400).json({
+                erro:
+                    "Dados de cadastro inválidos"
+            });
+        }
+
+
+        res.status(500).json({
+            erro:
+                "Erro ao cadastrar usuário"
+        });
+    }
+});
+
+
+// =========================================================
+// LOGIN
+// =========================================================
+
+router.post("/login", async (req, res) => {
+    try {
+
+        let {
+            email,
+            senha
+        } = req.body;
+
+
+        // =================================================
+        // VALIDAÇÃO
+        // =================================================
+
+        if (!email || !senha) {
+            return res.status(400).json({
+                erro:
+                    "Informe e-mail e senha"
+            });
+        }
+
+
+        email =
+            email
+                .trim()
+                .toLowerCase();
+
+
+        // =================================================
+        // BUSCAR USUÁRIO
+        // =================================================
+
+        const resultado =
+            await pool.query(
+                `
+                SELECT
+                    u.id,
+                    u.universidade_id,
+                    u.nome,
+                    u.email,
+                    u.senha_hash,
+                    u.perfil,
+                    u.ativo,
+
+                    uni.nome
+                        AS universidade,
+
+                    uni.sigla
+                        AS universidade_sigla,
+
+                    uni.ativo
+                        AS universidade_ativa
+
+                FROM usuario u
+
+                LEFT JOIN universidade uni
+                    ON uni.id = u.universidade_id
+
+                WHERE LOWER(u.email) = LOWER($1)
+                `,
+                [email]
+            );
+
+
+        if (
+            resultado.rows.length ===
+            0
+        ) {
+            return res.status(401).json({
+                erro:
+                    "E-mail ou senha inválidos"
+            });
+        }
+
+
+        const usuario =
+            resultado.rows[0];
+
+
+        // =================================================
+        // USUÁRIO DESATIVADO
+        // =================================================
+
+        if (!usuario.ativo) {
+            return res.status(403).json({
+                erro:
+                    "Usuário desativado"
+            });
+        }
+
+
+        // =================================================
+        // UNIVERSIDADE DESATIVADA
+        // =================================================
+
+        if (
+            usuario.universidade_id &&
+            usuario.universidade_ativa ===
+                false
+        ) {
+            return res.status(403).json({
+                erro:
+                    "A universidade vinculada a este usuário está desativada"
+            });
+        }
+
+
+        // =================================================
+        // VERIFICAR SENHA
+        // =================================================
+
+        const senhaCorreta =
+            await bcrypt.compare(
+                senha,
+                usuario.senha_hash
+            );
+
+
+        if (!senhaCorreta) {
+            return res.status(401).json({
+                erro:
+                    "E-mail ou senha inválidos"
+            });
+        }
+
+
+        // =================================================
+        // CRIAR SESSÃO
+        // =================================================
+
+        req.session.usuario = {
+
+            id:
+                usuario.id,
+
+            universidade_id:
+                usuario.universidade_id,
+
+            nome:
+                usuario.nome,
+
+            email:
+                usuario.email,
+
+            perfil:
+                usuario.perfil,
+
+            universidade:
+                usuario.universidade,
+
+            universidade_sigla:
+                usuario.universidade_sigla
+        };
+
+
+        res.json({
+
+            mensagem:
+                "Login realizado com sucesso",
+
+            usuario:
+                req.session.usuario
+        });
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro no login:",
+            erro
+        );
+
+
+        res.status(500).json({
+            erro:
+                "Erro interno no login"
+        });
+    }
+});
+
+
+// =========================================================
+// USUÁRIO LOGADO
+// =========================================================
+
+router.get(
+    "/me",
+    exigirLogin,
+    (req, res) => {
+
+        res.json(
+            req.session.usuario
+        );
+    }
+);
+
+
+// =========================================================
+// ATUALIZAR PERFIL DO USUÁRIO PÚBLICO
+// =========================================================
+
+router.put(
+    "/perfil",
+    exigirLogin,
+    async (req, res) => {
+
+        try {
 
             if (
-                !nome ||
-                !email ||
-                !senha ||
-                !confirmarSenha
+                req.session.usuario
+                    .perfil !==
+                "publico"
             ) {
-
-                mostrarMensagem(
-                    "Preencha todos os campos."
-                );
-
-                return;
+                return res.status(403).json({
+                    erro:
+                        "Esta função está disponível apenas para usuários públicos"
+                });
             }
 
 
-            if (senha.length < 6) {
+            let {
+                nome,
+                email
+            } = req.body;
 
-                mostrarMensagem(
-                    "A senha deve possuir pelo menos 6 caracteres."
+
+            // =============================================
+            // CAMPOS OBRIGATÓRIOS
+            // =============================================
+
+            if (!nome || !email) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe nome e e-mail"
+                    });
+            }
+
+
+            nome =
+                String(nome)
+                    .trim();
+
+
+            email =
+                String(email)
+                    .trim()
+                    .toLowerCase();
+
+
+            // =============================================
+            // VALIDAR NOME
+            // =============================================
+
+            if (
+                nome.length <
+                3
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe um nome válido"
+                    });
+            }
+
+
+            // =============================================
+            // VALIDAR E-MAIL
+            // =============================================
+
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    email
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe um e-mail válido"
+                    });
+            }
+
+
+            const usuarioId =
+                req.session.usuario.id;
+
+
+            // =============================================
+            // VERIFICAR E-MAIL EM OUTRA CONTA
+            // =============================================
+
+            const emailExistente =
+                await pool.query(
+                    `
+                    SELECT id
+                    FROM usuario
+                    WHERE
+                        LOWER(email) = LOWER($1)
+                        AND id <> $2
+                    LIMIT 1
+                    `,
+                    [
+                        email,
+                        usuarioId
+                    ]
                 );
 
-                return;
+
+            if (
+                emailExistente
+                    .rows
+                    .length >
+                0
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Este e-mail já está cadastrado em outra conta"
+                    });
+            }
+
+
+            // =============================================
+            // ATUALIZAR
+            // =============================================
+
+            const resultado =
+                await pool.query(
+                    `
+                    UPDATE usuario
+
+                    SET
+                        nome = $1,
+                        email = $2
+
+                    WHERE id = $3
+
+                    RETURNING
+                        id,
+                        nome,
+                        email,
+                        perfil
+                    `,
+                    [
+                        nome,
+                        email,
+                        usuarioId
+                    ]
+                );
+
+
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Usuário não encontrado"
+                    });
+            }
+
+
+            const usuarioAtualizado =
+                resultado.rows[0];
+
+
+            // =============================================
+            // ATUALIZAR SESSÃO
+            // =============================================
+
+            req.session.usuario.nome =
+                usuarioAtualizado.nome;
+
+
+            req.session.usuario.email =
+                usuarioAtualizado.email;
+
+
+            res.json({
+
+                mensagem:
+                    "Perfil atualizado com sucesso",
+
+                usuario: {
+                    ...req.session.usuario
+                }
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao atualizar perfil:",
+                erro
+            );
+
+
+            if (
+                erro.code ===
+                "23505"
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Este e-mail já está cadastrado"
+                    });
+            }
+
+
+            res.status(500).json({
+                erro:
+                    "Erro ao atualizar perfil"
+            });
+        }
+    }
+);
+
+
+// =========================================================
+// ALTERAR SENHA
+// =========================================================
+
+router.put(
+    "/senha",
+    exigirLogin,
+    async (req, res) => {
+
+        try {
+
+            if (
+                req.session.usuario
+                    .perfil !==
+                "publico"
+            ) {
+
+                return res.status(403).json({
+                    erro:
+                        "Esta função está disponível apenas para usuários públicos"
+                });
+            }
+
+
+            const {
+                senha_atual,
+                nova_senha,
+                confirmar_nova_senha
+            } = req.body;
+
+
+            // =============================================
+            // CAMPOS
+            // =============================================
+
+            if (
+                !senha_atual ||
+                !nova_senha ||
+                !confirmar_nova_senha
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Preencha todos os campos de senha"
+                    });
             }
 
 
             if (
-                senha !== confirmarSenha
+                nova_senha.length <
+                6
             ) {
 
-                mostrarMensagem(
-                    "As senhas não coincidem."
-                );
-
-                return;
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A nova senha deve possuir pelo menos 6 caracteres"
+                    });
             }
 
 
-            const botao =
-                formCadastro.querySelector(
-                    'button[type="submit"]'
+            if (
+                nova_senha.length >
+                72
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A nova senha deve possuir no máximo 72 caracteres"
+                    });
+            }
+
+
+            if (
+                nova_senha !==
+                confirmar_nova_senha
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A confirmação da nova senha não confere"
+                    });
+            }
+
+
+            const usuarioId =
+                req.session.usuario.id;
+
+
+            // =============================================
+            // BUSCAR HASH ATUAL
+            // =============================================
+
+            const resultado =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        senha_hash
+
+                    FROM usuario
+
+                    WHERE id = $1
+                    `,
+                    [
+                        usuarioId
+                    ]
                 );
 
-            const textoOriginal =
-                botao.textContent;
 
-            botao.disabled = true;
-            botao.textContent =
-                "Criando conta...";
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Usuário não encontrado"
+                    });
+            }
 
 
-            try {
+            const usuario =
+                resultado.rows[0];
 
-                const resposta =
-                    await fetch(
-                        "/api/auth/cadastro",
-                        {
-                            method: "POST",
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
+            // =============================================
+            // VALIDAR SENHA ATUAL
+            // =============================================
 
-                            body: JSON.stringify({
-                                nome,
-                                email,
-                                senha
-                            })
-                        }
+            const senhaAtualCorreta =
+                await bcrypt.compare(
+                    senha_atual,
+                    usuario.senha_hash
+                );
+
+
+            if (
+                !senhaAtualCorreta
+            ) {
+
+                return res
+                    .status(401)
+                    .json({
+                        erro:
+                            "A senha atual está incorreta"
+                    });
+            }
+
+
+            // =============================================
+            // NÃO ACEITAR A MESMA SENHA
+            // =============================================
+
+            const mesmaSenha =
+                await bcrypt.compare(
+                    nova_senha,
+                    usuario.senha_hash
+                );
+
+
+            if (mesmaSenha) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "A nova senha deve ser diferente da senha atual"
+                    });
+            }
+
+
+            // =============================================
+            // NOVO HASH
+            // =============================================
+
+            const novoHash =
+                await bcrypt.hash(
+                    nova_senha,
+                    10
+                );
+
+
+            await pool.query(
+                `
+                UPDATE usuario
+
+                SET senha_hash = $1
+
+                WHERE id = $2
+                `,
+                [
+                    novoHash,
+                    usuarioId
+                ]
+            );
+
+
+            res.json({
+                mensagem:
+                    "Senha alterada com sucesso"
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao alterar senha:",
+                erro
+            );
+
+
+            res.status(500).json({
+                erro:
+                    "Erro ao alterar senha"
+            });
+        }
+    }
+);
+
+
+// =========================================================
+// LOGOUT
+// =========================================================
+
+router.post(
+    "/logout",
+    exigirLogin,
+    (req, res) => {
+
+        req.session.destroy(
+            (erro) => {
+
+                if (erro) {
+
+                    console.error(
+                        "Erro ao encerrar sessão:",
+                        erro
                     );
 
-                const dados =
-                    await resposta.json();
 
-
-                if (!resposta.ok) {
-
-                    mostrarMensagem(
-                        dados.erro ||
-                        "Não foi possível realizar o cadastro."
-                    );
-
-                    return;
+                    return res
+                        .status(500)
+                        .json({
+                            erro:
+                                "Erro ao encerrar sessão"
+                        });
                 }
 
 
-                mostrarMensagem(
-                    "Conta criada com sucesso! Redirecionando para o login...",
-                    "sucesso"
+                res.clearCookie(
+                    "connect.sid"
                 );
 
 
-                formCadastro.reset();
-
-
-                setTimeout(() => {
-
-                    window.location.href =
-                        "/login.html";
-
-                }, 1200);
-
-
-            } catch (erro) {
-
-                console.error(
-                    "Erro no cadastro:",
-                    erro
-                );
-
-                mostrarMensagem(
-                    "Não foi possível conectar ao servidor."
-                );
-
-            } finally {
-
-                botao.disabled = false;
-                botao.textContent =
-                    textoOriginal;
+                res.json({
+                    mensagem:
+                        "Logout realizado com sucesso"
+                });
             }
-        }
-    );
-}
+        );
+    }
+);
+
+
+module.exports = router;
