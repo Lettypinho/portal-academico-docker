@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIA - Sistema de Indicadores Acadêmicos</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="sia-page">
+    <header class="topbar">
+        <div class="topbar__brand">
+            <img
+                src="/assets/logo-sia.png"
+                alt="Logo do SIA"
+                class="topbar__logo"
+            />
+            <div>
+                <strong>Sistema de Indicadores Acadêmicos</strong>
+                <span>Dados oficiais e indicadores acadêmicos</span>
+            </div>
+        </div>
+
+        <div class="topbar__user">
+            <div>
+                <span id="topbarUserName">Visitante</span>
+                <small id="topbarUserRole">Acesso público</small>
+            </div>
+            <button id="logoutButton" class="topbar__logout">Sair</button>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <a href="/index.html" class="main-nav__link main-nav__link--active">Início</a>
+        <a href="/explorar.html" class="main-nav__link">Instituições</a>
+        <a href="/cursos.html" class="main-nav__link">Cursos</a>
+        <a href="/comparar.html" class="main-nav__link">Comparar</a>
+    </nav>
+
+    <main class="page-content">
+        <section class="hero hero--home">
+            <div class="hero__content">
+                <span class="hero__eyebrow">PLATAFORMA ACADÊMICA</span>
+                <h1>Transforme dados acadêmicos em decisões mais inteligentes</h1>
+                <p>
+                    Consulte instituições de educação superior, cursos de graduação,
+                    indicadores oficiais do Inep e informações de trajetória acadêmica
+                    em um só lugar.
+                </p>
+
+                <div class="hero__actions">
+                    <a href="/comparar.html" class="button button--primary">
+                        Comparar cursos
+                    </a>
+                    <a href="/explorar.html" class="button button--ghost">
+                        Explorar instituições
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero__visual">
+                <div class="hero-chart">
+                    <div class="hero-chart__bar"></div>
+                    <div class="hero-chart__bar"></div>
+                    <div class="hero-chart__bar"></div>
+                    <div class="hero-chart__bar"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="home-info-strip">
+            <p id="resumoBaseInep">
+                <strong>Base oficial do Inep</strong> carregando resumo dos dados...
+            </p>
+        </section>
+
+        <section class="home-redirect-card">
+            <div class="home-redirect-card__text">
+                <span class="section-tag">INSTITUIÇÕES DE EDUCAÇÃO SUPERIOR</span>
+                <h2>Quer explorar universidades, institutos e faculdades?</h2>
+                <p>
+                    Acesse a página de instituições para pesquisar por nome, sigla,
+                    cidade, estado e visualizar os detalhes públicos de cada IES.
+                </p>
+            </div>
+
+            <div class="home-redirect-card__action">
+                <a href="/explorar.html" class="button button--primary button--large">
+                    Ir para Instituições
+                </a>
+            </div>
+        </section>
+
+        <section class="articles-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-tag">CONTEÚDO E ORIENTAÇÃO</span>
+                    <h2>Artigos e conteúdos em destaque</h2>
+                    <p>
+                        Materiais rápidos para ajudar na leitura dos indicadores,
+                        na comparação entre instituições e no entendimento dos dados.
+                    </p>
+                </div>
+            </div>
+
+            <div class="articles-grid" id="articlesGrid"></div>
+        </section>
+    </main>
+
+    <div class="article-modal" id="articleModal" hidden>
+        <div class="article-modal__overlay" id="articleModalOverlay"></div>
+
+        <div class="article-modal__content">
+            <button
+                type="button"
+                class="article-modal__close"
+                id="articleModalClose"
+                aria-label="Fechar artigo"
+            >
+                ×
+            </button>
+
+            <span class="article-modal__tag" id="articleModalCategory"></span>
+            <h3 id="articleModalTitle"></h3>
+            <p class="article-modal__subtitle" id="articleModalSubtitle"></p>
+
+            <div class="article-modal__body" id="articleModalBody"></div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
