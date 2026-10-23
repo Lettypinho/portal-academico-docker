@@ -30,6 +30,12 @@
         href="/css/instituicoes-detalhes.css?v=1"
     >
 
+
+    <link
+        rel="stylesheet"
+        href="/css/home-conteudos.css?v=1"
+    >
+
 </head>
 
 
@@ -209,35 +215,272 @@
             </div>
 
 
-            <div class="section-header">
+            <!-- =================================================
+                 ACESSO ÀS INSTITUIÇÕES
+                 ================================================= -->
 
-                <div>
+            <section class="home-ies-access">
 
-                    <span class="section-eyebrow">
-                        Instituições de Educação Superior
-                    </span>
+                <div class="home-ies-access-content">
 
-                    <h2>
-                        Explore as IES brasileiras
-                    </h2>
+                    <div class="home-ies-access-icon">
+                        IES
+                    </div>
 
-                    <p>
-                        Consulte instituições cadastradas
-                        a partir do Censo da Educação Superior.
-                        Clique em uma instituição para ver seus detalhes.
-                    </p>
+
+                    <div class="home-ies-access-text">
+
+                        <span class="section-eyebrow">
+                            Instituições de Educação Superior
+                        </span>
+
+
+                        <h2>
+                            Explore as instituições brasileiras
+                        </h2>
+
+
+                        <p>
+                            Consulte universidades, institutos federais,
+                            centros universitários, faculdades e Cefets
+                            de todo o Brasil. Pesquise por nome, sigla,
+                            cidade, estado ou tipo de instituição.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            id="btn-ir-instituicoes"
+                            class="home-ies-button"
+                        >
+                            Explorar instituições
+
+                            <span aria-hidden="true">
+                                →
+                            </span>
+                        </button>
+
+                    </div>
 
                 </div>
 
-            </div>
+            </section>
 
+
+            <!--
+                Mantido apenas por compatibilidade com explorar.js.
+                O JavaScript atual ainda preenche este elemento,
+                mas ele não é exibido na home.
+            -->
 
             <div
                 id="universidades-resumo"
-                class="cards-grid"
-            >
-                Carregando...
-            </div>
+                class="home-hidden-compat"
+                aria-hidden="true"
+            ></div>
+
+
+            <!-- =================================================
+                 CONTEÚDOS
+                 ================================================= -->
+
+            <section class="home-articles">
+
+                <div class="home-articles-header">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            Conteúdo e orientação
+                        </span>
+
+
+                        <h2>
+                            Entenda melhor a educação superior
+                        </h2>
+
+
+                        <p>
+                            Conteúdos rápidos para ajudar você a interpretar
+                            instituições, categorias e indicadores apresentados
+                            pelo SIA.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="home-articles-grid">
+
+
+                    <!-- ARTIGO 1 -->
+
+                    <article
+                        class="home-article-card"
+                        data-artigo="tipos-ies"
+                    >
+
+                        <div class="home-article-icon">
+                            IES
+                        </div>
+
+
+                        <div class="home-article-category">
+                            Instituições
+                        </div>
+
+
+                        <h3>
+                            Universidade, faculdade, centro universitário,
+                            IF e CEFET: qual a diferença?
+                        </h3>
+
+
+                        <p>
+                            Entenda o que significa a organização acadêmica
+                            de uma instituição de ensino superior.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="home-article-button"
+                            data-abrir-artigo="tipos-ies"
+                        >
+                            Ler artigo
+                            <span>→</span>
+                        </button>
+
+                    </article>
+
+
+                    <!-- ARTIGO 2 -->
+
+                    <article
+                        class="home-article-card"
+                        data-artigo="categorias"
+                    >
+
+                        <div class="home-article-icon">
+                            ADM
+                        </div>
+
+
+                        <div class="home-article-category">
+                            Categoria administrativa
+                        </div>
+
+
+                        <h3>
+                            Pública ou privada? Entenda as categorias
+                            das instituições
+                        </h3>
+
+
+                        <p>
+                            Saiba a diferença entre pública federal,
+                            estadual, municipal e instituições privadas
+                            com ou sem fins lucrativos.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="home-article-button"
+                            data-abrir-artigo="categorias"
+                        >
+                            Ler artigo
+                            <span>→</span>
+                        </button>
+
+                    </article>
+
+
+                    <!-- ARTIGO 3 -->
+
+                    <article
+                        class="home-article-card"
+                        data-artigo="qualidade"
+                    >
+
+                        <div class="home-article-icon">
+                            IGC
+                        </div>
+
+
+                        <div class="home-article-category">
+                            Indicadores de qualidade
+                        </div>
+
+
+                        <h3>
+                            IGC, CPC, Enade e IDD:
+                            o que esses indicadores significam?
+                        </h3>
+
+
+                        <p>
+                            Conheça os indicadores utilizados pelo Inep
+                            para avaliar instituições e cursos superiores.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="home-article-button"
+                            data-abrir-artigo="qualidade"
+                        >
+                            Ler artigo
+                            <span>→</span>
+                        </button>
+
+                    </article>
+
+
+                    <!-- ARTIGO 4 -->
+
+                    <article
+                        class="home-article-card"
+                        data-artigo="trajetoria"
+                    >
+
+                        <div class="home-article-icon">
+                            %
+                        </div>
+
+
+                        <div class="home-article-category">
+                            Trajetória acadêmica
+                        </div>
+
+
+                        <h3>
+                            Conclusão, desistência e permanência:
+                            como interpretar?
+                        </h3>
+
+
+                        <p>
+                            Descubra o que as taxas de trajetória mostram
+                            sobre uma coorte de estudantes ao longo dos anos.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="home-article-button"
+                            data-abrir-artigo="trajetoria"
+                        >
+                            Ler artigo
+                            <span>→</span>
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </section>
 
         </section>
 
@@ -585,6 +828,55 @@
     </main>
 
 
+    <!-- =====================================================
+         MODAL DOS ARTIGOS
+         ===================================================== -->
+
+    <div
+        id="home-article-modal"
+        class="home-article-modal hidden"
+        aria-hidden="true"
+    >
+
+        <div class="home-article-modal-backdrop"></div>
+
+
+        <article
+            class="home-article-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="home-article-modal-title"
+        >
+
+            <button
+                type="button"
+                id="btn-fechar-artigo"
+                class="home-article-modal-close"
+                aria-label="Fechar artigo"
+            >
+                ×
+            </button>
+
+
+            <div
+                id="home-article-modal-category"
+                class="home-article-modal-category"
+            ></div>
+
+
+            <h2 id="home-article-modal-title"></h2>
+
+
+            <div
+                id="home-article-modal-body"
+                class="home-article-modal-body"
+            ></div>
+
+        </article>
+
+    </div>
+
+
     <footer class="site-footer">
 
         <span>
@@ -604,6 +896,8 @@
     <script src="/js/cursos-filtros.js?v=1"></script>
 
     <script src="/js/instituicoes-detalhes.js?v=1"></script>
+
+    <script src="/js/home-conteudos.js?v=1"></script>
 
 </body>
 
