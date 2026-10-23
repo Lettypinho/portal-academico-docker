@@ -1,340 +1,326 @@
 // =========================================================
-// SIA - CONTEÚDOS DA HOME
+// SIA - CONTEÚDOS OFICIAIS DA HOME
+// Fontes: Inep / Governo Federal
 // =========================================================
 
 
 // =========================================================
-// ARTIGOS
+// PUBLICAÇÕES OFICIAIS
 // =========================================================
 
-const artigosSia = {
+const conteudosOficiaisSia = [
 
-
-    // =====================================================
-    // TIPOS DE IES
-    // =====================================================
-
-    "tipos-ies": {
+    {
+        id:
+            "censo-superior-2024",
 
         categoria:
-            "Instituições de Educação Superior",
+            "Censo da Educação Superior",
+
+        fonte:
+            "INEP • GOV.BR",
 
         titulo:
-            "Universidade, faculdade, centro universitário, IF e CEFET: qual a diferença?",
+            "Resumo Técnico do Censo da Educação Superior 2024",
 
-        conteudo: `
+        descricao:
+            "Publicação oficial com os principais resultados da educação superior brasileira, incluindo instituições, cursos, matrículas, concluintes, trajetória acadêmica e docentes.",
 
-            <p>
-                As Instituições de Educação Superior podem possuir
-                diferentes formas de organização acadêmica.
-                Essa classificação ajuda a entender a estrutura,
-                a autonomia e o tipo de atuação de cada instituição.
-            </p>
+        destaque:
+            "CENSO",
 
+        tipo:
+            "Publicação oficial",
 
-            <h3>
-                Universidade
-            </h3>
-
-            <p>
-                É uma instituição com atuação ampla no ensino superior,
-                normalmente envolvendo ensino, pesquisa e extensão.
-                Universidades oferecem diversos cursos e áreas do
-                conhecimento e possuem maior autonomia acadêmica.
-            </p>
-
-
-            <h3>
-                Centro Universitário
-            </h3>
-
-            <p>
-                Também possui autonomia para criar e organizar cursos,
-                mas não precisa ter a mesma abrangência de pesquisa
-                existente em uma universidade.
-            </p>
-
-
-            <h3>
-                Faculdade
-            </h3>
-
-            <p>
-                Normalmente possui uma atuação mais concentrada em
-                determinadas áreas ou cursos. Em comparação com
-                universidades e centros universitários, possui
-                autonomia institucional mais limitada.
-            </p>
-
-
-            <h3>
-                Instituto Federal
-            </h3>
-
-            <p>
-                Os Institutos Federais fazem parte da Rede Federal
-                de Educação Profissional, Científica e Tecnológica.
-                Podem oferecer desde educação técnica até cursos
-                superiores de graduação e pós-graduação.
-            </p>
-
-
-            <h3>
-                CEFET
-            </h3>
-
-            <p>
-                Os Centros Federais de Educação Tecnológica também
-                integram a educação pública federal e possuem forte
-                atuação na educação tecnológica e profissional.
-            </p>
-
-
-            <div class="home-article-highlight">
-                No SIA, essa informação aparece no campo
-                <strong>Organização acadêmica</strong> da instituição.
-            </div>
-        `
+        url:
+            "https://download.inep.gov.br/publicacoes/institucionais/avaliacoes_e_exames_da_educacao_superior/resumo_tecnico_do_censo_da_educacao_superior_2024.pdf"
     },
 
 
-    // =====================================================
-    // CATEGORIAS ADMINISTRATIVAS
-    // =====================================================
-
-    "categorias": {
-
-        categoria:
-            "Categoria administrativa",
-
-        titulo:
-            "Pública ou privada? Entenda as categorias das instituições",
-
-        conteudo: `
-
-            <p>
-                A categoria administrativa informa a natureza da
-                instituição e quem é responsável por sua manutenção
-                ou administração.
-            </p>
-
-
-            <h3>
-                Pública Federal
-            </h3>
-
-            <p>
-                Instituições mantidas pela União. Universidades
-                federais, Institutos Federais e CEFETs são exemplos
-                comuns dessa categoria.
-            </p>
-
-
-            <h3>
-                Pública Estadual
-            </h3>
-
-            <p>
-                São instituições mantidas pelos governos estaduais.
-            </p>
-
-
-            <h3>
-                Pública Municipal
-            </h3>
-
-            <p>
-                São instituições públicas vinculadas à administração
-                municipal.
-            </p>
-
-
-            <h3>
-                Privada com fins lucrativos
-            </h3>
-
-            <p>
-                É uma instituição particular que pode operar com
-                finalidade econômica e distribuir resultados aos
-                seus proprietários ou investidores.
-            </p>
-
-
-            <h3>
-                Privada sem fins lucrativos
-            </h3>
-
-            <p>
-                Também é uma instituição particular e pode cobrar
-                mensalidades, mas os recursos obtidos são destinados
-                à manutenção e às atividades da própria instituição,
-                em vez de serem distribuídos como lucro aos seus
-                proprietários.
-            </p>
-
-
-            <div class="home-article-highlight">
-                Organização acadêmica e categoria administrativa
-                são informações diferentes. Uma instituição pode,
-                por exemplo, ser uma
-                <strong>Universidade</strong>
-                e ao mesmo tempo ser
-                <strong>Pública Estadual</strong>.
-            </div>
-        `
-    },
-
-
-    // =====================================================
-    // QUALIDADE
-    // =====================================================
-
-    "qualidade": {
-
-        categoria:
-            "Indicadores de qualidade",
-
-        titulo:
-            "IGC, CPC, Enade e IDD: o que esses indicadores significam?",
-
-        conteudo: `
-
-            <p>
-                O SIA utiliza indicadores oficiais do Inep para
-                apresentar informações públicas sobre a qualidade
-                das instituições e dos cursos.
-            </p>
-
-
-            <h3>
-                IGC
-            </h3>
-
-            <p>
-                O Índice Geral de Cursos é um indicador associado
-                à instituição de educação superior. Ele apresenta
-                uma visão consolidada da qualidade da instituição.
-            </p>
-
-
-            <h3>
-                CPC
-            </h3>
-
-            <p>
-                O Conceito Preliminar de Curso é utilizado para
-                avaliar cursos de graduação e considera diferentes
-                componentes da formação oferecida.
-            </p>
-
-
-            <h3>
-                Enade
-            </h3>
-
-            <p>
-                O Exame Nacional de Desempenho dos Estudantes avalia
-                o desempenho dos estudantes concluintes em relação
-                aos conteúdos e competências esperados para a sua
-                formação.
-            </p>
-
-
-            <h3>
-                IDD
-            </h3>
-
-            <p>
-                O Indicador de Diferença entre os Desempenhos
-                Observado e Esperado busca representar a contribuição
-                do curso para o desenvolvimento dos estudantes.
-            </p>
-
-
-            <div class="home-article-highlight">
-                Esses indicadores devem ser utilizados em conjunto.
-                Um único número não representa sozinho toda a
-                qualidade de uma instituição ou curso.
-            </div>
-        `
-    },
-
-
-    // =====================================================
-    // TRAJETÓRIA
-    // =====================================================
-
-    "trajetoria": {
+    {
+        id:
+            "trajetoria-superior",
 
         categoria:
             "Trajetória acadêmica",
 
+        fonte:
+            "INEP • GOV.BR",
+
         titulo:
-            "Conclusão, desistência e permanência: como interpretar?",
+            "Indicadores de Trajetória da Educação Superior",
 
-        conteudo: `
+        descricao:
+            "Página oficial do Inep com as taxas de permanência, conclusão e desistência dos estudantes da educação superior, incluindo a coorte 2015–2024 utilizada pelo SIA.",
 
-            <p>
-                Os Indicadores de Trajetória da Educação Superior
-                permitem acompanhar o que aconteceu, ao longo dos
-                anos, com um grupo de estudantes que ingressou em
-                determinado período.
-            </p>
+        destaque:
+            "TCA",
 
+        tipo:
+            "Dados e indicadores oficiais",
 
-            <h3>
-                Taxa de conclusão acumulada
-            </h3>
-
-            <p>
-                Representa o percentual dos estudantes daquela
-                coorte que já concluiu o curso até o ano de
-                acompanhamento considerado.
-            </p>
+        url:
+            "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/indicadores-de-trajetoria-da-educacao-superior"
+    },
 
 
-            <h3>
-                Taxa de desistência acumulada
-            </h3>
+    {
+        id:
+            "qualidade-superior",
 
-            <p>
-                Representa a parcela da coorte que deixou o curso
-                ao longo do período de acompanhamento.
-            </p>
+        categoria:
+            "Qualidade da Educação Superior",
 
+        fonte:
+            "INEP • GOV.BR",
 
-            <h3>
-                Taxa de permanência
-            </h3>
+        titulo:
+            "Indicadores de Qualidade da Educação Superior",
 
-            <p>
-                Representa os estudantes da coorte que ainda
-                permanecem vinculados ao curso no ano analisado.
-            </p>
+        descricao:
+            "Página oficial que reúne informações sobre Conceito Enade, IDD, CPC e IGC, indicadores utilizados pelo SIA nas consultas e comparações.",
 
+        destaque:
+            "IGC",
 
-            <div class="home-article-highlight">
-                Por exemplo: quando o SIA apresenta uma coorte de
-                <strong>2015 acompanhada até 2024</strong>,
-                permanência não significa a quantidade de alunos
-                atualmente matriculados na instituição.
-                Significa a parcela dos alunos que ingressaram em
-                2015 e que ainda permanecia vinculada em 2024.
-            </div>
+        tipo:
+            "Indicadores oficiais",
+
+        url:
+            "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/indicadores-de-qualidade-da-educacao-superior"
+    },
 
 
-            <h3>
-                Por que esses indicadores são úteis?
-            </h3>
+    {
+        id:
+            "censo-superior",
 
-            <p>
-                Eles ajudam a observar padrões de conclusão,
-                desistência e retenção e permitem comparações mais
-                completas entre cursos e instituições.
-            </p>
-        `
+        categoria:
+            "Educação Superior",
+
+        fonte:
+            "INEP • GOV.BR",
+
+        titulo:
+            "Censo da Educação Superior",
+
+        descricao:
+            "Conheça a pesquisa oficial realizada anualmente pelo Inep e as informações coletadas sobre instituições, cursos, estudantes, vagas, concluintes e docentes.",
+
+        destaque:
+            "IES",
+
+        tipo:
+            "Página institucional",
+
+        url:
+            "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/censo-da-educacao-superior/"
+    },
+
+
+    {
+        id:
+            "sinopse-superior",
+
+        categoria:
+            "Estatísticas oficiais",
+
+        fonte:
+            "INEP • GOV.BR",
+
+        titulo:
+            "Sinopse Estatística da Educação Superior",
+
+        descricao:
+            "Base oficial com tabelas estatísticas da educação superior brasileira, incluindo dados organizados por instituições, cursos, municípios e unidades da Federação.",
+
+        destaque:
+            "BR",
+
+        tipo:
+            "Dados estatísticos",
+
+        url:
+            "https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/sinopses-estatisticas/educacao-superior"
+    },
+
+
+    {
+        id:
+            "metodologia-censo",
+
+        categoria:
+            "Metodologia",
+
+        fonte:
+            "INEP",
+
+        titulo:
+            "Metodologia de coleta do Censo da Educação Superior 2024",
+
+        descricao:
+            "Documento técnico oficial que apresenta a metodologia utilizada pelo Inep na coleta, verificação, tratamento e disseminação dos dados do Censo Superior 2024.",
+
+        destaque:
+            "DOC",
+
+        tipo:
+            "Documento técnico",
+
+        url:
+            "https://riep.inep.gov.br/items/55b18fd1-5853-4ec7-8b75-ec5a0f900e2c"
     }
-};
+
+];
+
+
+// =========================================================
+// RENDERIZAR CONTEÚDOS OFICIAIS
+// =========================================================
+
+function renderizarConteudosOficiais() {
+
+    const container =
+        document.querySelector(
+            ".home-articles-grid"
+        );
+
+
+    if (!container) {
+
+        return;
+    }
+
+
+    container.innerHTML =
+        conteudosOficiaisSia
+            .map(
+                conteudo => `
+
+                    <article
+                        class="home-article-card"
+                    >
+
+                        <div class="home-article-icon">
+
+                            ${conteudo.destaque}
+
+                        </div>
+
+
+                        <div class="home-article-category">
+
+                            ${conteudo.fonte}
+
+                        </div>
+
+
+                        <h3>
+
+                            ${conteudo.titulo}
+
+                        </h3>
+
+
+                        <p>
+
+                            ${conteudo.descricao}
+
+                        </p>
+
+
+                        <div
+                            style="
+                                margin-bottom: 16px;
+                                color: #92879d;
+                                font-size: 12px;
+                                font-weight: 650;
+                            "
+                        >
+
+                            ${conteudo.tipo}
+
+                        </div>
+
+
+                        <a
+                            href="${conteudo.url}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="home-article-button"
+                        >
+
+                            Acessar fonte oficial
+
+                            <span>
+                                ↗
+                            </span>
+
+                        </a>
+
+                    </article>
+                `
+            )
+            .join("");
+}
+
+
+// =========================================================
+// ALTERAR TÍTULO DA SEÇÃO
+// =========================================================
+
+function atualizarTituloConteudos() {
+
+    const secao =
+        document.querySelector(
+            ".home-articles"
+        );
+
+
+    if (!secao) {
+
+        return;
+    }
+
+
+    const eyebrow =
+        secao.querySelector(
+            ".section-eyebrow"
+        );
+
+
+    const titulo =
+        secao.querySelector(
+            ".home-articles-header h2"
+        );
+
+
+    const descricao =
+        secao.querySelector(
+            ".home-articles-header p"
+        );
+
+
+    if (eyebrow) {
+
+        eyebrow.textContent =
+            "Fontes oficiais";
+    }
+
+
+    if (titulo) {
+
+        titulo.textContent =
+            "Publicações e dados oficiais sobre a educação superior";
+    }
+
+
+    if (descricao) {
+
+        descricao.textContent =
+            "Acesse diretamente conteúdos publicados pelo Inep e pelo Governo Federal utilizados como referência para os dados apresentados no SIA.";
+    }
+}
 
 
 // =========================================================
@@ -380,198 +366,63 @@ function irParaInstituicoes() {
 
 
 // =========================================================
-// ABRIR ARTIGO
+// CONFIGURAR CTA
 // =========================================================
 
-function abrirArtigoSia(
-    id
-) {
+function configurarAcessoInstituicoes() {
 
-    const artigo =
-        artigosSia[id];
-
-
-    if (!artigo) {
-        return;
-    }
-
-
-    const modal =
+    const botao =
         document.getElementById(
-            "home-article-modal"
+            "btn-ir-instituicoes"
         );
 
 
-    const categoria =
-        document.getElementById(
-            "home-article-modal-category"
-        );
-
-
-    const titulo =
-        document.getElementById(
-            "home-article-modal-title"
-        );
-
-
-    const corpo =
-        document.getElementById(
-            "home-article-modal-body"
-        );
-
-
-    if (
-        !modal ||
-        !categoria ||
-        !titulo ||
-        !corpo
-    ) {
+    if (!botao) {
 
         return;
     }
 
 
-    categoria.textContent =
-        artigo.categoria;
-
-
-    titulo.textContent =
-        artigo.titulo;
-
-
-    corpo.innerHTML =
-        artigo.conteudo;
-
-
-    modal.classList.remove(
-        "hidden"
-    );
-
-
-    modal.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-
-    document.body.style.overflow =
-        "hidden";
-}
-
-
-// =========================================================
-// FECHAR ARTIGO
-// =========================================================
-
-function fecharArtigoSia() {
-
-    const modal =
-        document.getElementById(
-            "home-article-modal"
-        );
-
-
-    if (!modal) {
-        return;
-    }
-
-
-    modal.classList.add(
-        "hidden"
-    );
-
-
-    modal.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-
-    document.body.style.overflow =
-        "";
-}
-
-
-// =========================================================
-// EVENTOS
-// =========================================================
-
-const btnInstituicoes =
-    document.getElementById(
-        "btn-ir-instituicoes"
-    );
-
-
-if (btnInstituicoes) {
-
-    btnInstituicoes.addEventListener(
+    botao.addEventListener(
         "click",
         irParaInstituicoes
     );
 }
 
 
-document
-    .querySelectorAll(
-        "[data-abrir-artigo]"
-    )
-    .forEach(
-        botao => {
+// =========================================================
+// REMOVER MODAL ANTIGO
+// =========================================================
 
-            botao.addEventListener(
-                "click",
-                () => {
+function removerModalArtigosInternos() {
 
-                    abrirArtigoSia(
-                        botao.dataset
-                            .abrirArtigo
-                    );
-                }
-            );
-        }
-    );
+    const modal =
+        document.getElementById(
+            "home-article-modal"
+        );
 
 
-const btnFecharArtigo =
-    document.getElementById(
-        "btn-fechar-artigo"
-    );
+    if (modal) {
 
-
-if (btnFecharArtigo) {
-
-    btnFecharArtigo.addEventListener(
-        "click",
-        fecharArtigoSia
-    );
-}
-
-
-const modalBackdrop =
-    document.querySelector(
-        ".home-article-modal-backdrop"
-    );
-
-
-if (modalBackdrop) {
-
-    modalBackdrop.addEventListener(
-        "click",
-        fecharArtigoSia
-    );
-}
-
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key ===
-            "Escape"
-        ) {
-
-            fecharArtigoSia();
-        }
+        modal.remove();
     }
-);
+}
+
+
+// =========================================================
+// INICIALIZAÇÃO
+// =========================================================
+
+function iniciarConteudosOficiais() {
+
+    atualizarTituloConteudos();
+
+    renderizarConteudosOficiais();
+
+    configurarAcessoInstituicoes();
+
+    removerModalArtigosInternos();
+}
+
+
+iniciarConteudosOficiais();
