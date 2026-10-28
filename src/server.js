@@ -23,6 +23,11 @@ const perfilRoutes =
         "./routes/perfil.routes"
     );
 
+const solicitacoesVinculoRoutes =
+    require(
+        "./routes/solicitacoes-vinculo.routes"
+    );
+
 const cursosRoutes =
     require(
         "./routes/cursos.routes"
@@ -121,6 +126,12 @@ app.use(
 
 
 app.use(
+    "/api/solicitacoes-vinculo",
+    solicitacoesVinculoRoutes
+);
+
+
+app.use(
     "/api/universidades",
     universidadesRoutes
 );
@@ -151,7 +162,7 @@ app.use(
 
 
 // =========================================================
-// TESTE DA API
+// STATUS
 // =========================================================
 
 app.get(
