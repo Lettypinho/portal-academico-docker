@@ -178,15 +178,17 @@ async function carregarUsuario() {
 
 
         if (
-            usuarioAtual.perfil ===
-            "publico"
-        ) {
+    usuarioAtual.perfil ===
+        "publico" ||
+    usuarioAtual.perfil ===
+        "aluno"
+) {
 
-            window.location.href =
-                "/explorar.html";
+    window.location.href =
+        "/explorar.html";
 
-            return false;
-        }
+    return false;
+}
 
 
         if (
