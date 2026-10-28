@@ -1046,15 +1046,25 @@ async function carregarDadosPerfil() {
         "";
 
 
-    document
-        .getElementById(
-            "perfil-tipo"
-        )
-        .value =
-        usuarioPerfilAtual.perfil ===
-            "publico"
-            ? "Usuário público"
-            : usuarioPerfilAtual.perfil;
+    const nomesPerfil = {
+
+    publico:
+        "Usuário público",
+
+    aluno:
+        "Aluno"
+};
+
+
+document
+    .getElementById(
+        "perfil-tipo"
+    )
+    .value =
+    nomesPerfil[
+        usuarioPerfilAtual.perfil
+    ] ||
+    usuarioPerfilAtual.perfil;
 }
 
 

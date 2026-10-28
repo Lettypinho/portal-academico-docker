@@ -167,13 +167,16 @@ if (formLogin) {
                     const perfil =
                         dados.usuario.perfil;
 
-                    if (perfil === "publico") {
+                    if (
+    perfil === "publico" ||
+    perfil === "aluno"
+) {
 
-                        window.location.href =
-                            "/explorar.html";
+    window.location.href =
+        "/explorar.html";
 
-                        return;
-                    }
+    return;
+}
 
                     if (
                         perfil === "consulta_institucional" ||

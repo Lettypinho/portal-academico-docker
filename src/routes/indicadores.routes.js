@@ -1,11 +1,17 @@
-const express = require("express");
+const express =
+    require("express");
 
-const pool = require("../config/database");
+const pool =
+    require("../config/database");
+
 const {
-    exigirLogin
-} = require("../middleware/auth");
+    exigirPerfil
+} =
+    require("../middleware/auth");
 
-const router = express.Router();
+
+const router =
+    express.Router();
 
 
 // =========================================================
@@ -17,51 +23,75 @@ router.get(
     async (req, res) => {
 
         try {
+
             const {
                 curso,
                 ano,
                 semestre,
                 modalidade
-            } = req.query;
+            } =
+                req.query;
+
 
             if (!curso) {
-                return res.status(400).json({
-                    erro:
-                        "Informe o curso que deseja comparar"
-                });
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe o curso que deseja comparar"
+                    });
             }
+
 
             const parametros = [
                 `%${curso}%`
             ];
 
+
             const filtros = [
                 "curso ILIKE $1"
             ];
 
+
             if (ano) {
-                parametros.push(ano);
+
+                parametros.push(
+                    ano
+                );
+
 
                 filtros.push(
                     `ano = $${parametros.length}`
                 );
             }
 
+
             if (semestre) {
-                parametros.push(semestre);
+
+                parametros.push(
+                    semestre
+                );
+
 
                 filtros.push(
                     `semestre = $${parametros.length}`
                 );
             }
 
+
             if (modalidade) {
-                parametros.push(modalidade);
+
+                parametros.push(
+                    modalidade
+                );
+
 
                 filtros.push(
                     `modalidade = $${parametros.length}`
                 );
             }
+
 
             const resultado =
                 await pool.query(
@@ -97,10 +127,19 @@ router.get(
                     parametros
                 );
 
-            res.json(resultado.rows);
+
+            res.json(
+                resultado.rows
+            );
+
 
         } catch (erro) {
-            console.error(erro);
+
+            console.error(
+                "Erro ao comparar cursos:",
+                erro
+            );
+
 
             res.status(500).json({
                 erro:
@@ -113,112 +152,165 @@ router.get(
 
 // =========================================================
 // DASHBOARD DA UNIVERSIDADE LOGADA
+//
+// Somente usuários institucionais.
+// Aluno NÃO possui acesso aos indicadores privados.
 // =========================================================
 
 router.get(
     "/dashboard",
-    exigirLogin,
+
+    exigirPerfil(
+        "consulta_institucional",
+        "gestor",
+        "admin_universidade",
+        "super_admin"
+    ),
+
     async (req, res) => {
 
         try {
+
             const usuario =
                 req.session.usuario;
+
 
             let universidadeId =
                 usuario.universidade_id;
 
-            // Super admin não possui universidade própria.
-            // Ele poderá escolher qual deseja visualizar.
+
+            // =================================================
+            // SUPER ADMIN
+            // =================================================
+
             if (
-                usuario.perfil === "super_admin"
+                usuario.perfil ===
+                "super_admin"
             ) {
+
                 universidadeId =
-                    req.query.universidade_id;
+                    req.query
+                        .universidade_id;
+
 
                 if (!universidadeId) {
-                    return res.status(400).json({
-                        erro:
-                            "Informe a universidade que deseja visualizar"
-                    });
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Informe a universidade que deseja visualizar"
+                        });
                 }
             }
+
 
             const {
                 ano,
                 semestre
-            } = req.query;
+            } =
+                req.query;
 
-            // ---------------------------------------------
+
+            // =================================================
             // RESUMO
-            // ---------------------------------------------
+            // =================================================
 
             const resumo =
                 await pool.query(
                     `
                     SELECT *
+
                     FROM vw_dashboard_universidade
-                    WHERE universidade_id = $1
+
+                    WHERE
+                        universidade_id = $1
                     `,
-                    [universidadeId]
+                    [
+                        universidadeId
+                    ]
                 );
 
+
             if (
-                resumo.rows.length === 0
+                resumo.rows.length ===
+                0
             ) {
-                return res.status(404).json({
-                    erro:
-                        "Universidade não encontrada"
-                });
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Universidade não encontrada"
+                    });
             }
 
 
-            // ---------------------------------------------
-            // SITUAÇÃO DOS ALUNOS
-            // ---------------------------------------------
+            // =================================================
+            // SITUAÇÃO ATUAL DOS ALUNOS
+            // =================================================
 
             const situacao =
                 await pool.query(
                     `
                     SELECT *
+
                     FROM vw_situacao_alunos_universidade
-                    WHERE universidade_id = $1
+
+                    WHERE
+                        universidade_id = $1
                     `,
-                    [universidadeId]
+                    [
+                        universidadeId
+                    ]
                 );
 
 
-            // ---------------------------------------------
-            // INDICADORES ACADÊMICOS
-            // ---------------------------------------------
+            // =================================================
+            // INDICADORES ACADÊMICOS DO PERÍODO
+            // =================================================
 
             const parametros = [
                 universidadeId
             ];
 
+
             const filtros = [
                 "universidade_id = $1"
             ];
 
+
             if (ano) {
-                parametros.push(ano);
+
+                parametros.push(
+                    ano
+                );
+
 
                 filtros.push(
                     `ano = $${parametros.length}`
                 );
             }
 
+
             if (semestre) {
-                parametros.push(semestre);
+
+                parametros.push(
+                    semestre
+                );
+
 
                 filtros.push(
                     `semestre = $${parametros.length}`
                 );
             }
 
+
             const indicadores =
                 await pool.query(
                     `
                     SELECT *
+
                     FROM vw_indicadores_universidade_periodo
 
                     WHERE
@@ -232,33 +324,43 @@ router.get(
                 );
 
 
-            // ---------------------------------------------
-            // CURSOS
-            // ---------------------------------------------
+            // =================================================
+            // INDICADORES POR CURSO
+            //
+            // Todos os períodos são retornados porque o frontend
+            // utiliza esses registros para descobrir os períodos
+            // disponíveis no seletor global.
+            // =================================================
 
             const cursos =
                 await pool.query(
                     `
                     SELECT *
+
                     FROM vw_indicadores_curso_periodo
 
-                    WHERE universidade_id = $1
+                    WHERE
+                        universidade_id = $1
 
                     ORDER BY
                         ano DESC,
                         semestre DESC,
                         curso
                     `,
-                    [universidadeId]
+                    [
+                        universidadeId
+                    ]
                 );
 
 
             res.json({
+
                 universidade:
                     resumo.rows[0],
 
                 situacao_alunos:
-                    situacao.rows[0] || null,
+                    situacao.rows[0] ||
+                    null,
 
                 indicadores:
                     indicadores.rows,
@@ -267,8 +369,14 @@ router.get(
                     cursos.rows
             });
 
+
         } catch (erro) {
-            console.error(erro);
+
+            console.error(
+                "Erro ao carregar dashboard:",
+                erro
+            );
+
 
             res.status(500).json({
                 erro:
@@ -280,35 +388,59 @@ router.get(
 
 
 // =========================================================
-// INDICADORES PÚBLICOS DE DISCIPLINAS
-// POR ENQUANTO APENAS USO INTERNO/AUTENTICADO
+// INDICADORES DE DISCIPLINAS
+//
+// Dados privados da instituição.
+// Alunos não possuem acesso.
 // =========================================================
 
 router.get(
     "/disciplinas",
-    exigirLogin,
+
+    exigirPerfil(
+        "consulta_institucional",
+        "gestor",
+        "admin_universidade",
+        "super_admin"
+    ),
+
     async (req, res) => {
 
         try {
+
             const usuario =
                 req.session.usuario;
+
 
             let universidadeId =
                 usuario.universidade_id;
 
+
+            // =================================================
+            // SUPER ADMIN
+            // =================================================
+
             if (
-                usuario.perfil === "super_admin"
+                usuario.perfil ===
+                "super_admin"
             ) {
+
                 universidadeId =
-                    req.query.universidade_id;
+                    req.query
+                        .universidade_id;
+
 
                 if (!universidadeId) {
-                    return res.status(400).json({
-                        erro:
-                            "Informe a universidade"
-                    });
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Informe a universidade"
+                        });
                 }
             }
+
 
             const resultado =
                 await pool.query(
@@ -329,19 +461,33 @@ router.get(
 
                     FROM vw_indicadores_disciplina
 
-                    WHERE universidade_id = $1
+                    WHERE
+                        universidade_id = $1
 
                     ORDER BY
+                        ano DESC,
+                        semestre DESC,
                         taxa_reprovacao DESC NULLS LAST,
                         disciplina
                     `,
-                    [universidadeId]
+                    [
+                        universidadeId
+                    ]
                 );
 
-            res.json(resultado.rows);
+
+            res.json(
+                resultado.rows
+            );
+
 
         } catch (erro) {
-            console.error(erro);
+
+            console.error(
+                "Erro ao consultar indicadores das disciplinas:",
+                erro
+            );
+
 
             res.status(500).json({
                 erro:
@@ -352,4 +498,5 @@ router.get(
 );
 
 
-module.exports = router;
+module.exports =
+    router;

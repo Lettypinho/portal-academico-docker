@@ -1,19 +1,22 @@
-const express = require("express");
+const express =
+    require("express");
 
-const pool = require("../config/database");
+const pool =
+    require("../config/database");
 
 const {
-    exigirLogin,
     exigirPerfil
-} = require("../middleware/auth");
+} =
+    require("../middleware/auth");
 
 
-const router = express.Router();
+const router =
+    express.Router();
 
 
 // =========================================================
 // LISTAR CURSOS
-// Público
+// PÚBLICO
 // =========================================================
 
 router.get(
@@ -30,7 +33,8 @@ router.get(
                 estado,
                 cidade,
                 limite
-            } = req.query;
+            } =
+                req.query;
 
 
             // =================================================
@@ -69,7 +73,8 @@ router.get(
             // FILTROS
             // =================================================
 
-            const parametros = [];
+            const parametros =
+                [];
 
 
             const filtros = [
@@ -78,9 +83,9 @@ router.get(
             ];
 
 
-            // ---------------------------------------------
+            // =================================================
             // INSTITUIÇÃO
-            // ---------------------------------------------
+            // =================================================
 
             if (universidade_id) {
 
@@ -109,9 +114,9 @@ router.get(
             }
 
 
-            // ---------------------------------------------
-            // NOME DO CURSO
-            // ---------------------------------------------
+            // =================================================
+            // NOME
+            // =================================================
 
             if (
                 nome &&
@@ -129,9 +134,9 @@ router.get(
             }
 
 
-            // ---------------------------------------------
+            // =================================================
             // ESTADO
-            // ---------------------------------------------
+            // =================================================
 
             if (
                 estado &&
@@ -151,9 +156,9 @@ router.get(
             }
 
 
-            // ---------------------------------------------
+            // =================================================
             // CIDADE
-            // ---------------------------------------------
+            // =================================================
 
             if (
                 cidade &&
@@ -161,7 +166,8 @@ router.get(
             ) {
 
                 parametros.push(
-                    String(cidade).trim()
+                    String(cidade)
+                        .trim()
                 );
 
 
@@ -171,9 +177,9 @@ router.get(
             }
 
 
-            // ---------------------------------------------
+            // =================================================
             // MODALIDADE
-            // ---------------------------------------------
+            // =================================================
 
             if (
                 modalidade &&
@@ -181,7 +187,8 @@ router.get(
             ) {
 
                 parametros.push(
-                    String(modalidade).trim()
+                    String(modalidade)
+                        .trim()
                 );
 
 
@@ -191,9 +198,9 @@ router.get(
             }
 
 
-            // ---------------------------------------------
-            // GRAU ACADÊMICO
-            // ---------------------------------------------
+            // =================================================
+            // GRAU
+            // =================================================
 
             if (
                 grau &&
@@ -201,7 +208,8 @@ router.get(
             ) {
 
                 parametros.push(
-                    String(grau).trim()
+                    String(grau)
+                        .trim()
                 );
 
 
@@ -211,9 +219,9 @@ router.get(
             }
 
 
-            // ---------------------------------------------
+            // =================================================
             // LIMIT
-            // ---------------------------------------------
+            // =================================================
 
             parametros.push(
                 limiteConsulta
@@ -283,24 +291,18 @@ router.get(
 
 
                     JOIN universidade u
-
                         ON u.id =
                             c.universidade_id
 
 
                     WHERE
-
                         ${filtros.join(" AND ")}
 
 
                     ORDER BY
-
                         c.nome,
-
                         u.estado,
-
                         u.cidade,
-
                         u.nome
 
 
@@ -334,11 +336,22 @@ router.get(
 
 // =========================================================
 // CURSOS DA INSTITUIÇÃO DO USUÁRIO
+//
+// ROTA PRIVADA DO DASHBOARD.
+//
+// Aluno NÃO utiliza esta rota.
+// Para consulta pública, inclusive aluno, existe GET /api/cursos.
 // =========================================================
 
 router.get(
     "/minha-universidade",
-    exigirLogin,
+
+    exigirPerfil(
+        "consulta_institucional",
+        "gestor",
+        "admin_universidade"
+    ),
+
     async (req, res) => {
 
         try {
@@ -392,17 +405,15 @@ router.get(
                     FROM curso
 
                     WHERE
-
                         universidade_id = $1
 
                     ORDER BY
-
                         nome,
-
                         modalidade
                     `,
                     [
-                        usuario.universidade_id
+                        usuario
+                            .universidade_id
                     ]
                 );
 
@@ -435,10 +446,12 @@ router.get(
 
 router.post(
     "/",
+
     exigirPerfil(
         "super_admin",
         "admin_universidade"
     ),
+
     async (req, res) => {
 
         try {
@@ -454,7 +467,8 @@ router.post(
                 duracao_semestres,
                 grau_academico,
                 carga_horaria
-            } = req.body;
+            } =
+                req.body;
 
 
             // =================================================
@@ -476,7 +490,10 @@ router.post(
 
 
             // =================================================
-            // ADMIN INSTITUCIONAL
+            // ADMIN DA INSTITUIÇÃO
+            //
+            // Ignora qualquer universidade enviada pelo frontend
+            // e utiliza obrigatoriamente sua própria instituição.
             // =================================================
 
             if (
@@ -485,7 +502,8 @@ router.post(
             ) {
 
                 universidade_id =
-                    usuario.universidade_id;
+                    usuario
+                        .universidade_id;
             }
 
 
@@ -508,6 +526,28 @@ router.post(
             }
 
 
+            universidade_id =
+                Number(
+                    universidade_id
+                );
+
+
+            if (
+                !Number.isInteger(
+                    universidade_id
+                ) ||
+                universidade_id <= 0
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Instituição inválida"
+                    });
+            }
+
+
             // =================================================
             // VALIDAR INSTITUIÇÃO
             // =================================================
@@ -521,9 +561,7 @@ router.post(
                     FROM universidade
 
                     WHERE
-
                         id = $1
-
                         AND ativo = TRUE
                     `,
                     [
@@ -542,6 +580,31 @@ router.post(
                     .json({
                         erro:
                             "Instituição inválida"
+                    });
+            }
+
+
+            // =================================================
+            // VALIDAR MODALIDADE
+            // =================================================
+
+            const modalidadesPermitidas = [
+                "Presencial",
+                "EAD"
+            ];
+
+
+            if (
+                !modalidadesPermitidas.includes(
+                    modalidade
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Modalidade inválida"
                     });
             }
 
@@ -571,6 +634,86 @@ router.post(
 
 
             // =================================================
+            // DURAÇÃO
+            // =================================================
+
+            let duracaoSemestres =
+                null;
+
+
+            if (
+                duracao_semestres !==
+                    undefined &&
+                duracao_semestres !==
+                    null &&
+                duracao_semestres !==
+                    ""
+            ) {
+
+                duracaoSemestres =
+                    Number(
+                        duracao_semestres
+                    );
+
+
+                if (
+                    !Number.isInteger(
+                        duracaoSemestres
+                    ) ||
+                    duracaoSemestres <= 0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Duração do curso inválida"
+                        });
+                }
+            }
+
+
+            // =================================================
+            // CARGA HORÁRIA
+            // =================================================
+
+            let cargaHoraria =
+                null;
+
+
+            if (
+                carga_horaria !==
+                    undefined &&
+                carga_horaria !==
+                    null &&
+                carga_horaria !==
+                    ""
+            ) {
+
+                cargaHoraria =
+                    Number(
+                        carga_horaria
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        cargaHoraria
+                    ) ||
+                    cargaHoraria <= 0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Carga horária inválida"
+                        });
+                }
+            }
+
+
+            // =================================================
             // CADASTRAR
             // =================================================
 
@@ -580,38 +723,24 @@ router.post(
                     INSERT INTO curso
                     (
                         universidade_id,
-
                         nome,
-
                         modalidade,
-
                         duracao_semestres,
-
                         grau_academico,
-
                         nivel_academico,
-
                         carga_horaria,
-
                         origem_dados
                     )
 
                     VALUES
                     (
                         $1,
-
                         $2,
-
                         $3,
-
                         $4,
-
                         $5,
-
                         'Graduação',
-
                         $6,
-
                         'SIA'
                     )
 
@@ -625,20 +754,12 @@ router.post(
 
                         modalidade,
 
-                        duracao_semestres
-                            ? Number(
-                                duracao_semestres
-                            )
-                            : null,
+                        duracaoSemestres,
 
                         grau_academico ||
                             null,
 
-                        carga_horaria
-                            ? Number(
-                                carga_horaria
-                            )
-                            : null
+                        cargaHoraria
                     ]
                 );
 
@@ -695,4 +816,5 @@ router.post(
 );
 
 
-module.exports = router;
+module.exports =
+    router;

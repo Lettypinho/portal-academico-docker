@@ -8,46 +8,67 @@ const path =
     require("path");
 
 
+// =========================================================
+// ROTAS
+// =========================================================
+
 const universidadesRoutes =
     require(
         "./routes/universidades.routes"
     );
+
 
 const authRoutes =
     require(
         "./routes/auth.routes"
     );
 
+
 const perfilRoutes =
     require(
         "./routes/perfil.routes"
     );
+
 
 const solicitacoesVinculoRoutes =
     require(
         "./routes/solicitacoes-vinculo.routes"
     );
 
+
 const cursosRoutes =
     require(
         "./routes/cursos.routes"
     );
+
 
 const indicadoresRoutes =
     require(
         "./routes/indicadores.routes"
     );
 
+
 const indicadoresInepRoutes =
     require(
         "./routes/indicadores-inep.routes"
     );
+
 
 const adminRoutes =
     require(
         "./routes/admin.routes"
     );
 
+
+const adminInstituicaoRoutes =
+    require(
+        "./routes/admin-instituicao.routes"
+    );
+
+
+// =========================================================
+// APLICAÇÃO
+// =========================================================
 
 const app =
     express();
@@ -66,6 +87,10 @@ app.use(
     express.json()
 );
 
+
+// =========================================================
+// SESSÃO
+// =========================================================
 
 app.use(
     session({
@@ -96,7 +121,7 @@ app.use(
 
 
 // =========================================================
-// ARQUIVOS DO FRONTEND
+// ARQUIVOS ESTÁTICOS DO FRONTEND
 // =========================================================
 
 app.use(
@@ -110,7 +135,7 @@ app.use(
 
 
 // =========================================================
-// ROTAS
+// ROTAS DE AUTENTICAÇÃO
 // =========================================================
 
 app.use(
@@ -119,11 +144,19 @@ app.use(
 );
 
 
+// =========================================================
+// PERFIL
+// =========================================================
+
 app.use(
     "/api/perfil",
     perfilRoutes
 );
 
+
+// =========================================================
+// SOLICITAÇÕES DE VÍNCULO
+// =========================================================
 
 app.use(
     "/api/solicitacoes-vinculo",
@@ -131,11 +164,19 @@ app.use(
 );
 
 
+// =========================================================
+// UNIVERSIDADES
+// =========================================================
+
 app.use(
     "/api/universidades",
     universidadesRoutes
 );
 
+
+// =========================================================
+// CURSOS
+// =========================================================
 
 app.use(
     "/api/cursos",
@@ -143,17 +184,29 @@ app.use(
 );
 
 
+// =========================================================
+// INDICADORES INSTITUCIONAIS
+// =========================================================
+
 app.use(
     "/api/indicadores",
     indicadoresRoutes
 );
 
 
+// =========================================================
+// INDICADORES OFICIAIS DO INEP
+// =========================================================
+
 app.use(
     "/api/indicadores-inep",
     indicadoresInepRoutes
 );
 
+
+// =========================================================
+// SUPER ADMIN
+// =========================================================
 
 app.use(
     "/api/admin",
@@ -162,7 +215,17 @@ app.use(
 
 
 // =========================================================
-// STATUS
+// ADMINISTRAÇÃO DA INSTITUIÇÃO
+// =========================================================
+
+app.use(
+    "/api/admin-instituicao",
+    adminInstituicaoRoutes
+);
+
+
+// =========================================================
+// TESTE / STATUS DA API
 // =========================================================
 
 app.get(

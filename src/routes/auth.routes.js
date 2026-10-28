@@ -632,16 +632,19 @@ router.put(
         try {
 
             if (
-                req.session.usuario
-                    .perfil !==
-                "publico"
-            ) {
+    ![
+        "publico",
+        "aluno"
+    ].includes(
+        req.session.usuario.perfil
+    )
+) {
 
-                return res.status(403).json({
-                    erro:
-                        "Esta função está disponível apenas para usuários públicos"
-                });
-            }
+    return res.status(403).json({
+        erro:
+            "Esta função não está disponível para este perfil"
+    });
+}
 
 
             const {
