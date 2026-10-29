@@ -1,6 +1,8 @@
 // =========================================================
 // SIA - ADMINISTRAÇÃO DA INSTITUIÇÃO
+// Disponível para admin_universidade
 // =========================================================
+
 
 let usuarioAdminInstituicao =
     null;
@@ -102,7 +104,7 @@ function nomePerfilAdmin(
             "Gestor",
 
         admin_universidade:
-            "Administrador"
+            "Administrador da instituição"
     };
 
 
@@ -146,7 +148,116 @@ function nomeStatusAdmin(
 
 
 // =========================================================
-// MENSAGEM
+// ÍCONE DE CONFIGURAÇÕES DO PRÓPRIO ADMIN
+//
+// Aproveita o modal de perfil já existente no dashboard.
+// Apenas troca o ícone do botão para engrenagem.
+// =========================================================
+
+function configurarBotaoConfiguracoesAdmin() {
+
+    const botao =
+        document.getElementById(
+            "btn-dashboard-perfil"
+        );
+
+
+    if (!botao) {
+
+        return;
+    }
+
+
+    botao.title =
+        "Configurações da conta";
+
+
+    botao.setAttribute(
+        "aria-label",
+        "Abrir configurações da conta"
+    );
+
+
+    botao.classList.add(
+        "admin-settings-button"
+    );
+
+
+    botao.innerHTML = `
+
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+        >
+
+            <circle
+                cx="12"
+                cy="12"
+                r="3"
+            ></circle>
+
+            <path
+                d="
+                    M19.4 15
+                    a1.7 1.7 0 0 0 .34 1.88
+                    l.06.06
+                    a2 2 0 1 1-2.83 2.83
+                    l-.06-.06
+                    A1.7 1.7 0 0 0 15 19.4
+                    a1.7 1.7 0 0 0-1 .6
+                    a1.7 1.7 0 0 0-.5 1.2
+                    V21
+                    a2 2 0 1 1-4 0
+                    v-.09
+                    A1.7 1.7 0 0 0 8.4 19.4
+                    a1.7 1.7 0 0 0-1.88.34
+                    l-.06.06
+                    a2 2 0 1 1-2.83-2.83
+                    l.06-.06
+                    A1.7 1.7 0 0 0 4.6 15
+                    a1.7 1.7 0 0 0-.6-1
+                    a1.7 1.7 0 0 0-1.2-.5
+                    H3
+                    a2 2 0 1 1 0-4
+                    h.09
+                    A1.7 1.7 0 0 0 4.6 8.4
+                    a1.7 1.7 0 0 0-.34-1.88
+                    l-.06-.06
+                    a2 2 0 1 1 2.83-2.83
+                    l.06.06
+                    A1.7 1.7 0 0 0 9 4.6
+                    a1.7 1.7 0 0 0 1-.6
+                    a1.7 1.7 0 0 0 .5-1.2
+                    V3
+                    a2 2 0 1 1 4 0
+                    v.09
+                    A1.7 1.7 0 0 0 15.6 4.6
+                    a1.7 1.7 0 0 0 1.88-.34
+                    l.06-.06
+                    a2 2 0 1 1 2.83 2.83
+                    l-.06.06
+                    A1.7 1.7 0 0 0 19.4 9
+                    a1.7 1.7 0 0 0 .6 1
+                    a1.7 1.7 0 0 0 1.2.5
+                    H21
+                    a2 2 0 1 1 0 4
+                    h-.09
+                    A1.7 1.7 0 0 0 19.4 15
+                "
+            ></path>
+
+        </svg>
+    `;
+}
+
+
+// =========================================================
+// MENSAGEM GLOBAL
 // =========================================================
 
 function mostrarMensagemAdmin(
@@ -197,6 +308,344 @@ function mostrarMensagemAdmin(
 
 
 // =========================================================
+// CRIAR MODAL DE EDIÇÃO DE CONTA
+//
+// IMPORTANTE:
+// fica diretamente no BODY.
+// Isso impede o modal de ficar escondido dentro
+// de uma dashboard-section.
+// =========================================================
+
+function criarModalContaAdmin() {
+
+    if (
+        document.getElementById(
+            "admin-modal-conta"
+        )
+    ) {
+
+        return;
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "admin-modal-conta";
+
+
+    modal.className =
+        "admin-account-modal hidden";
+
+
+    modal.innerHTML = `
+
+        <div
+            class="admin-account-backdrop"
+            data-fechar-conta
+        ></div>
+
+
+        <div
+            class="admin-account-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Editar conta"
+        >
+
+            <div class="admin-account-header">
+
+                <div>
+
+                    <span class="section-eyebrow">
+                        Configurações da conta
+                    </span>
+
+                    <h2>
+                        Editar usuário
+                    </h2>
+
+                    <p id="admin-conta-subtitulo">
+                        Atualize os dados da conta.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="admin-account-close"
+                    data-fechar-conta
+                    aria-label="Fechar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="admin-form-conta">
+
+                <input
+                    type="hidden"
+                    id="admin-conta-id"
+                >
+
+
+                <!-- =====================================
+                     DADOS DA CONTA
+                     ===================================== -->
+
+                <section class="admin-account-section">
+
+                    <div class="admin-account-section-title">
+
+                        <h3>
+                            Dados da conta
+                        </h3>
+
+                        <p>
+                            Nome, e-mail e nível de acesso.
+                        </p>
+
+                    </div>
+
+
+                    <div class="admin-account-grid">
+
+                        <div class="admin-account-field">
+
+                            <label for="admin-conta-nome">
+                                Nome
+                            </label>
+
+                            <input
+                                type="text"
+                                id="admin-conta-nome"
+                                maxlength="150"
+                                autocomplete="name"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="admin-account-field">
+
+                            <label for="admin-conta-email">
+                                E-mail
+                            </label>
+
+                            <input
+                                type="email"
+                                id="admin-conta-email"
+                                maxlength="150"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="admin-account-field full">
+
+                            <label for="admin-conta-perfil">
+                                Perfil
+                            </label>
+
+                            <select
+                                id="admin-conta-perfil"
+                                required
+                            ></select>
+
+                            <small
+                                id="admin-conta-perfil-aviso"
+                                class="admin-account-help"
+                            ></small>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =====================================
+                     SEGURANÇA
+                     ===================================== -->
+
+                <section class="admin-account-section">
+
+                    <div class="admin-account-section-title">
+
+                        <h3>
+                            Segurança
+                        </h3>
+
+                        <p>
+                            Altere ou redefina a senha da conta.
+                        </p>
+
+                    </div>
+
+
+                    <div class="admin-account-grid">
+
+
+                        <div
+                            id="admin-grupo-senha-atual"
+                            class="admin-account-field full hidden"
+                        >
+
+                            <label for="admin-conta-senha-atual">
+                                Senha atual
+                            </label>
+
+                            <input
+                                type="password"
+                                id="admin-conta-senha-atual"
+                                maxlength="72"
+                                autocomplete="current-password"
+                            >
+
+                            <small class="admin-account-help">
+                                Para alterar sua própria senha,
+                                confirme primeiro a senha atual.
+                            </small>
+
+                        </div>
+
+
+                        <div class="admin-account-field">
+
+                            <label for="admin-conta-nova-senha">
+                                Nova senha
+                            </label>
+
+                            <input
+                                type="password"
+                                id="admin-conta-nova-senha"
+                                minlength="6"
+                                maxlength="72"
+                                autocomplete="new-password"
+                            >
+
+                            <small
+                                id="admin-conta-senha-ajuda"
+                                class="admin-account-help"
+                            >
+                                Deixe em branco para manter
+                                a senha atual.
+                            </small>
+
+                        </div>
+
+
+                        <div class="admin-account-field">
+
+                            <label for="admin-conta-confirmar-senha">
+                                Confirmar nova senha
+                            </label>
+
+                            <input
+                                type="password"
+                                id="admin-conta-confirmar-senha"
+                                minlength="6"
+                                maxlength="72"
+                                autocomplete="new-password"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <div
+                    id="admin-conta-mensagem"
+                    class="admin-account-message"
+                ></div>
+
+
+                <div class="admin-account-actions">
+
+                    <button
+                        type="button"
+                        class="admin-account-cancel"
+                        data-fechar-conta
+                    >
+                        Cancelar
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        id="admin-conta-salvar"
+                        class="admin-account-save"
+                    >
+                        Salvar alterações
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    document
+        .getElementById(
+            "admin-form-conta"
+        )
+        .addEventListener(
+            "submit",
+            salvarContaAdmin
+        );
+
+
+    modal
+        .querySelectorAll(
+            "[data-fechar-conta]"
+        )
+        .forEach(
+            elemento => {
+
+                elemento.addEventListener(
+                    "click",
+                    fecharModalContaAdmin
+                );
+            }
+        );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                fecharModalContaAdmin();
+            }
+        }
+    );
+}
+
+
+// =========================================================
 // CRIAR ABA DE ADMINISTRAÇÃO
 // =========================================================
 
@@ -234,7 +683,7 @@ function criarAbaAdministracao() {
 
 
     // =====================================================
-    // MENU
+    // ITEM DO MENU
     // =====================================================
 
     const botao =
@@ -278,7 +727,7 @@ function criarAbaAdministracao() {
 
 
     // =====================================================
-    // SEÇÃO
+    // CONTEÚDO
     // =====================================================
 
     const secao =
@@ -310,8 +759,9 @@ function criarAbaAdministracao() {
                 </h2>
 
                 <p>
-                    Gerencie vínculos, contas e permissões
-                    dos usuários da sua instituição.
+                    Gerencie solicitações de vínculo,
+                    usuários, contas e permissões
+                    da sua instituição.
                 </p>
 
             </div>
@@ -413,8 +863,8 @@ function criarAbaAdministracao() {
                     </h3>
 
                     <p>
-                        Analise solicitações feitas por
-                        alunos e funcionários.
+                        Analise solicitações feitas
+                        por alunos e funcionários.
                     </p>
 
                 </div>
@@ -472,7 +922,7 @@ function criarAbaAdministracao() {
 
 
         <!-- =============================================
-             CONTAS
+             USUÁRIOS
              ============================================= -->
 
         <div class="dashboard-panel admin-ies-panel">
@@ -490,8 +940,10 @@ function criarAbaAdministracao() {
                     </h3>
 
                     <p>
-                        Edite nome, e-mail, senha
-                        e permissões dos usuários.
+                        Clique em
+                        <strong>Editar conta</strong>
+                        para alterar nome, e-mail,
+                        perfil ou senha.
                     </p>
 
                 </div>
@@ -557,200 +1009,6 @@ function criarAbaAdministracao() {
             </div>
 
         </div>
-
-
-        <!-- =============================================
-             MODAL EDITAR CONTA
-             ============================================= -->
-
-        <div
-            id="admin-modal-conta"
-            class="admin-account-modal hidden"
-        >
-
-            <div
-                class="admin-account-backdrop"
-                data-fechar-conta
-            ></div>
-
-
-            <div class="admin-account-card">
-
-                <div class="admin-account-header">
-
-                    <div>
-
-                        <span class="section-eyebrow">
-                            Conta institucional
-                        </span>
-
-                        <h3>
-                            Editar usuário
-                        </h3>
-
-                        <p id="admin-conta-subtitulo">
-                            Atualize os dados da conta.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="admin-account-close"
-                        data-fechar-conta
-                        aria-label="Fechar"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <form id="admin-form-conta">
-
-                    <input
-                        type="hidden"
-                        id="admin-conta-id"
-                    >
-
-
-                    <div class="admin-account-grid">
-
-                        <label>
-
-                            Nome
-
-                            <input
-                                type="text"
-                                id="admin-conta-nome"
-                                maxlength="150"
-                                required
-                            >
-
-                        </label>
-
-
-                        <label>
-
-                            E-mail
-
-                            <input
-                                type="email"
-                                id="admin-conta-email"
-                                maxlength="150"
-                                required
-                            >
-
-                        </label>
-
-
-                        <label>
-
-                            Perfil
-
-                            <select
-                                id="admin-conta-perfil"
-                                required
-                            ></select>
-
-                            <small id="admin-conta-perfil-aviso"></small>
-
-                        </label>
-
-
-                        <div></div>
-
-
-                        <label
-                            id="admin-grupo-senha-atual"
-                            class="hidden"
-                        >
-
-                            Senha atual
-
-                            <input
-                                type="password"
-                                id="admin-conta-senha-atual"
-                                maxlength="72"
-                                autocomplete="current-password"
-                            >
-
-                            <small>
-                                Obrigatória somente ao alterar sua própria senha.
-                            </small>
-
-                        </label>
-
-
-                        <label>
-
-                            Nova senha
-
-                            <input
-                                type="password"
-                                id="admin-conta-nova-senha"
-                                minlength="6"
-                                maxlength="72"
-                                autocomplete="new-password"
-                            >
-
-                            <small id="admin-conta-senha-ajuda">
-                                Deixe em branco para manter a senha atual.
-                            </small>
-
-                        </label>
-
-
-                        <label>
-
-                            Confirmar nova senha
-
-                            <input
-                                type="password"
-                                id="admin-conta-confirmar-senha"
-                                minlength="6"
-                                maxlength="72"
-                                autocomplete="new-password"
-                            >
-
-                        </label>
-
-                    </div>
-
-
-                    <div
-                        id="admin-conta-mensagem"
-                        class="admin-account-message"
-                    ></div>
-
-
-                    <div class="admin-account-actions">
-
-                        <button
-                            type="button"
-                            class="admin-account-cancel"
-                            data-fechar-conta
-                        >
-                            Cancelar
-                        </button>
-
-
-                        <button
-                            type="submit"
-                            id="admin-conta-salvar"
-                            class="admin-account-save"
-                        >
-                            Salvar alterações
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
     `;
 
 
@@ -764,7 +1022,61 @@ function criarAbaAdministracao() {
 
 
 // =========================================================
-// EVENTOS
+// ABRIR ADMINISTRAÇÃO
+// =========================================================
+
+function abrirAdministracaoInstituicao() {
+
+    if (
+        typeof abrirSecao ===
+        "function"
+    ) {
+
+        abrirSecao(
+            "administracao"
+        );
+
+    } else {
+
+        document
+            .querySelectorAll(
+                ".dashboard-nav .nav-item"
+            )
+            .forEach(
+                item => {
+
+                    item.classList.toggle(
+                        "active",
+                        item.dataset.section ===
+                            "administracao"
+                    );
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".dashboard-section"
+            )
+            .forEach(
+                secao => {
+
+                    secao.classList.toggle(
+                        "active",
+                        secao.id ===
+                            "administracao"
+                    );
+                }
+            );
+    }
+
+
+    carregarAdministracaoInstituicao();
+}
+
+
+// =========================================================
+// EVENTOS DA ABA
 // =========================================================
 
 function configurarEventosAdminInstituicao() {
@@ -827,90 +1139,11 @@ function configurarEventosAdminInstituicao() {
             "click",
             tratarCliqueUsuario
         );
-
-
-    document
-        .getElementById(
-            "admin-form-conta"
-        )
-        .addEventListener(
-            "submit",
-            salvarContaAdmin
-        );
-
-
-    document
-        .querySelectorAll(
-            "[data-fechar-conta]"
-        )
-        .forEach(
-            elemento => {
-
-                elemento.addEventListener(
-                    "click",
-                    fecharModalContaAdmin
-                );
-            }
-        );
 }
 
 
 // =========================================================
-// ABRIR ADMINISTRAÇÃO
-// =========================================================
-
-function abrirAdministracaoInstituicao() {
-
-    if (
-        typeof abrirSecao ===
-        "function"
-    ) {
-
-        abrirSecao(
-            "administracao"
-        );
-
-    } else {
-
-        document
-            .querySelectorAll(
-                ".dashboard-nav .nav-item"
-            )
-            .forEach(
-                item => {
-
-                    item.classList.toggle(
-                        "active",
-                        item.dataset.section ===
-                            "administracao"
-                    );
-                }
-            );
-
-
-        document
-            .querySelectorAll(
-                ".dashboard-section"
-            )
-            .forEach(
-                secao => {
-
-                    secao.classList.toggle(
-                        "active",
-                        secao.id ===
-                            "administracao"
-                    );
-                }
-            );
-    }
-
-
-    carregarAdministracaoInstituicao();
-}
-
-
-// =========================================================
-// CARREGAR TUDO
+// CARREGAR ADMINISTRAÇÃO
 // =========================================================
 
 async function carregarAdministracaoInstituicao() {
@@ -1048,6 +1281,12 @@ async function carregarSolicitacoesAdmin() {
         document.getElementById(
             "admin-ies-solicitacoes"
         );
+
+
+    if (!container) {
+
+        return;
+    }
 
 
     const status =
@@ -1189,15 +1428,20 @@ function renderizarSolicitacoesAdmin(
                                     <div class="admin-request-badges">
 
                                         <span
-                                            class="admin-status-badge status-${escaparHtmlAdmin(
-                                                solicitacao.status
-                                            )}"
+                                            class="
+                                                admin-status-badge
+                                                status-${escaparHtmlAdmin(
+                                                    solicitacao.status
+                                                )}
+                                            "
                                         >
+
                                             ${escaparHtmlAdmin(
                                                 nomeStatusAdmin(
                                                     solicitacao.status
                                                 )
                                             )}
+
                                         </span>
 
 
@@ -1309,13 +1553,37 @@ function renderizarSolicitacoesAdmin(
 
 
                                 ${
+                                    solicitacao
+                                        .identificacao_institucional
+                                        ? `
+
+                                            <div>
+
+                                                <span>
+                                                    Identificação
+                                                </span>
+
+                                                <strong>
+                                                    ${escaparHtmlAdmin(
+                                                        solicitacao
+                                                            .identificacao_institucional
+                                                    )}
+                                                </strong>
+
+                                            </div>
+                                        `
+                                        : ""
+                                }
+
+
+                                ${
                                     solicitacao.cargo
                                         ? `
 
                                             <div>
 
                                                 <span>
-                                                    Cargo / função
+                                                    Cargo
                                                 </span>
 
                                                 <strong>
@@ -1355,28 +1623,6 @@ function renderizarSolicitacoesAdmin(
 
 
                             ${
-                                solicitacao.observacao_analise
-                                    ? `
-
-                                        <div class="admin-request-observation">
-
-                                            <strong>
-                                                Observação
-                                            </strong>
-
-                                            <p>
-                                                ${escaparHtmlAdmin(
-                                                    solicitacao.observacao_analise
-                                                )}
-                                            </p>
-
-                                        </div>
-                                    `
-                                    : ""
-                            }
-
-
-                            ${
                                 pendente
                                     ? `
 
@@ -1388,7 +1634,7 @@ function renderizarSolicitacoesAdmin(
 
                                                         <label>
 
-                                                            Permissão após aprovação
+                                                            Permissão
 
                                                             <select
                                                                 data-perfil-solicitacao="${solicitacao.id}"
@@ -1412,12 +1658,10 @@ function renderizarSolicitacoesAdmin(
                                                     `
                                                     : `
 
-                                                        <div>
-                                                            Ao aprovar,
-                                                            o usuário receberá
-                                                            o perfil
-                                                            <strong>Aluno</strong>.
-                                                        </div>
+                                                        <span>
+                                                            Será aprovado
+                                                            como Aluno.
+                                                        </span>
                                                     `
                                             }
 
@@ -1460,7 +1704,7 @@ function renderizarSolicitacoesAdmin(
 
 
 // =========================================================
-// CLIQUES EM SOLICITAÇÕES
+// EVENTOS DAS SOLICITAÇÕES
 // =========================================================
 
 async function tratarCliqueSolicitacao(
@@ -1499,7 +1743,7 @@ async function tratarCliqueSolicitacao(
 
 
 // =========================================================
-// APROVAR SOLICITAÇÃO
+// APROVAR
 // =========================================================
 
 async function aprovarSolicitacaoAdmin(
@@ -1541,7 +1785,7 @@ async function aprovarSolicitacaoAdmin(
             tipo ===
                 "aluno"
                 ? "Aprovar este vínculo como aluno?"
-                : "Aprovar este funcionário com a permissão selecionada?"
+                : "Aprovar este funcionário?"
         );
 
 
@@ -1615,7 +1859,7 @@ async function aprovarSolicitacaoAdmin(
 
 
 // =========================================================
-// REJEITAR SOLICITAÇÃO
+// REJEITAR
 // =========================================================
 
 async function rejeitarSolicitacaoAdmin(
@@ -1634,7 +1878,8 @@ async function rejeitarSolicitacaoAdmin(
 
 
     if (
-        observacao === null
+        observacao ===
+        null
     ) {
 
         return;
@@ -1747,20 +1992,26 @@ async function carregarUsuariosAdmin() {
         );
 
 
-        document
-            .getElementById(
+        const tbody =
+            document.getElementById(
                 "admin-ies-usuarios"
-            )
-            .innerHTML = `
+            );
+
+
+        if (tbody) {
+
+            tbody.innerHTML = `
 
                 <tr>
 
                     <td colspan="4">
-                        Não foi possível carregar os usuários.
+                        Não foi possível carregar
+                        os usuários.
                     </td>
 
                 </tr>
             `;
+        }
     }
 }
 
@@ -1808,7 +2059,11 @@ function renderizarUsuariosAdmin() {
 
 
                     const texto =
-                        `${usuario.nome} ${usuario.email} ${usuario.perfil}`
+                        `
+                            ${usuario.nome || ""}
+                            ${usuario.email || ""}
+                            ${usuario.perfil || ""}
+                        `
                             .toLowerCase();
 
 
@@ -1883,6 +2138,7 @@ function renderizarUsuariosAdmin() {
                                     ${
                                         ehProprio
                                             ? `
+
                                                 <small>
                                                     Você
                                                 </small>
@@ -1913,11 +2169,14 @@ function renderizarUsuariosAdmin() {
                             <td>
 
                                 <span
-                                    class="admin-user-status ${
-                                        usuario.ativo
-                                            ? "active"
-                                            : "inactive"
-                                    }"
+                                    class="
+                                        admin-user-status
+                                        ${
+                                            usuario.ativo
+                                                ? "active"
+                                                : "inactive"
+                                        }
+                                    "
                                 >
 
                                     ${
@@ -1938,7 +2197,9 @@ function renderizarUsuariosAdmin() {
                                     class="admin-user-edit"
                                     data-editar-conta="${usuario.id}"
                                 >
-                                    Editar
+
+                                    Editar conta
+
                                 </button>
 
                             </td>
@@ -1959,13 +2220,13 @@ function tratarCliqueUsuario(
     event
 ) {
 
-    const editar =
+    const botao =
         event.target.closest(
             "[data-editar-conta]"
         );
 
 
-    if (!editar) {
+    if (!botao) {
 
         return;
     }
@@ -1973,7 +2234,7 @@ function tratarCliqueUsuario(
 
     abrirModalContaAdmin(
         Number(
-            editar.dataset
+            botao.dataset
                 .editarConta
         )
     );
@@ -1981,7 +2242,7 @@ function tratarCliqueUsuario(
 
 
 // =========================================================
-// ABRIR MODAL DA CONTA
+// ABRIR MODAL DE CONTA
 // =========================================================
 
 function abrirModalContaAdmin(
@@ -1992,12 +2253,21 @@ function abrirModalContaAdmin(
         usuariosAdminInstituicao
             .find(
                 item =>
-                    Number(item.id) ===
-                    Number(usuarioId)
+                    Number(
+                        item.id
+                    ) ===
+                    Number(
+                        usuarioId
+                    )
             );
 
 
     if (!usuario) {
+
+        mostrarMensagemAdmin(
+            "Usuário não encontrado.",
+            "error"
+        );
 
         return;
     }
@@ -2008,7 +2278,8 @@ function abrirModalContaAdmin(
             usuario.id
         ) ===
         Number(
-            usuarioAdminInstituicao.id
+            usuarioAdminInstituicao
+                .id
         );
 
 
@@ -2030,7 +2301,8 @@ function abrirModalContaAdmin(
             "admin-conta-nome"
         )
         .value =
-        usuario.nome || "";
+        usuario.nome ||
+        "";
 
 
     document
@@ -2038,16 +2310,21 @@ function abrirModalContaAdmin(
             "admin-conta-email"
         )
         .value =
-        usuario.email || "";
+        usuario.email ||
+        "";
 
 
-    const perfil =
+    // =====================================================
+    // PERFIL
+    // =====================================================
+
+    const selectPerfil =
         document.getElementById(
             "admin-conta-perfil"
         );
 
 
-    const aviso =
+    const avisoPerfil =
         document.getElementById(
             "admin-conta-perfil-aviso"
         );
@@ -2057,7 +2334,7 @@ function abrirModalContaAdmin(
         ehAluno
     ) {
 
-        perfil.innerHTML = `
+        selectPerfil.innerHTML = `
 
             <option value="aluno">
                 Aluno
@@ -2065,37 +2342,37 @@ function abrirModalContaAdmin(
         `;
 
 
-        perfil.disabled =
+        selectPerfil.disabled =
             true;
 
 
-        aviso.textContent =
-            "O vínculo de aluno não é convertido por esta operação.";
+        avisoPerfil.textContent =
+            "O vínculo de aluno não pode ser convertido nesta tela.";
 
 
     } else if (
         ehProprio
     ) {
 
-        perfil.innerHTML = `
+        selectPerfil.innerHTML = `
 
             <option value="admin_universidade">
-                Administrador
+                Administrador da instituição
             </option>
         `;
 
 
-        perfil.disabled =
+        selectPerfil.disabled =
             true;
 
 
-        aviso.textContent =
-            "Seu próprio nível de administrador só pode ser alterado pelo super administrador.";
+        avisoPerfil.textContent =
+            "Seu próprio nível administrativo só pode ser alterado pelo Super Administrador.";
 
 
     } else {
 
-        perfil.innerHTML = `
+        selectPerfil.innerHTML = `
 
             <option value="consulta_institucional">
                 Consulta institucional
@@ -2106,34 +2383,37 @@ function abrirModalContaAdmin(
             </option>
 
             <option value="admin_universidade">
-                Administrador
+                Administrador da instituição
             </option>
         `;
 
 
-        perfil.disabled =
+        selectPerfil.disabled =
             false;
 
 
-        perfil.value =
+        selectPerfil.value =
             usuario.perfil;
 
 
-        aviso.textContent =
+        avisoPerfil.textContent =
             "";
     }
 
 
-    const grupoSenhaAtual =
-        document.getElementById(
+    // =====================================================
+    // SENHA
+    // =====================================================
+
+    document
+        .getElementById(
             "admin-grupo-senha-atual"
+        )
+        .classList
+        .toggle(
+            "hidden",
+            !ehProprio
         );
-
-
-    grupoSenhaAtual.classList.toggle(
-        "hidden",
-        !ehProprio
-    );
 
 
     document
@@ -2166,8 +2446,8 @@ function abrirModalContaAdmin(
         )
         .textContent =
         ehProprio
-            ? "Para trocar sua senha, informe também sua senha atual."
-            : "Informe uma senha somente se quiser redefinir o acesso deste usuário.";
+            ? "Para alterar sua senha, informe também sua senha atual."
+            : "Preencha apenas se quiser redefinir a senha deste usuário.";
 
 
     document
@@ -2176,8 +2456,8 @@ function abrirModalContaAdmin(
         )
         .textContent =
         ehProprio
-            ? "Você está editando a sua própria conta administrativa."
-            : `Editando ${usuario.nome}.`;
+            ? "Você está editando sua própria conta administrativa."
+            : `Editando a conta de ${usuario.nome}.`;
 
 
     const mensagem =
@@ -2194,18 +2474,37 @@ function abrirModalContaAdmin(
         "admin-account-message";
 
 
-    document
-        .getElementById(
+    // =====================================================
+    // EXIBIR
+    // =====================================================
+
+    const modal =
+        document.getElementById(
             "admin-modal-conta"
-        )
-        .classList
-        .remove(
-            "hidden"
         );
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+
+    // redundância proposital para evitar conflito
+    // com estilos antigos do dashboard
+
+    modal.style.display =
+        "flex";
 
 
     document.body.style.overflow =
         "hidden";
+
+
+    document
+        .getElementById(
+            "admin-conta-nome"
+        )
+        .focus();
 }
 
 
@@ -2215,14 +2514,25 @@ function abrirModalContaAdmin(
 
 function fecharModalContaAdmin() {
 
-    document
-        .getElementById(
+    const modal =
+        document.getElementById(
             "admin-modal-conta"
-        )
-        ?.classList
-        .add(
-            "hidden"
         );
+
+
+    if (!modal) {
+
+        return;
+    }
+
+
+    modal.classList.add(
+        "hidden"
+    );
+
+
+    modal.style.display =
+        "none";
 
 
     document.body.style.overflow =
@@ -2255,7 +2565,9 @@ async function salvarContaAdmin(
         usuariosAdminInstituicao
             .find(
                 item =>
-                    Number(item.id) ===
+                    Number(
+                        item.id
+                    ) ===
                     usuarioId
             );
 
@@ -2275,10 +2587,40 @@ async function salvarContaAdmin(
         );
 
 
-    const perfil =
+    const campoPerfil =
         document.getElementById(
             "admin-conta-perfil"
         );
+
+
+    const novaSenha =
+        document
+            .getElementById(
+                "admin-conta-nova-senha"
+            )
+            .value;
+
+
+    const confirmarSenha =
+        document
+            .getElementById(
+                "admin-conta-confirmar-senha"
+            )
+            .value;
+
+
+    if (
+        novaSenha !==
+        confirmarSenha
+    ) {
+
+        exibirMensagemConta(
+            "A confirmação da nova senha não confere.",
+            "error"
+        );
+
+        return;
+    }
 
 
     const payload = {
@@ -2300,7 +2642,7 @@ async function salvarContaAdmin(
                 .trim(),
 
         perfil:
-            perfil.value,
+            campoPerfil.value,
 
         senha_atual:
             ehProprio
@@ -2312,39 +2654,17 @@ async function salvarContaAdmin(
                 : "",
 
         nova_senha:
-            document
-                .getElementById(
-                    "admin-conta-nova-senha"
-                )
-                .value,
+            novaSenha,
 
         confirmar_nova_senha:
-            document
-                .getElementById(
-                    "admin-conta-confirmar-senha"
-                )
-                .value
+            confirmarSenha
     };
-
-
-    const mensagem =
-        document.getElementById(
-            "admin-conta-mensagem"
-        );
 
 
     const botao =
         document.getElementById(
             "admin-conta-salvar"
         );
-
-
-    mensagem.textContent =
-        "";
-
-
-    mensagem.className =
-        "admin-account-message";
 
 
     botao.disabled =
@@ -2365,6 +2685,7 @@ async function salvarContaAdmin(
                         "PATCH",
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
                     },
@@ -2390,18 +2711,15 @@ async function salvarContaAdmin(
         }
 
 
-        mensagem.textContent =
+        exibirMensagemConta(
             dados.mensagem ||
-            "Conta atualizada com sucesso.";
-
-
-        mensagem.classList.add(
+            "Conta atualizada com sucesso.",
             "success"
         );
 
 
         // =================================================
-        // SE EDITOU A PRÓPRIA CONTA
+        // PRÓPRIA CONTA
         // =================================================
 
         if (
@@ -2433,7 +2751,7 @@ async function salvarContaAdmin(
 
             if (
                 typeof usuarioAtual !==
-                "undefined" &&
+                    "undefined" &&
                 usuarioAtual
             ) {
 
@@ -2455,21 +2773,20 @@ async function salvarContaAdmin(
 
                 fecharModalContaAdmin();
 
+
                 mostrarMensagemAdmin(
                     "Conta atualizada com sucesso."
                 );
+
             },
-            650
+            700
         );
 
 
     } catch (erro) {
 
-        mensagem.textContent =
-            erro.message;
-
-
-        mensagem.classList.add(
+        exibirMensagemConta(
+            erro.message,
             "error"
         );
 
@@ -2483,6 +2800,30 @@ async function salvarContaAdmin(
         botao.textContent =
             "Salvar alterações";
     }
+}
+
+
+// =========================================================
+// MENSAGEM DO MODAL
+// =========================================================
+
+function exibirMensagemConta(
+    texto,
+    tipo
+) {
+
+    const mensagem =
+        document.getElementById(
+            "admin-conta-mensagem"
+        );
+
+
+    mensagem.textContent =
+        texto;
+
+
+    mensagem.className =
+        `admin-account-message ${tipo}`;
 }
 
 
@@ -2514,97 +2855,153 @@ function adicionarEstilosAdminInstituicao() {
 
     estilo.textContent = `
 
+        /* =================================================
+           CONFIGURAÇÕES DO TOPO
+           ================================================= */
+
+        .admin-settings-button {
+
+            border-color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .35
+                ) !important;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .10
+                ) !important;
+        }
+
+
+        .admin-settings-button:hover {
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .18
+                ) !important;
+        }
+
+
+        .admin-settings-button svg {
+
+            width:
+                20px;
+
+            height:
+                20px;
+        }
+
+
+        /* =================================================
+           MENU
+           ================================================= */
+
         .admin-nav-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            gap:
+                7px;
         }
 
 
         .admin-nav-badge {
-            min-width: 19px;
-            height: 19px;
 
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            min-width:
+                19px;
 
-            padding: 0 5px;
+            height:
+                19px;
 
-            border-radius: 999px;
+            display:
+                inline-flex;
 
-            color: #ffffff;
-            background: #dc2626;
+            align-items:
+                center;
 
-            font-size: 9px;
-            font-weight: 800;
+            justify-content:
+                center;
+
+            padding:
+                0 5px;
+
+            border-radius:
+                999px;
+
+            color:
+                #ffffff;
+
+            background:
+                #dc2626;
+
+            font-size:
+                9px;
+
+            font-weight:
+                800;
         }
 
 
         .admin-nav-badge.hidden {
-            display: none;
+
+            display:
+                none;
         }
 
 
-        .admin-ies-page-header {
-            align-items: center;
-            justify-content: space-between;
-        }
-
-
-        .admin-ies-message {
-            display: none;
-
-            margin-bottom: 18px;
-            padding: 12px 15px;
-
-            border-radius: 10px;
-
-            font-size: 12px;
-        }
-
-
-        .admin-ies-message.visible {
-            display: block;
-        }
-
-
-        .admin-ies-message.success {
-            border: 1px solid #bbf7d0;
-            color: #166534;
-            background: #f0fdf4;
-        }
-
-
-        .admin-ies-message.error {
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            background: #fef2f2;
-        }
-
+        /* =================================================
+           RESUMO
+           ================================================= */
 
         .admin-ies-summary-grid {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 repeat(
                     4,
-                    minmax(0, 1fr)
+                    minmax(
+                        0,
+                        1fr
+                    )
                 );
 
-            gap: 15px;
+            gap:
+                15px;
 
-            margin-bottom: 24px;
+            margin-bottom:
+                24px;
         }
 
 
         .admin-ies-summary-grid article {
-            padding: 19px;
 
-            border: 1px solid #e6ddec;
-            border-radius: 14px;
+            padding:
+                19px;
 
-            background: #ffffff;
+            border:
+                1px solid
+                #e6ddec;
+
+            border-radius:
+                14px;
+
+            background:
+                #ffffff;
 
             box-shadow:
                 0 7px 22px
@@ -2612,561 +3009,970 @@ function adicionarEstilosAdminInstituicao() {
                     76,
                     29,
                     149,
-                    0.045
+                    .045
                 );
         }
 
 
         .admin-ies-summary-grid span {
-            display: block;
 
-            margin-bottom: 8px;
+            display:
+                block;
 
-            color: #82768a;
+            margin-bottom:
+                8px;
 
-            font-size: 11px;
+            color:
+                #82768a;
+
+            font-size:
+                11px;
         }
 
 
         .admin-ies-summary-grid strong {
-            color: #31203d;
 
-            font-size: 25px;
+            color:
+                #31203d;
+
+            font-size:
+                25px;
         }
 
 
+        /* =================================================
+           PAINEL
+           ================================================= */
+
         .admin-ies-panel {
-            margin-bottom: 22px;
+
+            margin-bottom:
+                22px;
         }
 
 
         .admin-ies-panel-header {
-            display: flex;
 
-            align-items: flex-end;
-            justify-content: space-between;
+            display:
+                flex;
 
-            gap: 20px;
+            align-items:
+                flex-end;
 
-            margin-bottom: 20px;
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+
+            margin-bottom:
+                20px;
         }
 
 
         .admin-ies-panel-header h3 {
-            margin: 4px 0 5px;
 
-            font-size: 20px;
+            margin:
+                4px 0 5px;
+
+            font-size:
+                20px;
         }
 
 
         .admin-ies-panel-header p {
-            color: #746a7d;
 
-            font-size: 12px;
+            color:
+                #746a7d;
+
+            font-size:
+                12px;
+        }
+
+
+        .admin-ies-user-search input {
+
+            min-width:
+                260px;
+
+            min-height:
+                40px;
+
+            padding:
+                8px 10px;
+
+            border:
+                1px solid
+                #ded5e5;
+
+            border-radius:
+                8px;
+
+            background:
+                #ffffff;
         }
 
 
         .admin-ies-filter {
-            display: flex;
-            flex-direction: column;
 
-            gap: 6px;
+            display:
+                flex;
 
-            color: #746a7d;
+            flex-direction:
+                column;
 
-            font-size: 10px;
-            font-weight: 700;
+            gap:
+                5px;
+
+            color:
+                #746a7d;
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
         }
 
 
-        .admin-ies-filter select,
-        .admin-ies-user-search input {
-            min-height: 39px;
+        .admin-ies-filter select {
 
-            padding: 8px 10px;
+            min-height:
+                39px;
 
-            border: 1px solid #ded5e5;
-            border-radius: 8px;
+            padding:
+                7px 9px;
 
-            color: #31203d;
-            background: #ffffff;
+            border:
+                1px solid
+                #ded5e5;
+
+            border-radius:
+                8px;
+
+            background:
+                #ffffff;
         }
 
 
-        .admin-ies-user-search input {
-            min-width: 260px;
+        /* =================================================
+           MENSAGEM
+           ================================================= */
+
+        .admin-ies-message {
+
+            display:
+                none;
+
+            margin-bottom:
+                18px;
+
+            padding:
+                12px 15px;
+
+            border-radius:
+                10px;
+
+            font-size:
+                12px;
         }
 
+
+        .admin-ies-message.visible {
+
+            display:
+                block;
+        }
+
+
+        .admin-ies-message.success {
+
+            border:
+                1px solid
+                #bbf7d0;
+
+            color:
+                #166534;
+
+            background:
+                #f0fdf4;
+        }
+
+
+        .admin-ies-message.error {
+
+            border:
+                1px solid
+                #fecaca;
+
+            color:
+                #991b1b;
+
+            background:
+                #fef2f2;
+        }
+
+
+        /* =================================================
+           USUÁRIOS
+           ================================================= */
+
+        .admin-user-name strong {
+
+            display:
+                block;
+
+            font-size:
+                11px;
+        }
+
+
+        .admin-user-name span {
+
+            display:
+                block;
+
+            margin-top:
+                3px;
+
+            color:
+                #81768a;
+
+            font-size:
+                9px;
+        }
+
+
+        .admin-user-name small {
+
+            display:
+                inline-block;
+
+            margin-top:
+                5px;
+
+            padding:
+                3px 6px;
+
+            border-radius:
+                999px;
+
+            color:
+                #5b21b6;
+
+            background:
+                #ede9fe;
+
+            font-size:
+                8px;
+
+            font-weight:
+                750;
+        }
+
+
+        .admin-user-role-readonly {
+
+            color:
+                #5b21b6;
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
+        }
+
+
+        .admin-user-status {
+
+            display:
+                inline-flex;
+
+            padding:
+                5px 8px;
+
+            border-radius:
+                999px;
+
+            font-size:
+                9px;
+
+            font-weight:
+                750;
+        }
+
+
+        .admin-user-status.active {
+
+            color:
+                #166534;
+
+            background:
+                #dcfce7;
+        }
+
+
+        .admin-user-status.inactive {
+
+            color:
+                #991b1b;
+
+            background:
+                #fee2e2;
+        }
+
+
+        .admin-user-edit {
+
+            min-height:
+                35px;
+
+            padding:
+                7px 12px;
+
+            border:
+                1px solid
+                #ddd6fe;
+
+            border-radius:
+                8px;
+
+            color:
+                #5b21b6;
+
+            background:
+                #f5f3ff;
+
+            font-size:
+                10px;
+
+            font-weight:
+                750;
+
+            cursor:
+                pointer;
+        }
+
+
+        .admin-user-edit:hover {
+
+            background:
+                #ede9fe;
+        }
+
+
+        /* =================================================
+           SOLICITAÇÕES
+           ================================================= */
 
         .admin-ies-request-list {
-            display: grid;
 
-            gap: 14px;
+            display:
+                grid;
+
+            gap:
+                14px;
         }
 
 
         .admin-request-card {
-            padding: 17px;
 
-            border: 1px solid #e8e1ed;
-            border-radius: 12px;
+            padding:
+                17px;
 
-            background: #ffffff;
+            border:
+                1px solid
+                #e8e1ed;
+
+            border-radius:
+                12px;
+
+            background:
+                #ffffff;
         }
 
 
         .admin-request-header {
-            display: flex;
 
-            align-items: flex-start;
-            justify-content: space-between;
+            display:
+                flex;
 
-            gap: 20px;
+            justify-content:
+                space-between;
 
-            margin-bottom: 15px;
+            gap:
+                20px;
+
+            margin-bottom:
+                15px;
         }
 
 
         .admin-request-header h4 {
-            margin: 8px 0 3px;
 
-            font-size: 15px;
+            margin:
+                7px 0 3px;
+
+            font-size:
+                15px;
         }
 
 
         .admin-request-header p,
         .admin-request-header small {
-            color: #7c7284;
 
-            font-size: 10px;
+            color:
+                #7c7284;
+
+            font-size:
+                10px;
         }
 
 
         .admin-request-badges {
-            display: flex;
 
-            flex-wrap: wrap;
+            display:
+                flex;
 
-            gap: 6px;
+            gap:
+                6px;
+
+            flex-wrap:
+                wrap;
         }
 
 
         .admin-status-badge,
         .admin-request-type {
-            display: inline-flex;
 
-            padding: 5px 8px;
+            display:
+                inline-flex;
 
-            border-radius: 999px;
+            padding:
+                5px 8px;
 
-            font-size: 9px;
-            font-weight: 750;
+            border-radius:
+                999px;
+
+            font-size:
+                9px;
+
+            font-weight:
+                750;
         }
 
 
         .admin-request-type {
-            color: #5b21b6;
-            background: #ede9fe;
+
+            color:
+                #5b21b6;
+
+            background:
+                #ede9fe;
         }
 
 
         .status-pendente {
-            color: #92400e;
-            background: #fef3c7;
+
+            color:
+                #92400e;
+
+            background:
+                #fef3c7;
         }
 
 
         .status-aprovado {
-            color: #166534;
-            background: #dcfce7;
+
+            color:
+                #166534;
+
+            background:
+                #dcfce7;
         }
 
 
         .status-rejeitado,
         .status-revogado {
-            color: #991b1b;
-            background: #fee2e2;
+
+            color:
+                #991b1b;
+
+            background:
+                #fee2e2;
         }
 
 
         .status-cancelado {
-            color: #475569;
-            background: #e2e8f0;
+
+            color:
+                #475569;
+
+            background:
+                #e2e8f0;
         }
 
 
         .admin-request-details {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 repeat(
                     3,
-                    minmax(0, 1fr)
+                    minmax(
+                        0,
+                        1fr
+                    )
                 );
 
-            gap: 10px;
+            gap:
+                10px;
         }
 
 
         .admin-request-details > div {
-            padding: 10px;
 
-            border-radius: 8px;
+            padding:
+                10px;
 
-            background: #faf8fc;
+            border-radius:
+                8px;
+
+            background:
+                #faf8fc;
         }
 
 
         .admin-request-details span {
-            display: block;
 
-            margin-bottom: 3px;
+            display:
+                block;
 
-            color: #8b8192;
+            margin-bottom:
+                3px;
 
-            font-size: 9px;
+            color:
+                #8b8192;
+
+            font-size:
+                9px;
         }
 
 
         .admin-request-details strong {
-            font-size: 10px;
 
-            overflow-wrap: anywhere;
-        }
+            font-size:
+                10px;
 
-
-        .admin-request-observation {
-            margin-top: 12px;
-
-            padding: 11px;
-
-            border-radius: 8px;
-
-            background: #fff7ed;
-        }
-
-
-        .admin-request-observation strong {
-            font-size: 10px;
-        }
-
-
-        .admin-request-observation p {
-            margin-top: 4px;
-
-            color: #7c2d12;
-
-            font-size: 10px;
+            overflow-wrap:
+                anywhere;
         }
 
 
         .admin-request-actions {
-            display: flex;
 
-            align-items: flex-end;
-            justify-content: space-between;
+            display:
+                flex;
 
-            gap: 15px;
+            align-items:
+                flex-end;
 
-            margin-top: 15px;
-            padding-top: 15px;
+            justify-content:
+                space-between;
 
-            border-top: 1px solid #eee8f1;
-        }
+            gap:
+                15px;
 
+            margin-top:
+                15px;
 
-        .admin-request-actions label {
-            display: flex;
-            flex-direction: column;
+            padding-top:
+                15px;
 
-            gap: 6px;
-
-            color: #746a7d;
-
-            font-size: 10px;
-            font-weight: 700;
-        }
-
-
-        .admin-request-actions select {
-            min-height: 38px;
-
-            padding: 7px 9px;
-
-            border: 1px solid #ded5e5;
-            border-radius: 8px;
-
-            background: #ffffff;
+            border-top:
+                1px solid
+                #eee8f1;
         }
 
 
         .admin-request-buttons {
-            display: flex;
 
-            gap: 8px;
+            display:
+                flex;
+
+            gap:
+                8px;
         }
 
 
         .admin-reject-button,
-        .admin-approve-button,
-        .admin-user-edit {
-            min-height: 35px;
+        .admin-approve-button {
 
-            padding: 7px 11px;
+            min-height:
+                35px;
 
-            border-radius: 8px;
+            padding:
+                7px 11px;
 
-            font-size: 10px;
-            font-weight: 750;
+            border-radius:
+                8px;
+
+            font-size:
+                10px;
+
+            font-weight:
+                750;
         }
 
 
         .admin-reject-button {
-            border: 1px solid #fecaca;
 
-            color: #b91c1c;
-            background: #fff7f7;
+            border:
+                1px solid
+                #fecaca;
+
+            color:
+                #b91c1c;
+
+            background:
+                #fff7f7;
         }
 
 
-        .admin-approve-button,
-        .admin-user-edit {
-            border: 1px solid #ddd6fe;
+        .admin-approve-button {
 
-            color: #5b21b6;
-            background: #f5f3ff;
+            border:
+                1px solid
+                #ddd6fe;
+
+            color:
+                #5b21b6;
+
+            background:
+                #f5f3ff;
         }
 
 
-        .admin-user-name strong {
-            display: block;
-
-            font-size: 11px;
-        }
-
-
-        .admin-user-name span {
-            display: block;
-
-            margin-top: 3px;
-
-            color: #81768a;
-
-            font-size: 9px;
-        }
-
-
-        .admin-user-name small {
-            display: inline-block;
-
-            margin-top: 5px;
-            padding: 3px 6px;
-
-            border-radius: 999px;
-
-            color: #5b21b6;
-            background: #ede9fe;
-
-            font-size: 8px;
-            font-weight: 750;
-        }
-
-
-        .admin-user-role-readonly {
-            color: #5b21b6;
-
-            font-size: 10px;
-            font-weight: 700;
-        }
-
-
-        .admin-user-status {
-            display: inline-flex;
-
-            padding: 5px 8px;
-
-            border-radius: 999px;
-
-            font-size: 9px;
-            font-weight: 750;
-        }
-
-
-        .admin-user-status.active {
-            color: #166534;
-            background: #dcfce7;
-        }
-
-
-        .admin-user-status.inactive {
-            color: #991b1b;
-            background: #fee2e2;
-        }
-
-
-        /* =============================================
-           MODAL CONTA
-           ============================================= */
+        /* =================================================
+           MODAL DA CONTA
+           ================================================= */
 
         .admin-account-modal {
-            position: fixed;
 
-            inset: 0;
+            position:
+                fixed !important;
 
-            z-index: 2000;
+            inset:
+                0 !important;
 
-            display: flex;
+            z-index:
+                99999 !important;
 
-            align-items: center;
-            justify-content: center;
+            display:
+                flex;
 
-            padding: 20px;
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            padding:
+                20px;
         }
 
 
         .admin-account-modal.hidden {
-            display: none;
+
+            display:
+                none !important;
         }
 
 
         .admin-account-backdrop {
-            position: absolute;
 
-            inset: 0;
+            position:
+                absolute;
+
+            inset:
+                0;
 
             background:
                 rgba(
-                    25,
-                    8,
-                    37,
-                    0.58
+                    24,
+                    7,
+                    36,
+                    .63
                 );
 
-            backdrop-filter: blur(2px);
+            backdrop-filter:
+                blur(3px);
         }
 
 
         .admin-account-card {
-            position: relative;
 
-            z-index: 2;
+            position:
+                relative;
 
-            width: min(680px, 100%);
+            z-index:
+                2;
+
+            width:
+                min(
+                    720px,
+                    100%
+                );
 
             max-height:
                 calc(
                     100vh - 40px
                 );
 
-            overflow-y: auto;
+            overflow-y:
+                auto;
 
-            padding: 24px;
+            padding:
+                26px;
 
-            border: 1px solid #e4dce9;
-            border-radius: 18px;
+            border:
+                1px solid
+                #e5dce9;
 
-            background: #ffffff;
+            border-radius:
+                18px;
+
+            background:
+                #ffffff;
 
             box-shadow:
-                0 28px 75px
+                0 30px 90px
                 rgba(
                     36,
                     0,
                     70,
-                    0.30
+                    .32
                 );
         }
 
 
         .admin-account-header {
-            display: flex;
 
-            align-items: flex-start;
-            justify-content: space-between;
+            display:
+                flex;
 
-            gap: 20px;
+            align-items:
+                flex-start;
 
-            margin-bottom: 22px;
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+
+            margin-bottom:
+                24px;
         }
 
 
-        .admin-account-header h3 {
-            margin: 5px 0;
+        .admin-account-header h2 {
 
-            font-size: 21px;
+            margin:
+                5px 0;
+
+            color:
+                #31203d;
+
+            font-size:
+                23px;
         }
 
 
         .admin-account-header p {
-            color: #7c7284;
 
-            font-size: 11px;
+            color:
+                #7c7284;
+
+            font-size:
+                11px;
         }
 
 
         .admin-account-close {
-            width: 36px;
-            height: 36px;
 
-            border: 1px solid #e5dee9;
-            border-radius: 9px;
+            width:
+                36px;
 
-            color: #756a7c;
-            background: #ffffff;
+            height:
+                36px;
 
-            font-size: 20px;
+            flex:
+                0 0 36px;
+
+            border:
+                1px solid
+                #e5dee9;
+
+            border-radius:
+                9px;
+
+            color:
+                #756a7c;
+
+            background:
+                #ffffff;
+
+            font-size:
+                20px;
+
+            cursor:
+                pointer;
+        }
+
+
+        .admin-account-section {
+
+            margin-top:
+                20px;
+
+            padding:
+                18px;
+
+            border:
+                1px solid
+                #ece5f0;
+
+            border-radius:
+                13px;
+
+            background:
+                #fcfbfd;
+        }
+
+
+        .admin-account-section-title {
+
+            margin-bottom:
+                16px;
+        }
+
+
+        .admin-account-section-title h3 {
+
+            margin-bottom:
+                3px;
+
+            color:
+                #31203d;
+
+            font-size:
+                15px;
+        }
+
+
+        .admin-account-section-title p {
+
+            color:
+                #82768a;
+
+            font-size:
+                10px;
         }
 
 
         .admin-account-grid {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 repeat(
                     2,
-                    minmax(0, 1fr)
+                    minmax(
+                        0,
+                        1fr
+                    )
                 );
 
-            gap: 15px;
+            gap:
+                15px;
         }
 
 
-        .admin-account-grid label {
-            display: flex;
-            flex-direction: column;
+        .admin-account-field {
 
-            gap: 7px;
+            display:
+                flex;
 
-            color: #675d70;
+            flex-direction:
+                column;
 
-            font-size: 10px;
-            font-weight: 750;
+            gap:
+                7px;
         }
 
 
-        .admin-account-grid input,
-        .admin-account-grid select {
-            min-height: 42px;
+        .admin-account-field.full {
 
-            width: 100%;
-
-            padding: 9px 11px;
-
-            border: 1px solid #ded5e5;
-            border-radius: 9px;
-
-            color: #31203d;
-            background: #ffffff;
-
-            font: inherit;
+            grid-column:
+                1 / -1;
         }
 
 
-        .admin-account-grid input:focus,
-        .admin-account-grid select:focus {
-            border-color: #7c3aed;
+        .admin-account-field label {
 
-            outline: none;
+            color:
+                #675d70;
+
+            font-size:
+                10px;
+
+            font-weight:
+                750;
+        }
+
+
+        .admin-account-field input,
+        .admin-account-field select {
+
+            width:
+                100%;
+
+            min-height:
+                43px;
+
+            padding:
+                9px 11px;
+
+            border:
+                1px solid
+                #ded5e5;
+
+            border-radius:
+                9px;
+
+            color:
+                #31203d;
+
+            background:
+                #ffffff;
+
+            font:
+                inherit;
+        }
+
+
+        .admin-account-field input:focus,
+        .admin-account-field select:focus {
+
+            border-color:
+                #7c3aed;
+
+            outline:
+                none;
 
             box-shadow:
                 0 0 0 3px
@@ -3174,111 +3980,175 @@ function adicionarEstilosAdminInstituicao() {
                     124,
                     58,
                     237,
-                    0.10
+                    .10
                 );
         }
 
 
-        .admin-account-grid select:disabled {
-            cursor: not-allowed;
+        .admin-account-field select:disabled {
 
-            background: #f4f2f6;
+            cursor:
+                not-allowed;
+
+            background:
+                #f1eef3;
         }
 
 
-        .admin-account-grid small {
-            color: #918698;
+        .admin-account-help {
 
-            font-size: 8px;
-            line-height: 1.45;
+            color:
+                #918698;
+
+            font-size:
+                9px;
+
+            line-height:
+                1.45;
         }
 
 
         .admin-account-message {
-            display: none;
 
-            margin-top: 17px;
-            padding: 11px 13px;
+            display:
+                none;
 
-            border-radius: 9px;
+            margin-top:
+                17px;
 
-            font-size: 11px;
+            padding:
+                11px 13px;
+
+            border-radius:
+                9px;
+
+            font-size:
+                11px;
         }
 
 
         .admin-account-message:not(:empty) {
-            display: block;
+
+            display:
+                block;
         }
 
 
         .admin-account-message.success {
-            border: 1px solid #bbf7d0;
 
-            color: #166534;
-            background: #f0fdf4;
+            border:
+                1px solid
+                #bbf7d0;
+
+            color:
+                #166534;
+
+            background:
+                #f0fdf4;
         }
 
 
         .admin-account-message.error {
-            border: 1px solid #fecaca;
 
-            color: #991b1b;
-            background: #fef2f2;
+            border:
+                1px solid
+                #fecaca;
+
+            color:
+                #991b1b;
+
+            background:
+                #fef2f2;
         }
 
 
         .admin-account-actions {
-            display: flex;
 
-            justify-content: flex-end;
+            display:
+                flex;
 
-            gap: 9px;
+            justify-content:
+                flex-end;
 
-            margin-top: 20px;
-            padding-top: 18px;
+            gap:
+                9px;
 
-            border-top: 1px solid #ece6ef;
+            margin-top:
+                20px;
+
+            padding-top:
+                18px;
+
+            border-top:
+                1px solid
+                #ece6ef;
         }
 
 
         .admin-account-cancel,
         .admin-account-save {
-            min-height: 39px;
 
-            padding: 8px 14px;
+            min-height:
+                40px;
 
-            border-radius: 8px;
+            padding:
+                8px 15px;
 
-            font-size: 10px;
-            font-weight: 750;
+            border-radius:
+                8px;
+
+            font-size:
+                10px;
+
+            font-weight:
+                750;
+
+            cursor:
+                pointer;
         }
 
 
         .admin-account-cancel {
-            border: 1px solid #ded5e5;
 
-            color: #5e5367;
-            background: #ffffff;
+            border:
+                1px solid
+                #ded5e5;
+
+            color:
+                #5e5367;
+
+            background:
+                #ffffff;
         }
 
 
         .admin-account-save {
-            border: none;
 
-            color: #ffffff;
-            background: #6d28d9;
+            border:
+                none;
+
+            color:
+                #ffffff;
+
+            background:
+                #6d28d9;
         }
 
 
         .admin-account-save:hover {
-            background: #5b21b6;
+
+            background:
+                #5b21b6;
         }
 
 
         .admin-account-save:disabled {
-            cursor: not-allowed;
 
-            opacity: 0.65;
+            cursor:
+                not-allowed;
+
+            opacity:
+                .65;
         }
 
 
@@ -3287,6 +4157,7 @@ function adicionarEstilosAdminInstituicao() {
         ) {
 
             .admin-ies-summary-grid {
+
                 grid-template-columns:
                     repeat(
                         2,
@@ -3299,18 +4170,27 @@ function adicionarEstilosAdminInstituicao() {
 
 
             .admin-ies-panel-header {
-                align-items: stretch;
-                flex-direction: column;
+
+                align-items:
+                    stretch;
+
+                flex-direction:
+                    column;
             }
 
 
             .admin-ies-user-search input {
-                width: 100%;
-                min-width: 0;
+
+                width:
+                    100%;
+
+                min-width:
+                    0;
             }
 
 
             .admin-request-details {
+
                 grid-template-columns:
                     repeat(
                         2,
@@ -3319,12 +4199,6 @@ function adicionarEstilosAdminInstituicao() {
                             1fr
                         )
                     );
-            }
-
-
-            .admin-request-actions {
-                align-items: stretch;
-                flex-direction: column;
             }
 
         }
@@ -3337,18 +4211,31 @@ function adicionarEstilosAdminInstituicao() {
             .admin-ies-summary-grid,
             .admin-request-details,
             .admin-account-grid {
+
                 grid-template-columns:
                     1fr;
             }
 
 
-            .admin-request-header {
-                flex-direction: column;
+            .admin-account-field.full {
+
+                grid-column:
+                    auto;
+            }
+
+
+            .admin-request-header,
+            .admin-request-actions {
+
+                flex-direction:
+                    column;
             }
 
 
             .admin-account-actions {
-                display: grid;
+
+                display:
+                    grid;
 
                 grid-template-columns:
                     1fr 1fr;
@@ -3402,6 +4289,12 @@ async function iniciarAdminInstituicao() {
 
 
         adicionarEstilosAdminInstituicao();
+
+
+        configurarBotaoConfiguracoesAdmin();
+
+
+        criarModalContaAdmin();
 
 
         criarAbaAdministracao();
