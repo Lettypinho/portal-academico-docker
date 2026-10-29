@@ -110,6 +110,52 @@ app.use(
 
 
 // =========================================================
+// EVITAR CACHE ANTIGO DURANTE DESENVOLVIMENTO
+// =========================================================
+
+app.use(
+    (req, res, next) => {
+
+        const caminho =
+            req.path
+                .toLowerCase();
+
+
+        if (
+            caminho.endsWith(
+                ".html"
+            ) ||
+            caminho.endsWith(
+                ".js"
+            ) ||
+            caminho.endsWith(
+                ".css"
+            )
+        ) {
+
+            res.setHeader(
+                "Cache-Control",
+                "no-store, no-cache, must-revalidate, proxy-revalidate"
+            );
+
+            res.setHeader(
+                "Pragma",
+                "no-cache"
+            );
+
+            res.setHeader(
+                "Expires",
+                "0"
+            );
+        }
+
+
+        next();
+    }
+);
+
+
+// =========================================================
 // ARQUIVOS DO FRONTEND
 // =========================================================
 
@@ -118,7 +164,17 @@ app.use(
         path.join(
             __dirname,
             "../public"
-        )
+        ),
+        {
+            etag:
+                false,
+
+            lastModified:
+                false,
+
+            maxAge:
+                0
+        }
     )
 );
 
