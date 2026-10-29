@@ -1,54 +1,28 @@
-let adminAtual =
-    null;
+let adminAtual = null;
 
-let universidadesAdmin =
-    [];
+let universidadesAdmin = [];
 
-let usuariosAdmin =
-    [];
+let usuariosAdmin = [];
 
 
 // =========================================================
-// SEGURANÇA
+// UTILITÁRIOS
 // =========================================================
 
-function escaparHtml(
-    valor
-) {
+function escaparHtml(valor) {
 
     return String(
         valor ?? ""
     )
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 
-// =========================================================
-// PERFIS
-// =========================================================
-
-function nomePerfil(
-    perfil
-) {
+function nomePerfil(perfil) {
 
     const nomes = {
 
@@ -73,42 +47,25 @@ function nomePerfil(
 
 
     return (
-        nomes[
-            perfil
-        ] ||
+        nomes[perfil] ||
         perfil ||
         "-"
     );
 }
 
 
-function perfilComInstituicao(
-    perfil
-) {
+function perfilComInstituicao(perfil) {
 
     return [
-
         "aluno",
-
         "consulta_institucional",
-
         "gestor",
-
         "admin_universidade"
-
-    ].includes(
-        perfil
-    );
+    ].includes(perfil);
 }
 
 
-// =========================================================
-// DATA
-// =========================================================
-
-function formatarData(
-    valor
-) {
+function formatarData(valor) {
 
     if (!valor) {
 
@@ -117,9 +74,7 @@ function formatarData(
 
 
     const data =
-        new Date(
-            valor
-        );
+        new Date(valor);
 
 
     if (
@@ -151,9 +106,7 @@ async function carregarAdmin() {
         );
 
 
-    if (
-        !resposta.ok
-    ) {
+    if (!resposta.ok) {
 
         window.location.href =
             "/login.html";
@@ -194,20 +147,29 @@ async function carregarAdmin() {
     }
 
 
+    atualizarNomeAdmin();
+
+
+    return true;
+}
+
+
+function atualizarNomeAdmin() {
+
     const nome =
         document.getElementById(
             "admin-nome"
         );
 
 
-    if (nome) {
+    if (
+        nome &&
+        adminAtual
+    ) {
 
         nome.textContent =
             adminAtual.nome;
     }
-
-
-    return true;
 }
 
 
@@ -247,9 +209,7 @@ async function carregarResumo() {
         );
 
 
-    if (
-        !resposta.ok
-    ) {
+    if (!resposta.ok) {
 
         throw new Error(
             "Erro ao carregar resumo administrativo"
@@ -270,8 +230,7 @@ async function carregarResumo() {
             "stat-universidades"
         )
         .textContent =
-        resumo
-            .total_universidades;
+        resumo.total_universidades;
 
 
     document
@@ -287,8 +246,7 @@ async function carregarResumo() {
             "stat-usuarios"
         )
         .textContent =
-        resumo
-            .total_usuarios;
+        resumo.total_usuarios;
 
 
     document
@@ -296,8 +254,7 @@ async function carregarResumo() {
             "stat-institucionais"
         )
         .textContent =
-        resumo
-            .usuarios_institucionais;
+        resumo.usuarios_institucionais;
 
 
     document
@@ -305,8 +262,7 @@ async function carregarResumo() {
             "stat-cursos"
         )
         .textContent =
-        resumo
-            .total_cursos;
+        resumo.total_cursos;
 
 
     document
@@ -314,27 +270,24 @@ async function carregarResumo() {
             "stat-alunos"
         )
         .textContent =
-        resumo
-            .total_alunos;
+        resumo.total_alunos;
 
 
     renderizarUniversidadesRecentes(
-        dados
-            .universidades_recentes ||
+        dados.universidades_recentes ||
         []
     );
 
 
     renderizarUsuariosRecentes(
-        dados
-            .usuarios_recentes ||
+        dados.usuarios_recentes ||
         []
     );
 }
 
 
 // =========================================================
-// INSTITUIÇÕES RECENTES
+// RECENTES
 // =========================================================
 
 function renderizarUniversidadesRecentes(
@@ -347,13 +300,7 @@ function renderizarUniversidadesRecentes(
         );
 
 
-    if (
-        !Array.isArray(
-            universidades
-        ) ||
-        universidades.length ===
-            0
-    ) {
+    if (!universidades.length) {
 
         container.innerHTML = `
 
@@ -393,13 +340,11 @@ function renderizarUniversidadesRecentes(
 
                             </strong>
 
-
                             <span>
 
                                 ${escaparHtml(
-                                    universidade
-                                        .organizacao_academica ||
-                                    "Instituição de Ensino Superior"
+                                    universidade.organizacao_academica ||
+                                    "Instituição"
                                 )}
 
                                 •
@@ -439,10 +384,6 @@ function renderizarUniversidadesRecentes(
 }
 
 
-// =========================================================
-// USUÁRIOS RECENTES
-// =========================================================
-
 function renderizarUsuariosRecentes(
     usuarios
 ) {
@@ -453,13 +394,7 @@ function renderizarUsuariosRecentes(
         );
 
 
-    if (
-        !Array.isArray(
-            usuarios
-        ) ||
-        usuarios.length ===
-            0
-    ) {
+    if (!usuarios.length) {
 
         container.innerHTML = `
 
@@ -503,7 +438,6 @@ function renderizarUsuariosRecentes(
 
                             </strong>
 
-
                             <span>
 
                                 ${escaparHtml(
@@ -544,9 +478,7 @@ async function carregarUniversidades() {
         );
 
 
-    if (
-        !resposta.ok
-    ) {
+    if (!resposta.ok) {
 
         throw new Error(
             "Erro ao carregar instituições"
@@ -567,10 +499,6 @@ async function carregarUniversidades() {
 }
 
 
-// =========================================================
-// RENDERIZAR INSTITUIÇÕES
-// =========================================================
-
 function renderizarUniversidades(
     universidades
 ) {
@@ -581,13 +509,7 @@ function renderizarUniversidades(
         );
 
 
-    if (
-        !Array.isArray(
-            universidades
-        ) ||
-        universidades.length ===
-            0
-    ) {
+    if (!universidades.length) {
 
         tbody.innerHTML = `
 
@@ -623,7 +545,6 @@ function renderizarUniversidades(
 
                                 </strong>
 
-
                                 <span>
 
                                     ${escaparHtml(
@@ -647,8 +568,7 @@ function renderizarUniversidades(
                         <td>
 
                             ${escaparHtml(
-                                universidade
-                                    .organizacao_academica ||
+                                universidade.organizacao_academica ||
                                 "-"
                             )}
 
@@ -658,8 +578,7 @@ function renderizarUniversidades(
                         <td>
 
                             ${escaparHtml(
-                                universidade
-                                    .categoria_administrativa ||
+                                universidade.categoria_administrativa ||
                                 "-"
                             )}
 
@@ -768,13 +687,10 @@ function renderizarUniversidades(
 
                         alterarStatusUniversidade(
                             Number(
-                                botao
-                                    .dataset
+                                botao.dataset
                                     .universidadeStatus
                             ),
-
-                            botao
-                                .dataset
+                            botao.dataset
                                 .ativo ===
                             "true"
                         );
@@ -784,10 +700,6 @@ function renderizarUniversidades(
         );
 }
 
-
-// =========================================================
-// STATUS INSTITUIÇÃO
-// =========================================================
 
 async function alterarStatusUniversidade(
     id,
@@ -806,9 +718,7 @@ async function alterarStatusUniversidade(
         );
 
 
-    if (
-        !confirmar
-    ) {
+    if (!confirmar) {
 
         return;
     }
@@ -843,9 +753,7 @@ async function alterarStatusUniversidade(
             );
 
 
-    if (
-        !resposta.ok
-    ) {
+    if (!resposta.ok) {
 
         window.alert(
             dados.erro ||
@@ -857,9 +765,7 @@ async function alterarStatusUniversidade(
 
 
     await Promise.all([
-
         carregarUniversidades(),
-
         carregarResumo()
     ]);
 }
@@ -884,7 +790,6 @@ async function cadastrarUniversidade(
 
     mensagem.textContent =
         "";
-
 
     mensagem.className =
         "admin-message";
@@ -977,9 +882,7 @@ async function cadastrarUniversidade(
             );
 
 
-    if (
-        !resposta.ok
-    ) {
+    if (!resposta.ok) {
 
         mensagem.textContent =
             dados.erro ||
@@ -1012,9 +915,7 @@ async function cadastrarUniversidade(
 
 
     await Promise.all([
-
         carregarUniversidades(),
-
         carregarResumo()
     ]);
 
@@ -1025,10 +926,6 @@ async function cadastrarUniversidade(
     );
 }
 
-
-// =========================================================
-// FORMULÁRIO DE INSTITUIÇÃO
-// =========================================================
 
 function abrirFormularioUniversidade() {
 
@@ -1064,10 +961,6 @@ function fecharFormularioUniversidade() {
 }
 
 
-// =========================================================
-// FILTRAR INSTITUIÇÕES
-// =========================================================
-
 function filtrarUniversidades() {
 
     const busca =
@@ -1086,28 +979,20 @@ function filtrarUniversidades() {
                 universidade => {
 
                     const texto = `
-
                         ${universidade.nome || ""}
-
                         ${universidade.sigla || ""}
-
                         ${universidade.codigo || ""}
-
                         ${universidade.cidade || ""}
-
                         ${universidade.estado || ""}
-
                         ${universidade.organizacao_academica || ""}
-
                         ${universidade.categoria_administrativa || ""}
                     `
                         .toLowerCase();
 
 
-                    return texto
-                        .includes(
-                            busca
-                        );
+                    return texto.includes(
+                        busca
+                    );
                 }
             );
 
@@ -1130,9 +1015,7 @@ async function carregarUsuarios() {
         );
 
 
-    if (
-        !resposta.ok
-    ) {
+    if (!resposta.ok) {
 
         throw new Error(
             "Erro ao carregar usuários"
@@ -1147,10 +1030,6 @@ async function carregarUsuarios() {
     filtrarUsuarios();
 }
 
-
-// =========================================================
-// FILTRAR USUÁRIOS
-// =========================================================
 
 function filtrarUsuarios() {
 
@@ -1178,32 +1057,20 @@ function filtrarUsuarios() {
                 usuario => {
 
                     const texto = `
-
                         ${usuario.nome || ""}
-
                         ${usuario.email || ""}
-
                         ${usuario.universidade || ""}
                     `
                         .toLowerCase();
 
 
-                    const correspondeBusca =
-                        texto
-                            .includes(
-                                busca
-                            );
-
-
-                    const correspondePerfil =
-                        !perfil ||
-                        usuario.perfil ===
-                            perfil;
-
-
                     return (
-                        correspondeBusca &&
-                        correspondePerfil
+                        texto.includes(busca) &&
+                        (
+                            !perfil ||
+                            usuario.perfil ===
+                                perfil
+                        )
                     );
                 }
             );
@@ -1215,10 +1082,6 @@ function filtrarUsuarios() {
 }
 
 
-// =========================================================
-// RENDERIZAR USUÁRIOS
-// =========================================================
-
 function renderizarUsuarios(
     usuarios
 ) {
@@ -1229,13 +1092,7 @@ function renderizarUsuarios(
         );
 
 
-    if (
-        !Array.isArray(
-            usuarios
-        ) ||
-        usuarios.length ===
-            0
-    ) {
+    if (!usuarios.length) {
 
         tbody.innerHTML = `
 
@@ -1255,108 +1112,126 @@ function renderizarUsuarios(
     tbody.innerHTML =
         usuarios
             .map(
-                usuario => `
+                usuario => {
 
-                    <tr>
+                    const proprio =
+                        adminAtual &&
+                        Number(
+                            adminAtual.id
+                        ) ===
+                        Number(
+                            usuario.id
+                        );
 
-                        <td>
 
-                            <div class="admin-table-main">
+                    return `
 
-                                <strong>
+                        <tr>
+
+                            <td>
+
+                                <div class="admin-table-main">
+
+                                    <strong>
+
+                                        ${escaparHtml(
+                                            usuario.nome
+                                        )}
+
+                                    </strong>
+
+                                    <span>
+
+                                        ${escaparHtml(
+                                            usuario.email
+                                        )}
+
+                                        ${
+                                            proprio
+                                                ? " • Você"
+                                                : ""
+                                        }
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="admin-profile-badge">
 
                                     ${escaparHtml(
-                                        usuario.nome
-                                    )}
-
-                                </strong>
-
-
-                                <span>
-
-                                    ${escaparHtml(
-                                        usuario.email
+                                        nomePerfil(
+                                            usuario.perfil
+                                        )
                                     )}
 
                                 </span>
 
-                            </div>
-
-                        </td>
+                            </td>
 
 
-                        <td>
-
-                            <span class="admin-profile-badge">
+                            <td>
 
                                 ${escaparHtml(
-                                    nomePerfil(
-                                        usuario.perfil
-                                    )
+                                    usuario.universidade ||
+                                    "-"
                                 )}
 
-                            </span>
-
-                        </td>
+                            </td>
 
 
-                        <td>
+                            <td>
 
-                            ${escaparHtml(
-                                usuario.universidade ||
-                                "-"
-                            )}
+                                <span
+                                    class="
+                                        admin-status-badge
+                                        ${
+                                            usuario.ativo
+                                                ? "active"
+                                                : "inactive"
+                                        }
+                                    "
+                                >
 
-                        </td>
-
-
-                        <td>
-
-                            <span
-                                class="
-                                    admin-status-badge
                                     ${
                                         usuario.ativo
-                                            ? "active"
-                                            : "inactive"
+                                            ? "Ativo"
+                                            : "Desativado"
                                     }
-                                "
-                            >
 
-                                ${
-                                    usuario.ativo
-                                        ? "Ativo"
-                                        : "Desativado"
-                                }
+                                </span>
 
-                            </span>
-
-                        </td>
+                            </td>
 
 
-                        <td>
+                            <td>
 
-                            ${formatarData(
-                                usuario.criado_em
-                            )}
+                                ${formatarData(
+                                    usuario.criado_em
+                                )}
 
-                        </td>
+                            </td>
 
 
-                        <td>
+                            <td>
 
-                            <button
-                                type="button"
-                                class="admin-table-button"
-                                data-editar-usuario="${usuario.id}"
-                            >
-                                Editar
-                            </button>
+                                <button
+                                    type="button"
+                                    class="admin-table-button"
+                                    data-editar-usuario="${usuario.id}"
+                                >
+                                    Editar
+                                </button>
 
-                        </td>
+                            </td>
 
-                    </tr>
-                `
+                        </tr>
+                    `;
+                }
             )
             .join("");
 
@@ -1374,8 +1249,7 @@ function renderizarUsuarios(
 
                         abrirModalUsuario(
                             Number(
-                                botao
-                                    .dataset
+                                botao.dataset
                                     .editarUsuario
                             )
                         );
@@ -1412,17 +1286,10 @@ function preencherSelectUniversidades() {
                 universidade.ativo
         )
         .sort(
-            (
-                a,
-                b
-            ) =>
-                String(
-                    a.nome
-                )
+            (a, b) =>
+                String(a.nome)
                     .localeCompare(
-                        String(
-                            b.nome
-                        ),
+                        String(b.nome),
                         "pt-BR"
                     )
         )
@@ -1439,13 +1306,10 @@ function preencherSelectUniversidades() {
                     universidade.id;
 
 
-                const sigla =
-                    universidade.sigla ||
-                    universidade.nome;
-
-
                 option.textContent =
-                    `${sigla} - ${universidade.estado}`;
+                    universidade.sigla
+                        ? `${universidade.sigla} — ${universidade.nome}`
+                        : universidade.nome;
 
 
                 select.appendChild(
@@ -1457,32 +1321,33 @@ function preencherSelectUniversidades() {
 
 
 // =========================================================
-// MODAL USUÁRIO
+// MODAL DE USUÁRIO
 // =========================================================
 
-function abrirModalUsuario(
-    id
-) {
+function abrirModalUsuario(id) {
 
     const usuario =
         usuariosAdmin
             .find(
                 item =>
-                    Number(
-                        item.id
-                    ) ===
-                    Number(
-                        id
-                    )
+                    Number(item.id) ===
+                    Number(id)
             );
 
 
-    if (
-        !usuario
-    ) {
+    if (!usuario) {
 
         return;
     }
+
+
+    const proprio =
+        Number(
+            usuario.id
+        ) ===
+        Number(
+            adminAtual.id
+        );
 
 
     document
@@ -1495,26 +1360,44 @@ function abrirModalUsuario(
 
     document
         .getElementById(
-            "modal-usuario-nome"
-        )
-        .textContent =
-        usuario.nome;
-
-
-    document
-        .getElementById(
-            "modal-usuario-email"
-        )
-        .textContent =
-        usuario.email;
-
-
-    document
-        .getElementById(
-            "modal-perfil"
+            "modal-nome"
         )
         .value =
+        usuario.nome ||
+        "";
+
+
+    document
+        .getElementById(
+            "modal-email"
+        )
+        .value =
+        usuario.email ||
+        "";
+
+
+    const campoPerfil =
+        document.getElementById(
+            "modal-perfil"
+        );
+
+
+    campoPerfil.value =
         usuario.perfil;
+
+
+    campoPerfil.disabled =
+        proprio;
+
+
+    document
+        .getElementById(
+            "modal-perfil-aviso"
+        )
+        .textContent =
+        proprio
+            ? "Você não pode remover o próprio acesso de Super Administrador."
+            : "";
 
 
     document
@@ -1529,10 +1412,53 @@ function abrirModalUsuario(
 
     document
         .getElementById(
+            "modal-ativo"
+        )
+        .disabled =
+        proprio;
+
+
+    document
+        .getElementById(
             "modal-universidade"
         )
         .value =
         usuario.universidade_id ||
+        "";
+
+
+    document
+        .getElementById(
+            "grupo-modal-senha-atual"
+        )
+        .classList
+        .toggle(
+            "hidden",
+            !proprio
+        );
+
+
+    document
+        .getElementById(
+            "modal-senha-atual"
+        )
+        .value =
+        "";
+
+
+    document
+        .getElementById(
+            "modal-nova-senha"
+        )
+        .value =
+        "";
+
+
+    document
+        .getElementById(
+            "modal-confirmar-senha"
+        )
+        .value =
         "";
 
 
@@ -1547,7 +1473,6 @@ function abrirModalUsuario(
 
     mensagem.textContent =
         "";
-
 
     mensagem.className =
         "admin-message";
@@ -1646,11 +1571,35 @@ async function salvarUsuario(
 
 
     const id =
-        document
-            .getElementById(
-                "modal-usuario-id"
-            )
-            .value;
+        Number(
+            document
+                .getElementById(
+                    "modal-usuario-id"
+                )
+                .value
+        );
+
+
+    const usuario =
+        usuariosAdmin
+            .find(
+                item =>
+                    Number(item.id) ===
+                    id
+            );
+
+
+    if (!usuario) {
+
+        return;
+    }
+
+
+    const proprio =
+        Number(
+            adminAtual.id
+        ) ===
+        id;
 
 
     const perfil =
@@ -1678,6 +1627,22 @@ async function salvarUsuario(
         "true";
 
 
+    const novaSenha =
+        document
+            .getElementById(
+                "modal-nova-senha"
+            )
+            .value;
+
+
+    const confirmarNovaSenha =
+        document
+            .getElementById(
+                "modal-confirmar-senha"
+            )
+            .value;
+
+
     const mensagem =
         document.getElementById(
             "mensagem-editar-usuario"
@@ -1687,9 +1652,26 @@ async function salvarUsuario(
     mensagem.textContent =
         "";
 
-
     mensagem.className =
         "admin-message";
+
+
+    if (
+        novaSenha !==
+        confirmarNovaSenha
+    ) {
+
+        mensagem.textContent =
+            "A confirmação da nova senha não confere.";
+
+
+        mensagem.classList.add(
+            "error"
+        );
+
+
+        return;
+    }
 
 
     if (
@@ -1712,51 +1694,151 @@ async function salvarUsuario(
     }
 
 
-    const resposta =
-        await fetch(
-            `/api/admin/usuarios/${id}`,
-            {
-                method:
-                    "PATCH",
+    const payload = {
 
-                headers: {
-                    "Content-Type":
-                        "application/json"
-                },
+        nome:
+            document
+                .getElementById(
+                    "modal-nome"
+                )
+                .value
+                .trim(),
 
-                body:
-                    JSON.stringify({
+        email:
+            document
+                .getElementById(
+                    "modal-email"
+                )
+                .value
+                .trim(),
 
-                        perfil,
+        perfil,
 
-                        universidade_id:
-                            universidadeId
-                                ? Number(
-                                    universidadeId
-                                )
-                                : null,
+        universidade_id:
+            universidadeId
+                ? Number(
+                    universidadeId
+                )
+                : null,
 
-                        ativo
-                    })
-            }
+        ativo,
+
+        senha_atual:
+            proprio
+                ? document
+                    .getElementById(
+                        "modal-senha-atual"
+                    )
+                    .value
+                : "",
+
+        nova_senha:
+            novaSenha,
+
+        confirmar_nova_senha:
+            confirmarNovaSenha
+    };
+
+
+    const botao =
+        document.getElementById(
+            "btn-salvar-usuario"
         );
 
 
-    const dados =
-        await resposta
-            .json()
-            .catch(
-                () => ({})
+    botao.disabled =
+        true;
+
+
+    const textoOriginal =
+        botao.textContent;
+
+
+    botao.textContent =
+        "Salvando...";
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                `/api/admin/usuarios/${id}`,
+                {
+                    method:
+                        "PATCH",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+                }
             );
 
 
-    if (
-        !resposta.ok
-    ) {
+        const dados =
+            await resposta
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.erro ||
+                "Erro ao alterar usuário."
+            );
+        }
+
 
         mensagem.textContent =
-            dados.erro ||
-            "Erro ao alterar usuário.";
+            dados.mensagem ||
+            "Usuário atualizado com sucesso.";
+
+
+        mensagem.classList.add(
+            "success"
+        );
+
+
+        if (
+            proprio
+        ) {
+
+            adminAtual.nome =
+                dados.usuario.nome;
+
+
+            adminAtual.email =
+                dados.usuario.email;
+
+
+            atualizarNomeAdmin();
+        }
+
+
+        await Promise.all([
+            carregarUsuarios(),
+            carregarResumo()
+        ]);
+
+
+        window.setTimeout(
+            fecharModalUsuario,
+            700
+        );
+
+
+    } catch (erro) {
+
+        mensagem.textContent =
+            erro.message;
 
 
         mensagem.classList.add(
@@ -1764,31 +1846,15 @@ async function salvarUsuario(
         );
 
 
-        return;
+    } finally {
+
+        botao.disabled =
+            false;
+
+
+        botao.textContent =
+            textoOriginal;
     }
-
-
-    mensagem.textContent =
-        "Usuário atualizado com sucesso.";
-
-
-    mensagem.classList.add(
-        "success"
-    );
-
-
-    await Promise.all([
-
-        carregarUsuarios(),
-
-        carregarResumo()
-    ]);
-
-
-    window.setTimeout(
-        fecharModalUsuario,
-        600
-    );
 }
 
 
@@ -1796,9 +1862,7 @@ async function salvarUsuario(
 // MENU
 // =========================================================
 
-function abrirSecao(
-    nome
-) {
+function abrirSecao(nome) {
 
     document
         .querySelectorAll(
@@ -1833,7 +1897,6 @@ function abrirSecao(
 
 
     window.scrollTo({
-
         top:
             0,
 
@@ -1857,9 +1920,7 @@ function configurarMenu() {
                     () => {
 
                         abrirSecao(
-                            item
-                                .dataset
-                                .section
+                            item.dataset.section
                         );
                     }
                 );
@@ -1879,8 +1940,7 @@ function configurarMenu() {
                     () => {
 
                         abrirSecao(
-                            botao
-                                .dataset
+                            botao.dataset
                                 .goSection
                         );
                     }
@@ -1903,6 +1963,21 @@ function configurarEventos() {
         .addEventListener(
             "click",
             logoutAdmin
+        );
+
+
+    document
+        .getElementById(
+            "btn-admin-configuracoes"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                abrirModalUsuario(
+                    adminAtual.id
+                );
+            }
         );
 
 
@@ -2024,6 +2099,21 @@ function configurarEventos() {
             "click",
             fecharModalUsuario
         );
+
+
+    document.addEventListener(
+        "keydown",
+        evento => {
+
+            if (
+                evento.key ===
+                "Escape"
+            ) {
+
+                fecharModalUsuario();
+            }
+        }
+    );
 }
 
 
@@ -2039,9 +2129,7 @@ async function iniciarAdmin() {
             await carregarAdmin();
 
 
-        if (
-            !autorizado
-        ) {
+        if (!autorizado) {
 
             return;
         }
@@ -2053,11 +2141,8 @@ async function iniciarAdmin() {
 
 
         await Promise.all([
-
             carregarResumo(),
-
             carregarUniversidades(),
-
             carregarUsuarios()
         ]);
 
@@ -2076,9 +2161,7 @@ async function iniciarAdmin() {
             );
 
 
-        if (
-            main
-        ) {
+        if (main) {
 
             main.innerHTML = `
 
@@ -2089,11 +2172,9 @@ async function iniciarAdmin() {
                     </h2>
 
                     <p>
-
                         ${escaparHtml(
                             erro.message
                         )}
-
                     </p>
 
                 </div>
