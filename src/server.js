@@ -8,66 +8,59 @@ const path =
     require("path");
 
 
-// =========================================================
-// ROTAS
-// =========================================================
-
 const universidadesRoutes =
     require(
         "./routes/universidades.routes"
     );
-
 
 const authRoutes =
     require(
         "./routes/auth.routes"
     );
 
-
 const perfilRoutes =
     require(
         "./routes/perfil.routes"
     );
-
 
 const solicitacoesVinculoRoutes =
     require(
         "./routes/solicitacoes-vinculo.routes"
     );
 
-
 const cursosRoutes =
     require(
         "./routes/cursos.routes"
     );
-
 
 const indicadoresRoutes =
     require(
         "./routes/indicadores.routes"
     );
 
-
 const indicadoresInepRoutes =
     require(
         "./routes/indicadores-inep.routes"
     );
-
 
 const adminRoutes =
     require(
         "./routes/admin.routes"
     );
 
-
 const adminInstituicaoRoutes =
     require(
         "./routes/admin-instituicao.routes"
     );
 
+const adminAcessosRoutes =
+    require(
+        "./routes/admin-acessos.routes"
+    );
+
 
 // =========================================================
-// APLICAÇÃO
+// APP
 // =========================================================
 
 const app =
@@ -87,10 +80,6 @@ app.use(
     express.json()
 );
 
-
-// =========================================================
-// SESSÃO
-// =========================================================
 
 app.use(
     session({
@@ -121,7 +110,7 @@ app.use(
 
 
 // =========================================================
-// ARQUIVOS ESTÁTICOS DO FRONTEND
+// ARQUIVOS DO FRONTEND
 // =========================================================
 
 app.use(
@@ -135,7 +124,7 @@ app.use(
 
 
 // =========================================================
-// ROTAS DE AUTENTICAÇÃO
+// AUTENTICAÇÃO
 // =========================================================
 
 app.use(
@@ -195,7 +184,7 @@ app.use(
 
 
 // =========================================================
-// INDICADORES OFICIAIS DO INEP
+// INDICADORES OFICIAIS INEP
 // =========================================================
 
 app.use(
@@ -225,7 +214,17 @@ app.use(
 
 
 // =========================================================
-// TESTE / STATUS DA API
+// CRIAÇÃO DE ACESSOS PELO SUPER ADMIN
+// =========================================================
+
+app.use(
+    "/api/admin-acessos",
+    adminAcessosRoutes
+);
+
+
+// =========================================================
+// STATUS
 // =========================================================
 
 app.get(
