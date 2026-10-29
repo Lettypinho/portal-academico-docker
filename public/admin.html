@@ -28,10 +28,6 @@
 <body class="sia-page admin-page">
 
 
-    <!-- =====================================================
-         TOPO
-         ===================================================== -->
-
     <header class="topbar admin-topbar">
 
         <div class="topbar-brand">
@@ -75,8 +71,6 @@
 
             </div>
 
-
-            <!-- CONFIGURAÇÕES -->
 
             <button
                 id="btn-admin-configuracoes"
@@ -134,10 +128,6 @@
     </header>
 
 
-    <!-- =====================================================
-         MENU
-         ===================================================== -->
-
     <nav class="public-nav admin-menu">
 
         <button
@@ -169,16 +159,10 @@
     </nav>
 
 
-    <!-- =====================================================
-         CONTEÚDO
-         ===================================================== -->
-
     <main class="public-main admin-main">
 
 
-        <!-- =================================================
-             VISÃO GERAL
-             ================================================= -->
+        <!-- VISÃO GERAL -->
 
         <section
             id="visao-geral"
@@ -343,7 +327,6 @@
 
             <div class="admin-dashboard-grid">
 
-
                 <article class="admin-panel">
 
                     <div class="admin-panel-header">
@@ -424,9 +407,7 @@
         </section>
 
 
-        <!-- =================================================
-             INSTITUIÇÕES
-             ================================================= -->
+        <!-- INSTITUIÇÕES -->
 
         <section
             id="universidades"
@@ -498,7 +479,6 @@
                 <form id="form-universidade">
 
                     <div class="admin-form-grid">
-
 
                         <div class="admin-form-group">
 
@@ -708,7 +688,6 @@
                         <thead>
 
                             <tr>
-
                                 <th>Instituição</th>
                                 <th>Tipo</th>
                                 <th>Categoria</th>
@@ -717,7 +696,6 @@
                                 <th>Usuários</th>
                                 <th>Status</th>
                                 <th>Ação</th>
-
                             </tr>
 
                         </thead>
@@ -744,9 +722,7 @@
         </section>
 
 
-        <!-- =================================================
-             USUÁRIOS
-             ================================================= -->
+        <!-- USUÁRIOS -->
 
         <section
             id="usuarios"
@@ -767,7 +743,7 @@
 
                     <p>
                         Consulte contas, crie novos acessos,
-                        altere dados, permissões e senhas.
+                        altere perfis e permissões.
                     </p>
 
                 </div>
@@ -799,16 +775,8 @@
                         Aluno
                     </option>
 
-                    <option value="consulta_institucional">
-                        Consulta institucional
-                    </option>
-
-                    <option value="gestor">
-                        Gestor
-                    </option>
-
-                    <option value="admin_universidade">
-                        Administrador da instituição
+                    <option value="institucional">
+                        Institucional
                     </option>
 
                     <option value="super_admin">
@@ -829,14 +797,12 @@
                         <thead>
 
                             <tr>
-
                                 <th>Usuário</th>
                                 <th>Perfil</th>
                                 <th>Instituição</th>
                                 <th>Status</th>
                                 <th>Cadastrado em</th>
                                 <th>Ação</th>
-
                             </tr>
 
                         </thead>
@@ -865,9 +831,7 @@
     </main>
 
 
-    <!-- =====================================================
-         MODAL EDITAR USUÁRIO
-         ===================================================== -->
+    <!-- MODAL EDITAR USUÁRIO -->
 
     <div
         id="modal-usuario"
@@ -911,7 +875,6 @@
 
             <form id="form-editar-usuario">
 
-
                 <input
                     type="hidden"
                     id="modal-usuario-id"
@@ -919,9 +882,6 @@
 
 
                 <div class="admin-form-grid">
-
-
-                    <!-- NOME -->
 
                     <div class="admin-form-group">
 
@@ -933,14 +893,11 @@
                             type="text"
                             id="modal-nome"
                             maxlength="150"
-                            autocomplete="name"
                             required
                         >
 
                     </div>
 
-
-                    <!-- EMAIL -->
 
                     <div class="admin-form-group">
 
@@ -952,14 +909,11 @@
                             type="email"
                             id="modal-email"
                             maxlength="150"
-                            autocomplete="email"
                             required
                         >
 
                     </div>
 
-
-                    <!-- PERFIL -->
 
                     <div class="admin-form-group">
 
@@ -977,16 +931,8 @@
                                 Aluno
                             </option>
 
-                            <option value="consulta_institucional">
-                                Consulta institucional
-                            </option>
-
-                            <option value="gestor">
-                                Gestor
-                            </option>
-
-                            <option value="admin_universidade">
-                                Administrador da instituição
+                            <option value="institucional">
+                                Institucional
                             </option>
 
                             <option value="super_admin">
@@ -999,8 +945,6 @@
 
                     </div>
 
-
-                    <!-- INSTITUIÇÃO -->
 
                     <div
                         id="grupo-modal-universidade"
@@ -1021,8 +965,6 @@
 
                     </div>
 
-
-                    <!-- STATUS -->
 
                     <div class="admin-form-group">
 
@@ -1048,8 +990,6 @@
                     <div></div>
 
 
-                    <!-- SENHA ATUAL DO SUPER ADMIN -->
-
                     <div
                         id="grupo-modal-senha-atual"
                         class="admin-form-group hidden"
@@ -1063,17 +1003,10 @@
                             type="password"
                             id="modal-senha-atual"
                             maxlength="72"
-                            autocomplete="current-password"
                         >
-
-                        <small>
-                            Obrigatória para alterar a sua própria senha.
-                        </small>
 
                     </div>
 
-
-                    <!-- NOVA SENHA -->
 
                     <div class="admin-form-group">
 
@@ -1086,7 +1019,6 @@
                             id="modal-nova-senha"
                             minlength="6"
                             maxlength="72"
-                            autocomplete="new-password"
                         >
 
                         <small>
@@ -1095,8 +1027,6 @@
 
                     </div>
 
-
-                    <!-- CONFIRMAR SENHA -->
 
                     <div class="admin-form-group">
 
@@ -1109,7 +1039,6 @@
                             id="modal-confirmar-senha"
                             minlength="6"
                             maxlength="72"
-                            autocomplete="new-password"
                         >
 
                     </div>
@@ -1151,13 +1080,9 @@
     </div>
 
 
-    <!-- =====================================================
-         JAVASCRIPT
-         ===================================================== -->
+    <script src="/js/admin.js?v=5"></script>
 
-    <script src="/js/admin.js?v=4"></script>
-
-    <script src="/js/admin-acessos.js?v=2"></script>
+    <script src="/js/admin-acessos.js?v=4"></script>
 
 </body>
 

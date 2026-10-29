@@ -1,8 +1,6 @@
 // =========================================================
-// SIA
-// ACESSOS + PERMISSÕES DO SUPER ADMIN
+// SIA - ACESSOS + PERMISSÕES
 // =========================================================
-
 
 let universidadesNovoAcesso =
     [];
@@ -15,6 +13,25 @@ let usuarioPermissoesEdicao =
 
 let funcaoAbrirModalUsuarioOriginal =
     null;
+
+
+// =========================================================
+// UTILITÁRIO
+// =========================================================
+
+function escaparHtmlPermissao(
+    valor
+) {
+
+    return String(
+        valor ?? ""
+    )
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
 
 
 // =========================================================
@@ -31,7 +48,9 @@ async function iniciarNovoAcessoAdmin() {
             );
 
 
-        if (!resposta.ok) {
+        if (
+            !resposta.ok
+        ) {
 
             return;
         }
@@ -55,15 +74,11 @@ async function iniciarNovoAcessoAdmin() {
 
         criarEstilosPermissoes();
 
-
         criarBotaoNovoAcesso();
-
 
         criarModalNovoAcesso();
 
-
         criarSecaoPermissoesEdicao();
-
 
         integrarModalEdicaoUsuario();
 
@@ -71,7 +86,7 @@ async function iniciarNovoAcessoAdmin() {
     } catch (erro) {
 
         console.error(
-            "Erro ao iniciar criação de acessos:",
+            "Erro ao iniciar acessos:",
             erro
         );
     }
@@ -79,7 +94,7 @@ async function iniciarNovoAcessoAdmin() {
 
 
 // =========================================================
-// CATÁLOGO DE PERMISSÕES
+// CATÁLOGO
 // =========================================================
 
 async function carregarCatalogoPermissoes() {
@@ -98,7 +113,9 @@ async function carregarCatalogoPermissoes() {
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             dados.erro ||
@@ -117,7 +134,7 @@ async function carregarCatalogoPermissoes() {
 
 
 // =========================================================
-// AGRUPAR PERMISSÕES
+// AGRUPAR
 // =========================================================
 
 function agruparPermissoes() {
@@ -164,7 +181,7 @@ function agruparPermissoes() {
 
 
 // =========================================================
-// RENDERIZAR CHECKBOXES
+// RENDER
 // =========================================================
 
 function renderizarPermissoes(
@@ -173,7 +190,9 @@ function renderizarPermissoes(
     bloqueado = false
 ) {
 
-    if (!container) {
+    if (
+        !container
+    ) {
 
         return;
     }
@@ -187,22 +206,6 @@ function renderizarPermissoes(
 
     const grupos =
         agruparPermissoes();
-
-
-    if (
-        grupos.size ===
-        0
-    ) {
-
-        container.innerHTML = `
-
-            <div class="permission-empty">
-                Nenhuma permissão cadastrada.
-            </div>
-        `;
-
-        return;
-    }
 
 
     container.innerHTML =
@@ -285,49 +288,16 @@ function renderizarPermissoes(
 
 
 // =========================================================
-// HTML SEGURO
-// =========================================================
-
-function escaparHtmlPermissao(
-    valor
-) {
-
-    return String(
-        valor ??
-        ""
-    )
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-}
-
-
-// =========================================================
-// OBTER CHECKBOXES MARCADOS
+// MARCADAS
 // =========================================================
 
 function obterPermissoesMarcadas(
     container
 ) {
 
-    if (!container) {
+    if (
+        !container
+    ) {
 
         return [];
     }
@@ -346,16 +316,14 @@ function obterPermissoesMarcadas(
 }
 
 
-// =========================================================
-// MARCAR / LIMPAR TODAS
-// =========================================================
-
 function alterarTodasPermissoes(
     container,
     marcado
 ) {
 
-    if (!container) {
+    if (
+        !container
+    ) {
 
         return;
     }
@@ -376,52 +344,25 @@ function alterarTodasPermissoes(
 
 
 // =========================================================
-// PERMISSÕES PADRÃO DOS PERFIS ANTIGOS
-//
-// Somente durante a transição.
+// PADRÃO DO PERFIL
 // =========================================================
 
 function permissoesPadraoPerfil(
     perfil
 ) {
 
-    const todas =
-        catalogoPermissoesAdmin
-            .map(
-                permissao =>
-                    permissao.codigo
-            );
+    if (
+        perfil ===
+        "institucional"
+    ) {
 
-
-    const padroes = {
-
-        publico:
-            [],
-
-        aluno:
-            [],
-
-        consulta_institucional: [
+        return [
             "VISUALIZAR_DADOS_INSTITUCIONAIS"
-        ],
-
-        gestor: [
-            "VISUALIZAR_DADOS_INSTITUCIONAIS",
-            "EDITAR_DADOS_INSTITUCIONAIS",
-            "GERENCIAR_CURSOS",
-            "GERENCIAR_DISCIPLINAS",
-            "GERENCIAR_ALUNOS"
-        ],
-
-        admin_universidade:
-            todas
-    };
+        ];
+    }
 
 
-    return (
-        padroes[perfil] ||
-        []
-    );
+    return [];
 }
 
 
@@ -447,7 +388,9 @@ function criarBotaoNovoAcesso() {
         );
 
 
-    if (!cabecalho) {
+    if (
+        !cabecalho
+    ) {
 
         return;
     }
@@ -540,8 +483,7 @@ function criarModalNovoAcesso() {
                     </h2>
 
                     <p>
-                        Crie a conta e escolha individualmente
-                        o que este usuário poderá fazer.
+                        Crie uma conta e defina suas permissões.
                     </p>
 
                 </div>
@@ -629,23 +571,15 @@ function criarModalNovoAcesso() {
                             </option>
 
                             <option value="publico">
-                                Usuário público
+                                Público
                             </option>
 
                             <option value="aluno">
                                 Aluno
                             </option>
 
-                            <option value="consulta_institucional">
-                                Consulta institucional
-                            </option>
-
-                            <option value="gestor">
-                                Gestor
-                            </option>
-
-                            <option value="admin_universidade">
-                                Administrador da instituição
+                            <option value="institucional">
+                                Institucional
                             </option>
 
                         </select>
@@ -698,10 +632,6 @@ function criarModalNovoAcesso() {
                 </div>
 
 
-                <!-- =========================================
-                     PERMISSÕES
-                     ========================================= -->
-
                 <section class="permission-editor">
 
                     <div class="permission-editor-header">
@@ -713,12 +643,11 @@ function criarModalNovoAcesso() {
                             </span>
 
                             <h3>
-                                O que este usuário poderá fazer?
+                                Permissões individuais
                             </h3>
 
                             <p>
-                                O perfil identifica o tipo de usuário.
-                                As permissões definem as ações liberadas.
+                                Defina o que esta conta poderá fazer.
                             </p>
 
                         </div>
@@ -749,21 +678,6 @@ function criarModalNovoAcesso() {
                         id="permissoes-novo-acesso"
                         class="permission-list"
                     ></div>
-
-
-                    <div class="permission-note">
-
-                        <strong>
-                            Importante
-                        </strong>
-
-                        <span>
-                            Permissões institucionais dependem
-                            de um vínculo com uma instituição para
-                            que possam ser utilizadas naquele contexto.
-                        </span>
-
-                    </div>
 
                 </section>
 
@@ -906,16 +820,10 @@ function criarModalNovoAcesso() {
 
 
 // =========================================================
-// ABRIR NOVO ACESSO
+// ABRIR
 // =========================================================
 
 async function abrirNovoAcesso() {
-
-    const modal =
-        document.getElementById(
-            "modal-novo-acesso"
-        );
-
 
     document
         .getElementById(
@@ -932,6 +840,15 @@ async function abrirNovoAcesso() {
         "";
 
 
+    if (
+        universidadesNovoAcesso.length ===
+        0
+    ) {
+
+        await carregarInstituicoesNovoAcesso();
+    }
+
+
     atualizarInstituicaoNovoAcesso();
 
 
@@ -942,24 +859,16 @@ async function abrirNovoAcesso() {
     );
 
 
-    if (
-        universidadesNovoAcesso.length ===
-        0
-    ) {
-
-        await carregarInstituicoesNovoAcesso();
-    }
-
-
-    modal.classList.remove(
-        "hidden"
-    );
+    document
+        .getElementById(
+            "modal-novo-acesso"
+        )
+        .classList
+        .remove(
+            "hidden"
+        );
 }
 
-
-// =========================================================
-// FECHAR NOVO ACESSO
-// =========================================================
 
 function fecharNovoAcesso() {
 
@@ -975,7 +884,7 @@ function fecharNovoAcesso() {
 
 
 // =========================================================
-// INSTITUIÇÕES
+// IES
 // =========================================================
 
 async function carregarInstituicoesNovoAcesso() {
@@ -986,7 +895,9 @@ async function carregarInstituicoesNovoAcesso() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Não foi possível carregar as instituições"
@@ -1054,10 +965,6 @@ async function carregarInstituicoesNovoAcesso() {
 }
 
 
-// =========================================================
-// INSTITUIÇÃO DO NOVO ACESSO
-// =========================================================
-
 function atualizarInstituicaoNovoAcesso() {
 
     const perfil =
@@ -1080,42 +987,25 @@ function atualizarInstituicaoNovoAcesso() {
         );
 
 
-    if (
-        !grupo ||
-        !campo
-    ) {
-
-        return;
-    }
-
-
-    const exigeInstituicao = [
-
-        "aluno",
-
-        "consulta_institucional",
-
-        "gestor",
-
-        "admin_universidade"
-
-    ].includes(
-        perfil
-    );
+    const exige =
+        perfil ===
+            "aluno" ||
+        perfil ===
+            "institucional";
 
 
     grupo.classList.toggle(
         "hidden",
-        !exigeInstituicao
+        !exige
     );
 
 
     campo.required =
-        exigeInstituicao;
+        exige;
 
 
     if (
-        !exigeInstituicao
+        !exige
     ) {
 
         campo.value =
@@ -1125,7 +1015,7 @@ function atualizarInstituicaoNovoAcesso() {
 
 
 // =========================================================
-// APLICAR PADRÃO DO PERFIL
+// PADRÃO
 // =========================================================
 
 function aplicarPermissoesPadraoNovoAcesso() {
@@ -1146,13 +1036,10 @@ function aplicarPermissoesPadraoNovoAcesso() {
         );
 
 
-    const container =
-        document.getElementById(
+    document
+        .getElementById(
             "permissoes-novo-acesso"
-        );
-
-
-    container
+        )
         .querySelectorAll(
             'input[type="checkbox"]'
         )
@@ -1169,7 +1056,7 @@ function aplicarPermissoesPadraoNovoAcesso() {
 
 
 // =========================================================
-// SALVAR PERMISSÕES VIA API
+// SALVAR PERMISSÕES
 // =========================================================
 
 async function salvarPermissoesUsuario(
@@ -1205,7 +1092,9 @@ async function salvarPermissoesUsuario(
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             dados.erro ||
@@ -1219,7 +1108,7 @@ async function salvarPermissoesUsuario(
 
 
 // =========================================================
-// SALVAR NOVO ACESSO
+// CRIAR ACESSO
 // =========================================================
 
 async function salvarNovoAcesso(
@@ -1242,12 +1131,20 @@ async function salvarNovoAcesso(
         "admin-message";
 
 
-    const perfil =
+    const perfilInterface =
         document
             .getElementById(
                 "novo-acesso-perfil"
             )
             .value;
+
+
+    // Compatibilidade interna temporária.
+    const perfilBackend =
+        perfilInterface ===
+        "institucional"
+            ? "gestor"
+            : perfilInterface;
 
 
     const universidade =
@@ -1291,7 +1188,8 @@ async function salvarNovoAcesso(
                 )
                 .value,
 
-        perfil,
+        perfil:
+            perfilBackend,
 
         universidade_id:
             universidade
@@ -1354,7 +1252,9 @@ async function salvarNovoAcesso(
             await resposta.json();
 
 
-        if (!resposta.ok) {
+        if (
+            !resposta.ok
+        ) {
 
             throw new Error(
                 dados.erro ||
@@ -1363,45 +1263,14 @@ async function salvarNovoAcesso(
         }
 
 
-        // =================================================
-        // SALVAR PERMISSÕES DA CONTA CRIADA
-        // =================================================
-
-        try {
-
-            await salvarPermissoesUsuario(
-                dados.usuario.id,
-                permissoes
-            );
-
-
-        } catch (erroPermissao) {
-
-            mensagem.textContent =
-                "A conta foi criada, mas ocorreu um erro ao salvar as permissões: " +
-                erroPermissao.message;
-
-
-            mensagem.classList.add(
-                "error"
-            );
-
-
-            if (
-                typeof carregarUsuarios ===
-                "function"
-            ) {
-
-                await carregarUsuarios();
-            }
-
-
-            return;
-        }
+        await salvarPermissoesUsuario(
+            dados.usuario.id,
+            permissoes
+        );
 
 
         mensagem.textContent =
-            "Acesso e permissões criados com sucesso.";
+            "Acesso criado com sucesso.";
 
 
         mensagem.classList.add(
@@ -1457,7 +1326,7 @@ async function salvarNovoAcesso(
 
 
 // =========================================================
-// SEÇÃO DE PERMISSÕES NO MODAL EDITAR USUÁRIO
+// PERMISSÕES DO MODAL DE EDIÇÃO
 // =========================================================
 
 function criarSecaoPermissoesEdicao() {
@@ -1556,13 +1425,7 @@ function criarSecaoPermissoesEdicao() {
         <div
             id="permissoes-edicao-usuario"
             class="permission-list"
-        >
-
-            <div class="permission-empty">
-                Selecione um usuário.
-            </div>
-
-        </div>
+        ></div>
 
 
         <div
@@ -1648,7 +1511,7 @@ function criarSecaoPermissoesEdicao() {
 
 
 // =========================================================
-// INTEGRAR COM O MODAL EXISTENTE DO ADMIN.JS
+// INTERCEPTAR ABERTURA DO MODAL
 // =========================================================
 
 function integrarModalEdicaoUsuario() {
@@ -1657,10 +1520,6 @@ function integrarModalEdicaoUsuario() {
         typeof abrirModalUsuario !==
         "function"
     ) {
-
-        console.warn(
-            "Função abrirModalUsuario não encontrada."
-        );
 
         return;
     }
@@ -1696,7 +1555,7 @@ function integrarModalEdicaoUsuario() {
 
 
 // =========================================================
-// CARREGAR PERMISSÕES PARA EDIÇÃO
+// CARREGAR PERMISSÕES
 // =========================================================
 
 async function carregarPermissoesEdicao(
@@ -1740,14 +1599,6 @@ async function carregarPermissoesEdicao(
         "admin-message";
 
 
-    container.innerHTML = `
-
-        <div class="permission-empty">
-            Carregando permissões...
-        </div>
-    `;
-
-
     try {
 
         const resposta =
@@ -1760,7 +1611,9 @@ async function carregarPermissoesEdicao(
             await resposta.json();
 
 
-        if (!resposta.ok) {
+        if (
+            !resposta.ok
+        ) {
 
             throw new Error(
                 dados.erro ||
@@ -1786,14 +1639,14 @@ async function carregarPermissoesEdicao(
         );
 
 
+        aviso.classList.remove(
+            "hidden"
+        );
+
+
         if (
             automaticas
         ) {
-
-            aviso.classList.remove(
-                "hidden"
-            );
-
 
             aviso.innerHTML = `
 
@@ -1802,9 +1655,7 @@ async function carregarPermissoesEdicao(
                 </strong>
 
                 <span>
-                    Este perfil possui todas as permissões
-                    automaticamente. Elas não podem ser
-                    removidas individualmente.
+                    Este perfil possui todas as permissões automaticamente.
                 </span>
             `;
 
@@ -1821,20 +1672,15 @@ async function carregarPermissoesEdicao(
 
         } else {
 
-            aviso.classList.remove(
-                "hidden"
-            );
-
-
             aviso.innerHTML = `
 
                 <strong>
-                    Permissões independentes do perfil
+                    Permissões individuais
                 </strong>
 
                 <span>
-                    O Super Administrador pode conceder ou
-                    remover estas permissões individualmente.
+                    O perfil identifica o usuário.
+                    As permissões determinam o que ele pode fazer.
                 </span>
             `;
 
@@ -1852,14 +1698,6 @@ async function carregarPermissoesEdicao(
 
     } catch (erro) {
 
-        container.innerHTML = `
-
-            <div class="permission-empty">
-                Não foi possível carregar as permissões.
-            </div>
-        `;
-
-
         mensagem.textContent =
             erro.message;
 
@@ -1872,20 +1710,13 @@ async function carregarPermissoesEdicao(
 
 
 // =========================================================
-// SALVAR PERMISSÕES DE USUÁRIO EXISTENTE
+// SALVAR EDIÇÃO
 // =========================================================
 
 async function salvarPermissoesEdicao() {
 
     if (
-        !usuarioPermissoesEdicao
-    ) {
-
-        return;
-    }
-
-
-    if (
+        !usuarioPermissoesEdicao ||
         usuarioPermissoesEdicao
             .perfil ===
         "super_admin"
@@ -1895,9 +1726,11 @@ async function salvarPermissoesEdicao() {
     }
 
 
-    const container =
-        document.getElementById(
-            "permissoes-edicao-usuario"
+    const permissoes =
+        obterPermissoesMarcadas(
+            document.getElementById(
+                "permissoes-edicao-usuario"
+            )
         );
 
 
@@ -1911,19 +1744,6 @@ async function salvarPermissoesEdicao() {
         document.getElementById(
             "btn-salvar-permissoes-edicao"
         );
-
-
-    const permissoes =
-        obterPermissoesMarcadas(
-            container
-        );
-
-
-    mensagem.textContent =
-        "";
-
-    mensagem.className =
-        "admin-message";
 
 
     const textoOriginal =
@@ -1950,9 +1770,8 @@ async function salvarPermissoesEdicao() {
             "Permissões atualizadas com sucesso.";
 
 
-        mensagem.classList.add(
-            "success"
-        );
+        mensagem.className =
+            "admin-message success";
 
 
     } catch (erro) {
@@ -1961,9 +1780,8 @@ async function salvarPermissoesEdicao() {
             erro.message;
 
 
-        mensagem.classList.add(
-            "error"
-        );
+        mensagem.className =
+            "admin-message error";
 
 
     } finally {
@@ -2007,398 +1825,140 @@ function criarEstilosPermissoes() {
     style.textContent = `
 
         .permissions-modal-card {
-
-            width:
-                min(
-                    880px,
-                    calc(
-                        100vw - 30px
-                    )
-                );
-
-            max-height:
-                calc(
-                    100vh - 30px
-                );
-
-            overflow-y:
-                auto;
+            width: min(880px, calc(100vw - 30px));
+            max-height: calc(100vh - 30px);
+            overflow-y: auto;
         }
-
 
         .permission-editor {
-
-            margin-top:
-                20px;
-
-            padding:
-                18px;
-
-            border:
-                1px solid
-                #e7dfea;
-
-            border-radius:
-                13px;
-
-            background:
-                #faf8fc;
+            margin-top: 20px;
+            padding: 18px;
+            border: 1px solid #e7dfea;
+            border-radius: 13px;
+            background: #faf8fc;
         }
-
 
         .permission-editor-edit {
-
-            margin-bottom:
-                20px;
+            margin-bottom: 20px;
         }
-
 
         .permission-editor-header {
-
-            display:
-                flex;
-
-            align-items:
-                flex-start;
-
-            justify-content:
-                space-between;
-
-            gap:
-                15px;
-
-            margin-bottom:
-                16px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 16px;
         }
-
 
         .permission-editor-header h3 {
-
-            margin:
-                4px 0;
-
-            color:
-                #31203d;
-
-            font-size:
-                16px;
+            margin: 4px 0;
+            font-size: 16px;
         }
-
 
         .permission-editor-header p {
-
-            color:
-                #7c7284;
-
-            font-size:
-                10px;
-
-            line-height:
-                1.5;
+            color: #7c7284;
+            font-size: 10px;
         }
-
 
         .permission-bulk-actions {
-
-            display:
-                flex;
-
-            gap:
-                7px;
-
-            flex-shrink:
-                0;
+            display: flex;
+            gap: 7px;
         }
-
 
         .permission-bulk-actions button {
-
-            min-height:
-                33px;
-
-            padding:
-                6px 9px;
-
-            border:
-                1px solid
-                #ddd6fe;
-
-            border-radius:
-                7px;
-
-            color:
-                #5b21b6;
-
-            background:
-                #ffffff;
-
-            font-size:
-                9px;
-
-            font-weight:
-                700;
-
-            cursor:
-                pointer;
+            padding: 7px 10px;
+            border: 1px solid #ddd6fe;
+            border-radius: 7px;
+            color: #5b21b6;
+            background: white;
+            font-size: 9px;
+            font-weight: 700;
         }
-
 
         .permission-list {
-
-            display:
-                grid;
-
-            gap:
-                13px;
+            display: grid;
+            gap: 13px;
         }
-
 
         .permission-category {
-
-            overflow:
-                hidden;
-
-            border:
-                1px solid
-                #ece5f0;
-
-            border-radius:
-                10px;
-
-            background:
-                #ffffff;
+            overflow: hidden;
+            border: 1px solid #ece5f0;
+            border-radius: 10px;
+            background: white;
         }
-
 
         .permission-category-title {
-
-            padding:
-                9px 11px;
-
-            border-bottom:
-                1px solid
-                #eee8f1;
-
-            color:
-                #5b21b6;
-
-            background:
-                #faf5ff;
-
-            font-size:
-                10px;
-
-            font-weight:
-                800;
+            padding: 9px 11px;
+            border-bottom: 1px solid #eee8f1;
+            color: #5b21b6;
+            background: #faf5ff;
+            font-size: 10px;
+            font-weight: 800;
         }
-
 
         .permission-options {
-
-            display:
-                grid;
-
-            grid-template-columns:
-                repeat(
-                    2,
-                    minmax(
-                        0,
-                        1fr
-                    )
-                );
-
-            gap:
-                1px;
-
-            background:
-                #f0ebf3;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1px;
+            background: #f0ebf3;
         }
-
 
         .permission-option {
-
-            min-height:
-                72px;
-
-            display:
-                flex;
-
-            align-items:
-                flex-start;
-
-            gap:
-                10px;
-
-            padding:
-                12px;
-
-            background:
-                #ffffff;
-
-            cursor:
-                pointer;
+            min-height: 72px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: white;
         }
-
-
-        .permission-option:hover {
-
-            background:
-                #fcfaff;
-        }
-
 
         .permission-option input {
-
-            width:
-                17px;
-
-            height:
-                17px;
-
-            flex:
-                0 0 17px;
-
-            margin-top:
-                2px;
-
-            accent-color:
-                #6d28d9;
+            width: 17px;
+            height: 17px;
+            margin-top: 2px;
+            accent-color: #6d28d9;
         }
-
 
         .permission-option strong {
-
-            display:
-                block;
-
-            margin-bottom:
-                4px;
-
-            color:
-                #31203d;
-
-            font-size:
-                10px;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 10px;
         }
-
 
         .permission-option small {
-
-            display:
-                block;
-
-            color:
-                #81768a;
-
-            font-size:
-                9px;
-
-            line-height:
-                1.45;
+            display: block;
+            color: #81768a;
+            font-size: 9px;
+            line-height: 1.45;
         }
-
 
         .permission-note {
-
-            display:
-                flex;
-
-            flex-direction:
-                column;
-
-            gap:
-                3px;
-
-            margin-top:
-                14px;
-
-            padding:
-                10px 12px;
-
-            border:
-                1px solid
-                #e9d5ff;
-
-            border-radius:
-                8px;
-
-            color:
-                #6b21a8;
-
-            background:
-                #faf5ff;
-
-            font-size:
-                9px;
-
-            line-height:
-                1.45;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-top: 14px;
+            padding: 10px 12px;
+            border: 1px solid #e9d5ff;
+            border-radius: 8px;
+            color: #6b21a8;
+            background: #faf5ff;
+            font-size: 9px;
         }
-
-
-        .permission-note strong {
-
-            font-size:
-                10px;
-        }
-
 
         .permission-save-area {
-
-            display:
-                flex;
-
-            justify-content:
-                flex-end;
-
-            margin-top:
-                14px;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 14px;
         }
 
-
-        .permission-empty {
-
-            padding:
-                15px;
-
-            border:
-                1px dashed
-                #ddd5e2;
-
-            border-radius:
-                8px;
-
-            color:
-                #81768a;
-
-            background:
-                #ffffff;
-
-            font-size:
-                10px;
-
-            text-align:
-                center;
-        }
-
-
-        @media (
-            max-width: 700px
-        ) {
+        @media (max-width: 700px) {
 
             .permission-editor-header {
-
-                flex-direction:
-                    column;
+                flex-direction: column;
             }
-
 
             .permission-options {
-
-                grid-template-columns:
-                    1fr;
+                grid-template-columns: 1fr;
             }
-
         }
     `;
 
@@ -2408,9 +1968,5 @@ function criarEstilosPermissoes() {
     );
 }
 
-
-// =========================================================
-// INICIAR
-// =========================================================
 
 iniciarNovoAcessoAdmin();

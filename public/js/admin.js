@@ -6,23 +6,130 @@ let usuariosAdmin = [];
 
 
 // =========================================================
+// PERFIS INSTITUCIONAIS ANTIGOS
+// COMPATIBILIDADE TEMPORÁRIA
+// =========================================================
+
+const perfisInstitucionaisLegados = [
+    "consulta_institucional",
+    "gestor",
+    "admin_universidade",
+    "institucional"
+];
+
+
+function ehPerfilInstitucional(
+    perfil
+) {
+
+    return perfisInstitucionaisLegados
+        .includes(
+            perfil
+        );
+}
+
+
+function perfilParaInterface(
+    perfil
+) {
+
+    if (
+        ehPerfilInstitucional(
+            perfil
+        )
+    ) {
+
+        return "institucional";
+    }
+
+
+    return perfil;
+}
+
+
+function perfilParaBackend(
+    perfilInterface,
+    usuarioAnterior = null
+) {
+
+    if (
+        perfilInterface !==
+        "institucional"
+    ) {
+
+        return perfilInterface;
+    }
+
+
+    // Se já era um perfil institucional antigo,
+    // preserva internamente durante a transição.
+
+    if (
+        usuarioAnterior &&
+        ehPerfilInstitucional(
+            usuarioAnterior.perfil
+        ) &&
+        usuarioAnterior.perfil !==
+            "institucional"
+    ) {
+
+        return usuarioAnterior.perfil;
+    }
+
+
+    // Novos institucionais utilizam "gestor"
+    // internamente até a migração definitiva das rotas.
+    return "gestor";
+}
+
+
+// =========================================================
 // UTILITÁRIOS
 // =========================================================
 
-function escaparHtml(valor) {
+function escaparHtml(
+    valor
+) {
 
     return String(
         valor ?? ""
     )
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
-function nomePerfil(perfil) {
+function nomePerfil(
+    perfil
+) {
+
+    if (
+        ehPerfilInstitucional(
+            perfil
+        )
+    ) {
+
+        return "Institucional";
+    }
+
 
     const nomes = {
 
@@ -31,15 +138,6 @@ function nomePerfil(perfil) {
 
         aluno:
             "Aluno",
-
-        consulta_institucional:
-            "Consulta institucional",
-
-        gestor:
-            "Gestor",
-
-        admin_universidade:
-            "Administrador da instituição",
 
         super_admin:
             "Super administrador"
@@ -54,18 +152,25 @@ function nomePerfil(perfil) {
 }
 
 
-function perfilComInstituicao(perfil) {
+function perfilComInstituicao(
+    perfil
+) {
 
-    return [
-        "aluno",
-        "consulta_institucional",
-        "gestor",
-        "admin_universidade"
-    ].includes(perfil);
+    return (
+        perfil ===
+            "aluno" ||
+        perfil ===
+            "institucional" ||
+        ehPerfilInstitucional(
+            perfil
+        )
+    );
 }
 
 
-function formatarData(valor) {
+function formatarData(
+    valor
+) {
 
     if (!valor) {
 
@@ -74,7 +179,9 @@ function formatarData(valor) {
 
 
     const data =
-        new Date(valor);
+        new Date(
+            valor
+        );
 
 
     if (
@@ -106,7 +213,9 @@ async function carregarAdmin() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         window.location.href =
             "/login.html";
@@ -209,7 +318,9 @@ async function carregarResumo() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Erro ao carregar resumo administrativo"
@@ -300,7 +411,13 @@ function renderizarUniversidadesRecentes(
         );
 
 
-    if (!universidades.length) {
+    if (
+        !Array.isArray(
+            universidades
+        ) ||
+        universidades.length ===
+        0
+    ) {
 
         container.innerHTML = `
 
@@ -343,7 +460,8 @@ function renderizarUniversidadesRecentes(
                             <span>
 
                                 ${escaparHtml(
-                                    universidade.organizacao_academica ||
+                                    universidade
+                                        .organizacao_academica ||
                                     "Instituição"
                                 )}
 
@@ -394,7 +512,13 @@ function renderizarUsuariosRecentes(
         );
 
 
-    if (!usuarios.length) {
+    if (
+        !Array.isArray(
+            usuarios
+        ) ||
+        usuarios.length ===
+        0
+    ) {
 
         container.innerHTML = `
 
@@ -478,7 +602,9 @@ async function carregarUniversidades() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Erro ao carregar instituições"
@@ -509,7 +635,13 @@ function renderizarUniversidades(
         );
 
 
-    if (!universidades.length) {
+    if (
+        !Array.isArray(
+            universidades
+        ) ||
+        universidades.length ===
+        0
+    ) {
 
         tbody.innerHTML = `
 
@@ -568,7 +700,8 @@ function renderizarUniversidades(
                         <td>
 
                             ${escaparHtml(
-                                universidade.organizacao_academica ||
+                                universidade
+                                    .organizacao_academica ||
                                 "-"
                             )}
 
@@ -578,7 +711,8 @@ function renderizarUniversidades(
                         <td>
 
                             ${escaparHtml(
-                                universidade.categoria_administrativa ||
+                                universidade
+                                    .categoria_administrativa ||
                                 "-"
                             )}
 
@@ -718,7 +852,9 @@ async function alterarStatusUniversidade(
         );
 
 
-    if (!confirmar) {
+    if (
+        !confirmar
+    ) {
 
         return;
     }
@@ -753,7 +889,9 @@ async function alterarStatusUniversidade(
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         window.alert(
             dados.erro ||
@@ -772,7 +910,7 @@ async function alterarStatusUniversidade(
 
 
 // =========================================================
-// CADASTRAR INSTITUIÇÃO
+// CADASTRO DE INSTITUIÇÃO
 // =========================================================
 
 async function cadastrarUniversidade(
@@ -882,7 +1020,9 @@ async function cadastrarUniversidade(
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         mensagem.textContent =
             dados.erro ||
@@ -990,9 +1130,10 @@ function filtrarUniversidades() {
                         .toLowerCase();
 
 
-                    return texto.includes(
-                        busca
-                    );
+                    return texto
+                        .includes(
+                            busca
+                        );
                 }
             );
 
@@ -1015,7 +1156,9 @@ async function carregarUsuarios() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Erro ao carregar usuários"
@@ -1043,7 +1186,7 @@ function filtrarUsuarios() {
             .toLowerCase();
 
 
-    const perfil =
+    const perfilFiltro =
         document
             .getElementById(
                 "filtro-perfil"
@@ -1064,13 +1207,40 @@ function filtrarUsuarios() {
                         .toLowerCase();
 
 
-                    return (
-                        texto.includes(busca) &&
-                        (
-                            !perfil ||
+                    const correspondeBusca =
+                        texto.includes(
+                            busca
+                        );
+
+
+                    let correspondePerfil =
+                        true;
+
+
+                    if (
+                        perfilFiltro ===
+                        "institucional"
+                    ) {
+
+                        correspondePerfil =
+                            ehPerfilInstitucional(
+                                usuario.perfil
+                            );
+
+
+                    } else if (
+                        perfilFiltro
+                    ) {
+
+                        correspondePerfil =
                             usuario.perfil ===
-                                perfil
-                        )
+                            perfilFiltro;
+                    }
+
+
+                    return (
+                        correspondeBusca &&
+                        correspondePerfil
                     );
                 }
             );
@@ -1092,7 +1262,13 @@ function renderizarUsuarios(
         );
 
 
-    if (!usuarios.length) {
+    if (
+        !Array.isArray(
+            usuarios
+        ) ||
+        usuarios.length ===
+        0
+    ) {
 
         tbody.innerHTML = `
 
@@ -1261,7 +1437,7 @@ function renderizarUsuarios(
 
 
 // =========================================================
-// SELECT DE INSTITUIÇÕES
+// SELECT INSTITUIÇÕES
 // =========================================================
 
 function preencherSelectUniversidades() {
@@ -1286,10 +1462,17 @@ function preencherSelectUniversidades() {
                 universidade.ativo
         )
         .sort(
-            (a, b) =>
-                String(a.nome)
+            (
+                a,
+                b
+            ) =>
+                String(
+                    a.nome
+                )
                     .localeCompare(
-                        String(b.nome),
+                        String(
+                            b.nome
+                        ),
                         "pt-BR"
                     )
         )
@@ -1321,21 +1504,29 @@ function preencherSelectUniversidades() {
 
 
 // =========================================================
-// MODAL DE USUÁRIO
+// MODAL
 // =========================================================
 
-function abrirModalUsuario(id) {
+function abrirModalUsuario(
+    id
+) {
 
     const usuario =
         usuariosAdmin
             .find(
                 item =>
-                    Number(item.id) ===
-                    Number(id)
+                    Number(
+                        item.id
+                    ) ===
+                    Number(
+                        id
+                    )
             );
 
 
-    if (!usuario) {
+    if (
+        !usuario
+    ) {
 
         return;
     }
@@ -1383,7 +1574,9 @@ function abrirModalUsuario(id) {
 
 
     campoPerfil.value =
-        usuario.perfil;
+        perfilParaInterface(
+            usuario.perfil
+        );
 
 
     campoPerfil.disabled =
@@ -1503,7 +1696,7 @@ function fecharModalUsuario() {
 
 
 // =========================================================
-// PERFIL / INSTITUIÇÃO
+// PERFIL / IES
 // =========================================================
 
 function atualizarCampoUniversidade() {
@@ -1542,6 +1735,7 @@ function atualizarCampoUniversidade() {
         select.required =
             true;
 
+
     } else {
 
         grupo.classList.add(
@@ -1560,7 +1754,7 @@ function atualizarCampoUniversidade() {
 
 
 // =========================================================
-// SALVAR USUÁRIO
+// SALVAR
 // =========================================================
 
 async function salvarUsuario(
@@ -1584,12 +1778,16 @@ async function salvarUsuario(
         usuariosAdmin
             .find(
                 item =>
-                    Number(item.id) ===
+                    Number(
+                        item.id
+                    ) ===
                     id
             );
 
 
-    if (!usuario) {
+    if (
+        !usuario
+    ) {
 
         return;
     }
@@ -1602,12 +1800,19 @@ async function salvarUsuario(
         id;
 
 
-    const perfil =
+    const perfilInterface =
         document
             .getElementById(
                 "modal-perfil"
             )
             .value;
+
+
+    const perfilBackend =
+        perfilParaBackend(
+            perfilInterface,
+            usuario
+        );
 
 
     const universidadeId =
@@ -1676,7 +1881,7 @@ async function salvarUsuario(
 
     if (
         perfilComInstituicao(
-            perfil
+            perfilInterface
         ) &&
         !universidadeId
     ) {
@@ -1712,7 +1917,8 @@ async function salvarUsuario(
                 .value
                 .trim(),
 
-        perfil,
+        perfil:
+            perfilBackend,
 
         universidade_id:
             universidadeId
@@ -1788,7 +1994,9 @@ async function salvarUsuario(
                 );
 
 
-        if (!resposta.ok) {
+        if (
+            !resposta.ok
+        ) {
 
             throw new Error(
                 dados.erro ||
@@ -1862,7 +2070,9 @@ async function salvarUsuario(
 // MENU
 // =========================================================
 
-function abrirSecao(nome) {
+function abrirSecao(
+    nome
+) {
 
     document
         .querySelectorAll(
@@ -1897,6 +2107,7 @@ function abrirSecao(nome) {
 
 
     window.scrollTo({
+
         top:
             0,
 
@@ -2099,26 +2310,11 @@ function configurarEventos() {
             "click",
             fecharModalUsuario
         );
-
-
-    document.addEventListener(
-        "keydown",
-        evento => {
-
-            if (
-                evento.key ===
-                "Escape"
-            ) {
-
-                fecharModalUsuario();
-            }
-        }
-    );
 }
 
 
 // =========================================================
-// INICIALIZAÇÃO
+// INÍCIO
 // =========================================================
 
 async function iniciarAdmin() {
@@ -2129,7 +2325,9 @@ async function iniciarAdmin() {
             await carregarAdmin();
 
 
-        if (!autorizado) {
+        if (
+            !autorizado
+        ) {
 
             return;
         }
@@ -2141,8 +2339,11 @@ async function iniciarAdmin() {
 
 
         await Promise.all([
+
             carregarResumo(),
+
             carregarUniversidades(),
+
             carregarUsuarios()
         ]);
 
@@ -2153,33 +2354,6 @@ async function iniciarAdmin() {
             "Erro ao iniciar administração:",
             erro
         );
-
-
-        const main =
-            document.querySelector(
-                ".admin-main"
-            );
-
-
-        if (main) {
-
-            main.innerHTML = `
-
-                <div class="admin-error">
-
-                    <h2>
-                        Não foi possível carregar a administração
-                    </h2>
-
-                    <p>
-                        ${escaparHtml(
-                            erro.message
-                        )}
-                    </p>
-
-                </div>
-            `;
-        }
     }
 }
 
