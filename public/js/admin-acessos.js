@@ -1,10 +1,20 @@
 // =========================================================
-// SIA - CRIAÇÃO DE ACESSOS PELO SUPER ADMIN
+// SIA
+// ACESSOS + PERMISSÕES DO SUPER ADMIN
 // =========================================================
 
 
 let universidadesNovoAcesso =
     [];
+
+let catalogoPermissoesAdmin =
+    [];
+
+let usuarioPermissoesEdicao =
+    null;
+
+let funcaoAbrirModalUsuarioOriginal =
+    null;
 
 
 // =========================================================
@@ -40,9 +50,22 @@ async function iniciarNovoAcessoAdmin() {
         }
 
 
+        await carregarCatalogoPermissoes();
+
+
+        criarEstilosPermissoes();
+
+
         criarBotaoNovoAcesso();
 
+
         criarModalNovoAcesso();
+
+
+        criarSecaoPermissoesEdicao();
+
+
+        integrarModalEdicaoUsuario();
 
 
     } catch (erro) {
@@ -56,7 +79,354 @@ async function iniciarNovoAcessoAdmin() {
 
 
 // =========================================================
-// BOTÃO
+// CATÁLOGO DE PERMISSÕES
+// =========================================================
+
+async function carregarCatalogoPermissoes() {
+
+    const resposta =
+        await fetch(
+            "/api/admin-permissoes/catalogo"
+        );
+
+
+    const dados =
+        await resposta
+            .json()
+            .catch(
+                () => []
+            );
+
+
+    if (!resposta.ok) {
+
+        throw new Error(
+            dados.erro ||
+            "Não foi possível carregar as permissões"
+        );
+    }
+
+
+    catalogoPermissoesAdmin =
+        Array.isArray(
+            dados
+        )
+            ? dados
+            : [];
+}
+
+
+// =========================================================
+// AGRUPAR PERMISSÕES
+// =========================================================
+
+function agruparPermissoes() {
+
+    const grupos =
+        new Map();
+
+
+    catalogoPermissoesAdmin
+        .forEach(
+            permissao => {
+
+                const categoria =
+                    permissao.categoria ||
+                    "Outras permissões";
+
+
+                if (
+                    !grupos.has(
+                        categoria
+                    )
+                ) {
+
+                    grupos.set(
+                        categoria,
+                        []
+                    );
+                }
+
+
+                grupos
+                    .get(
+                        categoria
+                    )
+                    .push(
+                        permissao
+                    );
+            }
+        );
+
+
+    return grupos;
+}
+
+
+// =========================================================
+// RENDERIZAR CHECKBOXES
+// =========================================================
+
+function renderizarPermissoes(
+    container,
+    selecionadas = [],
+    bloqueado = false
+) {
+
+    if (!container) {
+
+        return;
+    }
+
+
+    const selecionadasSet =
+        new Set(
+            selecionadas
+        );
+
+
+    const grupos =
+        agruparPermissoes();
+
+
+    if (
+        grupos.size ===
+        0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="permission-empty">
+                Nenhuma permissão cadastrada.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        Array
+            .from(
+                grupos.entries()
+            )
+            .map(
+                ([
+                    categoria,
+                    permissoes
+                ]) => `
+
+                    <div class="permission-category">
+
+                        <div class="permission-category-title">
+                            ${escaparHtmlPermissao(
+                                categoria
+                            )}
+                        </div>
+
+
+                        <div class="permission-options">
+
+                            ${permissoes
+                                .map(
+                                    permissao => `
+
+                                        <label class="permission-option">
+
+                                            <input
+                                                type="checkbox"
+                                                value="${escaparHtmlPermissao(
+                                                    permissao.codigo
+                                                )}"
+                                                ${
+                                                    selecionadasSet.has(
+                                                        permissao.codigo
+                                                    )
+                                                        ? "checked"
+                                                        : ""
+                                                }
+                                                ${
+                                                    bloqueado
+                                                        ? "disabled"
+                                                        : ""
+                                                }
+                                            >
+
+
+                                            <span>
+
+                                                <strong>
+                                                    ${escaparHtmlPermissao(
+                                                        permissao.nome
+                                                    )}
+                                                </strong>
+
+                                                <small>
+                                                    ${escaparHtmlPermissao(
+                                                        permissao.descricao ||
+                                                        ""
+                                                    )}
+                                                </small>
+
+                                            </span>
+
+                                        </label>
+                                    `
+                                )
+                                .join("")}
+
+                        </div>
+
+                    </div>
+                `
+            )
+            .join("");
+}
+
+
+// =========================================================
+// HTML SEGURO
+// =========================================================
+
+function escaparHtmlPermissao(
+    valor
+) {
+
+    return String(
+        valor ??
+        ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
+
+
+// =========================================================
+// OBTER CHECKBOXES MARCADOS
+// =========================================================
+
+function obterPermissoesMarcadas(
+    container
+) {
+
+    if (!container) {
+
+        return [];
+    }
+
+
+    return Array
+        .from(
+            container.querySelectorAll(
+                'input[type="checkbox"]:checked'
+            )
+        )
+        .map(
+            campo =>
+                campo.value
+        );
+}
+
+
+// =========================================================
+// MARCAR / LIMPAR TODAS
+// =========================================================
+
+function alterarTodasPermissoes(
+    container,
+    marcado
+) {
+
+    if (!container) {
+
+        return;
+    }
+
+
+    container
+        .querySelectorAll(
+            'input[type="checkbox"]:not(:disabled)'
+        )
+        .forEach(
+            campo => {
+
+                campo.checked =
+                    marcado;
+            }
+        );
+}
+
+
+// =========================================================
+// PERMISSÕES PADRÃO DOS PERFIS ANTIGOS
+//
+// Somente durante a transição.
+// =========================================================
+
+function permissoesPadraoPerfil(
+    perfil
+) {
+
+    const todas =
+        catalogoPermissoesAdmin
+            .map(
+                permissao =>
+                    permissao.codigo
+            );
+
+
+    const padroes = {
+
+        publico:
+            [],
+
+        aluno:
+            [],
+
+        consulta_institucional: [
+            "VISUALIZAR_DADOS_INSTITUCIONAIS"
+        ],
+
+        gestor: [
+            "VISUALIZAR_DADOS_INSTITUCIONAIS",
+            "EDITAR_DADOS_INSTITUCIONAIS",
+            "GERENCIAR_CURSOS",
+            "GERENCIAR_DISCIPLINAS",
+            "GERENCIAR_ALUNOS"
+        ],
+
+        admin_universidade:
+            todas
+    };
+
+
+    return (
+        padroes[perfil] ||
+        []
+    );
+}
+
+
+// =========================================================
+// BOTÃO NOVO ACESSO
 // =========================================================
 
 function criarBotaoNovoAcesso() {
@@ -118,7 +488,7 @@ function criarBotaoNovoAcesso() {
 
 
 // =========================================================
-// MODAL
+// MODAL NOVO ACESSO
 // =========================================================
 
 function criarModalNovoAcesso() {
@@ -155,13 +525,13 @@ function criarModalNovoAcesso() {
         ></div>
 
 
-        <div class="admin-modal-card">
+        <div class="admin-modal-card permissions-modal-card">
 
             <div class="admin-panel-header">
 
                 <div>
 
-                    <span class="admin-panel-label">
+                    <span class="section-eyebrow">
                         Controle de acesso
                     </span>
 
@@ -170,8 +540,8 @@ function criarModalNovoAcesso() {
                     </h2>
 
                     <p>
-                        Crie uma conta e defina diretamente
-                        seu nível de acesso.
+                        Crie a conta e escolha individualmente
+                        o que este usuário poderá fazer.
                     </p>
 
                 </div>
@@ -189,6 +559,7 @@ function criarModalNovoAcesso() {
 
 
             <form id="form-novo-acesso">
+
 
                 <div class="admin-form-grid">
 
@@ -327,6 +698,76 @@ function criarModalNovoAcesso() {
                 </div>
 
 
+                <!-- =========================================
+                     PERMISSÕES
+                     ========================================= -->
+
+                <section class="permission-editor">
+
+                    <div class="permission-editor-header">
+
+                        <div>
+
+                            <span class="section-eyebrow">
+                                Permissões
+                            </span>
+
+                            <h3>
+                                O que este usuário poderá fazer?
+                            </h3>
+
+                            <p>
+                                O perfil identifica o tipo de usuário.
+                                As permissões definem as ações liberadas.
+                            </p>
+
+                        </div>
+
+
+                        <div class="permission-bulk-actions">
+
+                            <button
+                                type="button"
+                                id="btn-marcar-todas-novo"
+                            >
+                                Marcar todas
+                            </button>
+
+                            <button
+                                type="button"
+                                id="btn-limpar-permissoes-novo"
+                            >
+                                Limpar
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="permissoes-novo-acesso"
+                        class="permission-list"
+                    ></div>
+
+
+                    <div class="permission-note">
+
+                        <strong>
+                            Importante
+                        </strong>
+
+                        <span>
+                            Permissões institucionais dependem
+                            de um vínculo com uma instituição para
+                            que possam ser utilizadas naquele contexto.
+                        </span>
+
+                    </div>
+
+                </section>
+
+
                 <div
                     id="mensagem-novo-acesso"
                     class="admin-message"
@@ -362,6 +803,13 @@ function criarModalNovoAcesso() {
 
     document.body.appendChild(
         modal
+    );
+
+
+    renderizarPermissoes(
+        document.getElementById(
+            "permissoes-novo-acesso"
+        )
     );
 
 
@@ -401,7 +849,48 @@ function criarModalNovoAcesso() {
         )
         .addEventListener(
             "change",
-            atualizarInstituicaoNovoAcesso
+            () => {
+
+                atualizarInstituicaoNovoAcesso();
+
+                aplicarPermissoesPadraoNovoAcesso();
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btn-marcar-todas-novo"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alterarTodasPermissoes(
+                    document.getElementById(
+                        "permissoes-novo-acesso"
+                    ),
+                    true
+                );
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btn-limpar-permissoes-novo"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alterarTodasPermissoes(
+                    document.getElementById(
+                        "permissoes-novo-acesso"
+                    ),
+                    false
+                );
+            }
         );
 
 
@@ -417,7 +906,7 @@ function criarModalNovoAcesso() {
 
 
 // =========================================================
-// ABRIR
+// ABRIR NOVO ACESSO
 // =========================================================
 
 async function abrirNovoAcesso() {
@@ -446,6 +935,13 @@ async function abrirNovoAcesso() {
     atualizarInstituicaoNovoAcesso();
 
 
+    renderizarPermissoes(
+        document.getElementById(
+            "permissoes-novo-acesso"
+        )
+    );
+
+
     if (
         universidadesNovoAcesso.length ===
         0
@@ -462,7 +958,7 @@ async function abrirNovoAcesso() {
 
 
 // =========================================================
-// FECHAR
+// FECHAR NOVO ACESSO
 // =========================================================
 
 function fecharNovoAcesso() {
@@ -479,7 +975,7 @@ function fecharNovoAcesso() {
 
 
 // =========================================================
-// CARREGAR IES
+// INSTITUIÇÕES
 // =========================================================
 
 async function carregarInstituicoesNovoAcesso() {
@@ -559,7 +1055,7 @@ async function carregarInstituicoesNovoAcesso() {
 
 
 // =========================================================
-// MOSTRAR IES QUANDO NECESSÁRIO
+// INSTITUIÇÃO DO NOVO ACESSO
 // =========================================================
 
 function atualizarInstituicaoNovoAcesso() {
@@ -618,7 +1114,9 @@ function atualizarInstituicaoNovoAcesso() {
         exigeInstituicao;
 
 
-    if (!exigeInstituicao) {
+    if (
+        !exigeInstituicao
+    ) {
 
         campo.value =
             "";
@@ -627,7 +1125,101 @@ function atualizarInstituicaoNovoAcesso() {
 
 
 // =========================================================
-// SALVAR
+// APLICAR PADRÃO DO PERFIL
+// =========================================================
+
+function aplicarPermissoesPadraoNovoAcesso() {
+
+    const perfil =
+        document
+            .getElementById(
+                "novo-acesso-perfil"
+            )
+            .value;
+
+
+    const selecionadas =
+        new Set(
+            permissoesPadraoPerfil(
+                perfil
+            )
+        );
+
+
+    const container =
+        document.getElementById(
+            "permissoes-novo-acesso"
+        );
+
+
+    container
+        .querySelectorAll(
+            'input[type="checkbox"]'
+        )
+        .forEach(
+            campo => {
+
+                campo.checked =
+                    selecionadas.has(
+                        campo.value
+                    );
+            }
+        );
+}
+
+
+// =========================================================
+// SALVAR PERMISSÕES VIA API
+// =========================================================
+
+async function salvarPermissoesUsuario(
+    usuarioId,
+    permissoes
+) {
+
+    const resposta =
+        await fetch(
+            `/api/admin-permissoes/usuarios/${usuarioId}`,
+            {
+                method:
+                    "PUT",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+                        permissoes
+                    })
+            }
+        );
+
+
+    const dados =
+        await resposta
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (!resposta.ok) {
+
+        throw new Error(
+            dados.erro ||
+            "Não foi possível salvar as permissões"
+        );
+    }
+
+
+    return dados;
+}
+
+
+// =========================================================
+// SALVAR NOVO ACESSO
 // =========================================================
 
 async function salvarNovoAcesso(
@@ -645,7 +1237,6 @@ async function salvarNovoAcesso(
 
     mensagem.textContent =
         "";
-
 
     mensagem.className =
         "admin-message";
@@ -665,6 +1256,14 @@ async function salvarNovoAcesso(
                 "novo-acesso-universidade"
             )
             .value;
+
+
+    const permissoes =
+        obterPermissoesMarcadas(
+            document.getElementById(
+                "permissoes-novo-acesso"
+            )
+        );
 
 
     const payload = {
@@ -764,8 +1363,45 @@ async function salvarNovoAcesso(
         }
 
 
+        // =================================================
+        // SALVAR PERMISSÕES DA CONTA CRIADA
+        // =================================================
+
+        try {
+
+            await salvarPermissoesUsuario(
+                dados.usuario.id,
+                permissoes
+            );
+
+
+        } catch (erroPermissao) {
+
+            mensagem.textContent =
+                "A conta foi criada, mas ocorreu um erro ao salvar as permissões: " +
+                erroPermissao.message;
+
+
+            mensagem.classList.add(
+                "error"
+            );
+
+
+            if (
+                typeof carregarUsuarios ===
+                "function"
+            ) {
+
+                await carregarUsuarios();
+            }
+
+
+            return;
+        }
+
+
         mensagem.textContent =
-            "Acesso criado com sucesso.";
+            "Acesso e permissões criados com sucesso.";
 
 
         mensagem.classList.add(
@@ -819,5 +1455,962 @@ async function salvarNovoAcesso(
     }
 }
 
+
+// =========================================================
+// SEÇÃO DE PERMISSÕES NO MODAL EDITAR USUÁRIO
+// =========================================================
+
+function criarSecaoPermissoesEdicao() {
+
+    if (
+        document.getElementById(
+            "admin-permissoes-edicao"
+        )
+    ) {
+
+        return;
+    }
+
+
+    const formulario =
+        document.getElementById(
+            "form-editar-usuario"
+        );
+
+
+    const mensagemConta =
+        document.getElementById(
+            "mensagem-editar-usuario"
+        );
+
+
+    if (
+        !formulario ||
+        !mensagemConta
+    ) {
+
+        return;
+    }
+
+
+    const secao =
+        document.createElement(
+            "section"
+        );
+
+
+    secao.id =
+        "admin-permissoes-edicao";
+
+
+    secao.className =
+        "permission-editor permission-editor-edit";
+
+
+    secao.innerHTML = `
+
+        <div class="permission-editor-header">
+
+            <div>
+
+                <span class="section-eyebrow">
+                    Permissões
+                </span>
+
+                <h3>
+                    Permissões individuais
+                </h3>
+
+                <p>
+                    Escolha exatamente quais recursos
+                    esta conta poderá utilizar.
+                </p>
+
+            </div>
+
+
+            <div
+                id="acoes-permissoes-edicao"
+                class="permission-bulk-actions"
+            >
+
+                <button
+                    type="button"
+                    id="btn-marcar-todas-edicao"
+                >
+                    Marcar todas
+                </button>
+
+                <button
+                    type="button"
+                    id="btn-limpar-permissoes-edicao"
+                >
+                    Limpar
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="permissoes-edicao-usuario"
+            class="permission-list"
+        >
+
+            <div class="permission-empty">
+                Selecione um usuário.
+            </div>
+
+        </div>
+
+
+        <div
+            id="aviso-permissoes-edicao"
+            class="permission-note hidden"
+        ></div>
+
+
+        <div
+            id="mensagem-permissoes-edicao"
+            class="admin-message"
+        ></div>
+
+
+        <div
+            id="acoes-salvar-permissoes-edicao"
+            class="permission-save-area"
+        >
+
+            <button
+                type="button"
+                id="btn-salvar-permissoes-edicao"
+                class="admin-primary-button"
+            >
+                Salvar permissões
+            </button>
+
+        </div>
+    `;
+
+
+    formulario.insertBefore(
+        secao,
+        mensagemConta
+    );
+
+
+    document
+        .getElementById(
+            "btn-marcar-todas-edicao"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alterarTodasPermissoes(
+                    document.getElementById(
+                        "permissoes-edicao-usuario"
+                    ),
+                    true
+                );
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btn-limpar-permissoes-edicao"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alterarTodasPermissoes(
+                    document.getElementById(
+                        "permissoes-edicao-usuario"
+                    ),
+                    false
+                );
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btn-salvar-permissoes-edicao"
+        )
+        .addEventListener(
+            "click",
+            salvarPermissoesEdicao
+        );
+}
+
+
+// =========================================================
+// INTEGRAR COM O MODAL EXISTENTE DO ADMIN.JS
+// =========================================================
+
+function integrarModalEdicaoUsuario() {
+
+    if (
+        typeof abrirModalUsuario !==
+        "function"
+    ) {
+
+        console.warn(
+            "Função abrirModalUsuario não encontrada."
+        );
+
+        return;
+    }
+
+
+    if (
+        funcaoAbrirModalUsuarioOriginal
+    ) {
+
+        return;
+    }
+
+
+    funcaoAbrirModalUsuarioOriginal =
+        abrirModalUsuario;
+
+
+    abrirModalUsuario =
+        function (
+            usuarioId
+        ) {
+
+            funcaoAbrirModalUsuarioOriginal(
+                usuarioId
+            );
+
+
+            carregarPermissoesEdicao(
+                usuarioId
+            );
+        };
+}
+
+
+// =========================================================
+// CARREGAR PERMISSÕES PARA EDIÇÃO
+// =========================================================
+
+async function carregarPermissoesEdicao(
+    usuarioId
+) {
+
+    const container =
+        document.getElementById(
+            "permissoes-edicao-usuario"
+        );
+
+
+    const mensagem =
+        document.getElementById(
+            "mensagem-permissoes-edicao"
+        );
+
+
+    const aviso =
+        document.getElementById(
+            "aviso-permissoes-edicao"
+        );
+
+
+    const acoes =
+        document.getElementById(
+            "acoes-permissoes-edicao"
+        );
+
+
+    const salvar =
+        document.getElementById(
+            "acoes-salvar-permissoes-edicao"
+        );
+
+
+    mensagem.textContent =
+        "";
+
+    mensagem.className =
+        "admin-message";
+
+
+    container.innerHTML = `
+
+        <div class="permission-empty">
+            Carregando permissões...
+        </div>
+    `;
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                `/api/admin-permissoes/usuarios/${usuarioId}`
+            );
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.erro ||
+                "Erro ao carregar permissões"
+            );
+        }
+
+
+        usuarioPermissoesEdicao =
+            dados.usuario;
+
+
+        const automaticas =
+            dados.permissoes_automaticas ===
+            true;
+
+
+        renderizarPermissoes(
+            container,
+            dados.permissoes ||
+            [],
+            automaticas
+        );
+
+
+        if (
+            automaticas
+        ) {
+
+            aviso.classList.remove(
+                "hidden"
+            );
+
+
+            aviso.innerHTML = `
+
+                <strong>
+                    Super Administrador
+                </strong>
+
+                <span>
+                    Este perfil possui todas as permissões
+                    automaticamente. Elas não podem ser
+                    removidas individualmente.
+                </span>
+            `;
+
+
+            acoes.classList.add(
+                "hidden"
+            );
+
+
+            salvar.classList.add(
+                "hidden"
+            );
+
+
+        } else {
+
+            aviso.classList.remove(
+                "hidden"
+            );
+
+
+            aviso.innerHTML = `
+
+                <strong>
+                    Permissões independentes do perfil
+                </strong>
+
+                <span>
+                    O Super Administrador pode conceder ou
+                    remover estas permissões individualmente.
+                </span>
+            `;
+
+
+            acoes.classList.remove(
+                "hidden"
+            );
+
+
+            salvar.classList.remove(
+                "hidden"
+            );
+        }
+
+
+    } catch (erro) {
+
+        container.innerHTML = `
+
+            <div class="permission-empty">
+                Não foi possível carregar as permissões.
+            </div>
+        `;
+
+
+        mensagem.textContent =
+            erro.message;
+
+
+        mensagem.classList.add(
+            "error"
+        );
+    }
+}
+
+
+// =========================================================
+// SALVAR PERMISSÕES DE USUÁRIO EXISTENTE
+// =========================================================
+
+async function salvarPermissoesEdicao() {
+
+    if (
+        !usuarioPermissoesEdicao
+    ) {
+
+        return;
+    }
+
+
+    if (
+        usuarioPermissoesEdicao
+            .perfil ===
+        "super_admin"
+    ) {
+
+        return;
+    }
+
+
+    const container =
+        document.getElementById(
+            "permissoes-edicao-usuario"
+        );
+
+
+    const mensagem =
+        document.getElementById(
+            "mensagem-permissoes-edicao"
+        );
+
+
+    const botao =
+        document.getElementById(
+            "btn-salvar-permissoes-edicao"
+        );
+
+
+    const permissoes =
+        obterPermissoesMarcadas(
+            container
+        );
+
+
+    mensagem.textContent =
+        "";
+
+    mensagem.className =
+        "admin-message";
+
+
+    const textoOriginal =
+        botao.textContent;
+
+
+    botao.disabled =
+        true;
+
+
+    botao.textContent =
+        "Salvando...";
+
+
+    try {
+
+        await salvarPermissoesUsuario(
+            usuarioPermissoesEdicao.id,
+            permissoes
+        );
+
+
+        mensagem.textContent =
+            "Permissões atualizadas com sucesso.";
+
+
+        mensagem.classList.add(
+            "success"
+        );
+
+
+    } catch (erro) {
+
+        mensagem.textContent =
+            erro.message;
+
+
+        mensagem.classList.add(
+            "error"
+        );
+
+
+    } finally {
+
+        botao.disabled =
+            false;
+
+
+        botao.textContent =
+            textoOriginal;
+    }
+}
+
+
+// =========================================================
+// ESTILOS
+// =========================================================
+
+function criarEstilosPermissoes() {
+
+    if (
+        document.getElementById(
+            "admin-permissoes-estilos"
+        )
+    ) {
+
+        return;
+    }
+
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+
+    style.id =
+        "admin-permissoes-estilos";
+
+
+    style.textContent = `
+
+        .permissions-modal-card {
+
+            width:
+                min(
+                    880px,
+                    calc(
+                        100vw - 30px
+                    )
+                );
+
+            max-height:
+                calc(
+                    100vh - 30px
+                );
+
+            overflow-y:
+                auto;
+        }
+
+
+        .permission-editor {
+
+            margin-top:
+                20px;
+
+            padding:
+                18px;
+
+            border:
+                1px solid
+                #e7dfea;
+
+            border-radius:
+                13px;
+
+            background:
+                #faf8fc;
+        }
+
+
+        .permission-editor-edit {
+
+            margin-bottom:
+                20px;
+        }
+
+
+        .permission-editor-header {
+
+            display:
+                flex;
+
+            align-items:
+                flex-start;
+
+            justify-content:
+                space-between;
+
+            gap:
+                15px;
+
+            margin-bottom:
+                16px;
+        }
+
+
+        .permission-editor-header h3 {
+
+            margin:
+                4px 0;
+
+            color:
+                #31203d;
+
+            font-size:
+                16px;
+        }
+
+
+        .permission-editor-header p {
+
+            color:
+                #7c7284;
+
+            font-size:
+                10px;
+
+            line-height:
+                1.5;
+        }
+
+
+        .permission-bulk-actions {
+
+            display:
+                flex;
+
+            gap:
+                7px;
+
+            flex-shrink:
+                0;
+        }
+
+
+        .permission-bulk-actions button {
+
+            min-height:
+                33px;
+
+            padding:
+                6px 9px;
+
+            border:
+                1px solid
+                #ddd6fe;
+
+            border-radius:
+                7px;
+
+            color:
+                #5b21b6;
+
+            background:
+                #ffffff;
+
+            font-size:
+                9px;
+
+            font-weight:
+                700;
+
+            cursor:
+                pointer;
+        }
+
+
+        .permission-list {
+
+            display:
+                grid;
+
+            gap:
+                13px;
+        }
+
+
+        .permission-category {
+
+            overflow:
+                hidden;
+
+            border:
+                1px solid
+                #ece5f0;
+
+            border-radius:
+                10px;
+
+            background:
+                #ffffff;
+        }
+
+
+        .permission-category-title {
+
+            padding:
+                9px 11px;
+
+            border-bottom:
+                1px solid
+                #eee8f1;
+
+            color:
+                #5b21b6;
+
+            background:
+                #faf5ff;
+
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+        }
+
+
+        .permission-options {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(
+                        0,
+                        1fr
+                    )
+                );
+
+            gap:
+                1px;
+
+            background:
+                #f0ebf3;
+        }
+
+
+        .permission-option {
+
+            min-height:
+                72px;
+
+            display:
+                flex;
+
+            align-items:
+                flex-start;
+
+            gap:
+                10px;
+
+            padding:
+                12px;
+
+            background:
+                #ffffff;
+
+            cursor:
+                pointer;
+        }
+
+
+        .permission-option:hover {
+
+            background:
+                #fcfaff;
+        }
+
+
+        .permission-option input {
+
+            width:
+                17px;
+
+            height:
+                17px;
+
+            flex:
+                0 0 17px;
+
+            margin-top:
+                2px;
+
+            accent-color:
+                #6d28d9;
+        }
+
+
+        .permission-option strong {
+
+            display:
+                block;
+
+            margin-bottom:
+                4px;
+
+            color:
+                #31203d;
+
+            font-size:
+                10px;
+        }
+
+
+        .permission-option small {
+
+            display:
+                block;
+
+            color:
+                #81768a;
+
+            font-size:
+                9px;
+
+            line-height:
+                1.45;
+        }
+
+
+        .permission-note {
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            gap:
+                3px;
+
+            margin-top:
+                14px;
+
+            padding:
+                10px 12px;
+
+            border:
+                1px solid
+                #e9d5ff;
+
+            border-radius:
+                8px;
+
+            color:
+                #6b21a8;
+
+            background:
+                #faf5ff;
+
+            font-size:
+                9px;
+
+            line-height:
+                1.45;
+        }
+
+
+        .permission-note strong {
+
+            font-size:
+                10px;
+        }
+
+
+        .permission-save-area {
+
+            display:
+                flex;
+
+            justify-content:
+                flex-end;
+
+            margin-top:
+                14px;
+        }
+
+
+        .permission-empty {
+
+            padding:
+                15px;
+
+            border:
+                1px dashed
+                #ddd5e2;
+
+            border-radius:
+                8px;
+
+            color:
+                #81768a;
+
+            background:
+                #ffffff;
+
+            font-size:
+                10px;
+
+            text-align:
+                center;
+        }
+
+
+        @media (
+            max-width: 700px
+        ) {
+
+            .permission-editor-header {
+
+                flex-direction:
+                    column;
+            }
+
+
+            .permission-options {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+    `;
+
+
+    document.head.appendChild(
+        style
+    );
+}
+
+
+// =========================================================
+// INICIAR
+// =========================================================
 
 iniciarNovoAcessoAdmin();
