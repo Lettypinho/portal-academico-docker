@@ -5,7 +5,7 @@ const pool =
     require("../config/database");
 
 const {
-    exigirPerfil
+    exigirPermissao
 } =
     require("../middleware/auth");
 
@@ -33,7 +33,9 @@ router.get(
                 req.query;
 
 
-            if (!curso) {
+            if (
+                !curso
+            ) {
 
                 return res
                     .status(400)
@@ -54,7 +56,9 @@ router.get(
             ];
 
 
-            if (ano) {
+            if (
+                ano
+            ) {
 
                 parametros.push(
                     ano
@@ -67,7 +71,9 @@ router.get(
             }
 
 
-            if (semestre) {
+            if (
+                semestre
+            ) {
 
                 parametros.push(
                     semestre
@@ -80,7 +86,9 @@ router.get(
             }
 
 
-            if (modalidade) {
+            if (
+                modalidade
+            ) {
 
                 parametros.push(
                     modalidade
@@ -141,30 +149,26 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao comparar cursos"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao comparar cursos"
+                });
         }
     }
 );
 
 
 // =========================================================
-// DASHBOARD DA UNIVERSIDADE LOGADA
-//
-// Somente usuários institucionais.
-// Aluno NÃO possui acesso aos indicadores privados.
+// DASHBOARD PRIVADO
 // =========================================================
 
 router.get(
     "/dashboard",
 
-    exigirPerfil(
-        "consulta_institucional",
-        "gestor",
-        "admin_universidade",
-        "super_admin"
+    exigirPermissao(
+        "VISUALIZAR_DADOS_INSTITUCIONAIS"
     ),
 
     async (req, res) => {
@@ -179,10 +183,6 @@ router.get(
                 usuario.universidade_id;
 
 
-            // =================================================
-            // SUPER ADMIN
-            // =================================================
-
             if (
                 usuario.perfil ===
                 "super_admin"
@@ -193,7 +193,9 @@ router.get(
                         .universidade_id;
 
 
-                if (!universidadeId) {
+                if (
+                    !universidadeId
+                ) {
 
                     return res
                         .status(400)
@@ -205,16 +207,25 @@ router.get(
             }
 
 
+            if (
+                !universidadeId
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O usuário não está vinculado a uma instituição"
+                    });
+            }
+
+
             const {
                 ano,
                 semestre
             } =
                 req.query;
 
-
-            // =================================================
-            // RESUMO
-            // =================================================
 
             const resumo =
                 await pool.query(
@@ -246,10 +257,6 @@ router.get(
             }
 
 
-            // =================================================
-            // SITUAÇÃO ATUAL DOS ALUNOS
-            // =================================================
-
             const situacao =
                 await pool.query(
                     `
@@ -266,10 +273,6 @@ router.get(
                 );
 
 
-            // =================================================
-            // INDICADORES ACADÊMICOS DO PERÍODO
-            // =================================================
-
             const parametros = [
                 universidadeId
             ];
@@ -280,7 +283,9 @@ router.get(
             ];
 
 
-            if (ano) {
+            if (
+                ano
+            ) {
 
                 parametros.push(
                     ano
@@ -293,7 +298,9 @@ router.get(
             }
 
 
-            if (semestre) {
+            if (
+                semestre
+            ) {
 
                 parametros.push(
                     semestre
@@ -323,14 +330,6 @@ router.get(
                     parametros
                 );
 
-
-            // =================================================
-            // INDICADORES POR CURSO
-            //
-            // Todos os períodos são retornados porque o frontend
-            // utiliza esses registros para descobrir os períodos
-            // disponíveis no seletor global.
-            // =================================================
 
             const cursos =
                 await pool.query(
@@ -378,30 +377,26 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao carregar dashboard"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar dashboard"
+                });
         }
     }
 );
 
 
 // =========================================================
-// INDICADORES DE DISCIPLINAS
-//
-// Dados privados da instituição.
-// Alunos não possuem acesso.
+// INDICADORES DAS DISCIPLINAS
 // =========================================================
 
 router.get(
     "/disciplinas",
 
-    exigirPerfil(
-        "consulta_institucional",
-        "gestor",
-        "admin_universidade",
-        "super_admin"
+    exigirPermissao(
+        "VISUALIZAR_DADOS_INSTITUCIONAIS"
     ),
 
     async (req, res) => {
@@ -416,10 +411,6 @@ router.get(
                 usuario.universidade_id;
 
 
-            // =================================================
-            // SUPER ADMIN
-            // =================================================
-
             if (
                 usuario.perfil ===
                 "super_admin"
@@ -430,7 +421,9 @@ router.get(
                         .universidade_id;
 
 
-                if (!universidadeId) {
+                if (
+                    !universidadeId
+                ) {
 
                     return res
                         .status(400)
@@ -439,6 +432,19 @@ router.get(
                                 "Informe a universidade"
                         });
                 }
+            }
+
+
+            if (
+                !universidadeId
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O usuário não está vinculado a uma instituição"
+                    });
             }
 
 
@@ -489,10 +495,12 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar indicadores das disciplinas"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar indicadores das disciplinas"
+                });
         }
     }
 );

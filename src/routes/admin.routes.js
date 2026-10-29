@@ -5,25 +5,17 @@ const bcrypt =
     require("bcryptjs");
 
 const pool =
-    require(
-        "../config/database"
-    );
+    require("../config/database");
 
 const {
     exigirPerfil
 } =
-    require(
-        "../middleware/auth"
-    );
+    require("../middleware/auth");
 
 
 const router =
     express.Router();
 
-
-// =========================================================
-// TODAS AS ROTAS EXIGEM SUPER ADMIN
-// =========================================================
 
 router.use(
     exigirPerfil(
@@ -42,6 +34,36 @@ function emailValido(
 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         .test(email);
+}
+
+
+function normalizarPerfil(
+    perfil
+) {
+
+    const valor =
+        String(
+            perfil ||
+            ""
+        )
+            .trim();
+
+
+    if (
+        [
+            "consulta_institucional",
+            "gestor",
+            "admin_universidade"
+        ].includes(
+            valor
+        )
+    ) {
+
+        return "institucional";
+    }
+
+
+    return valor;
 }
 
 
@@ -84,6 +106,7 @@ router.get(
                             FROM usuario
 
                             WHERE perfil IN (
+                                'institucional',
                                 'consulta_institucional',
                                 'gestor',
                                 'admin_universidade'
@@ -190,7 +213,7 @@ router.get(
 
 
 // =========================================================
-// LISTAR INSTITUIÇÕES
+// INSTITUIÇÕES
 // =========================================================
 
 router.get(
@@ -282,10 +305,6 @@ router.get(
     }
 );
 
-
-// =========================================================
-// ATIVAR / DESATIVAR INSTITUIÇÃO
-// =========================================================
 
 router.patch(
     "/universidades/:id/status",
@@ -401,7 +420,7 @@ router.patch(
 
 
 // =========================================================
-// LISTAR USUÁRIOS
+// USUÁRIOS
 // =========================================================
 
 router.get(
@@ -469,21 +488,6 @@ router.get(
 
 // =========================================================
 // ALTERAR USUÁRIO
-//
-// SUPER ADMIN PODE ALTERAR:
-// - nome
-// - email
-// - perfil
-// - instituição
-// - status
-// - senha
-//
-// AO EDITAR A PRÓPRIA CONTA:
-// - pode alterar nome
-// - pode alterar email
-// - pode alterar senha
-// - NÃO pode remover o próprio super_admin
-// - NÃO pode desativar a própria conta
 // =========================================================
 
 router.patch(
@@ -543,11 +547,9 @@ router.patch(
 
 
             perfil =
-                String(
-                    perfil ||
-                    ""
-                )
-                    .trim();
+                normalizarPerfil(
+                    perfil
+                );
 
 
             senha_atual =
@@ -573,9 +575,7 @@ router.patch(
 
             const administradorId =
                 Number(
-                    req.session
-                        .usuario
-                        .id
+                    req.session.usuario.id
                 );
 
 
@@ -583,10 +583,6 @@ router.patch(
                 administradorId ===
                 id;
 
-
-            // =================================================
-            // BUSCAR USUÁRIO ATUAL
-            // =================================================
 
             const atual =
                 await pool.query(
@@ -631,10 +627,6 @@ router.patch(
                 atual.rows[0];
 
 
-            // =================================================
-            // NOME
-            // =================================================
-
             if (
                 nome.length < 3
             ) {
@@ -661,10 +653,6 @@ router.patch(
             }
 
 
-            // =================================================
-            // EMAIL
-            // =================================================
-
             if (
                 !emailValido(
                     email
@@ -676,19 +664,6 @@ router.patch(
                     .json({
                         erro:
                             "Informe um e-mail válido"
-                    });
-            }
-
-
-            if (
-                email.length > 150
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "O e-mail deve possuir no máximo 150 caracteres"
                     });
             }
 
@@ -729,16 +704,10 @@ router.patch(
             }
 
 
-            // =================================================
-            // PERFIL
-            // =================================================
-
             const perfisPermitidos = [
                 "publico",
                 "aluno",
-                "consulta_institucional",
-                "gestor",
-                "admin_universidade",
+                "institucional",
                 "super_admin"
             ];
 
@@ -758,10 +727,6 @@ router.patch(
             }
 
 
-            // =================================================
-            // STATUS
-            // =================================================
-
             if (
                 typeof ativo !==
                 "boolean"
@@ -775,10 +740,6 @@ router.patch(
                     });
             }
 
-
-            // =================================================
-            // PROTEGER A PRÓPRIA CONTA SUPER ADMIN
-            // =================================================
 
             if (
                 proprioUsuario &&
@@ -814,16 +775,11 @@ router.patch(
             // INSTITUIÇÃO
             // =================================================
 
-            const perfisComInstituicao = [
-                "aluno",
-                "consulta_institucional",
-                "gestor",
-                "admin_universidade"
-            ];
-
-
             if (
-                perfisComInstituicao.includes(
+                [
+                    "aluno",
+                    "institucional"
+                ].includes(
                     perfil
                 )
             ) {
@@ -885,9 +841,8 @@ router.patch(
 
 
                 if (
-                    instituicao.rows[0]
-                        .ativo ===
-                    false
+                    !instituicao.rows[0]
+                        .ativo
                 ) {
 
                     return res
@@ -978,10 +933,6 @@ router.patch(
                 }
 
 
-                // =============================================
-                // ALTERANDO A PRÓPRIA SENHA
-                // =============================================
-
                 if (
                     proprioUsuario
                 ) {
@@ -1002,8 +953,7 @@ router.patch(
                     const senhaCorreta =
                         await bcrypt.compare(
                             senha_atual,
-                            usuarioAtual
-                                .senha_hash
+                            usuarioAtual.senha_hash
                         );
 
 
@@ -1023,8 +973,7 @@ router.patch(
                     const mesmaSenha =
                         await bcrypt.compare(
                             nova_senha,
-                            usuarioAtual
-                                .senha_hash
+                            usuarioAtual.senha_hash
                         );
 
 
@@ -1049,10 +998,6 @@ router.patch(
                     );
             }
 
-
-            // =================================================
-            // ATUALIZAR
-            // =================================================
 
             const resultado =
                 await pool.query(
@@ -1100,40 +1045,19 @@ router.patch(
 
 
             if (
-                resultado.rows.length ===
-                0
-            ) {
-
-                return res
-                    .status(404)
-                    .json({
-                        erro:
-                            "Usuário não encontrado"
-                    });
-            }
-
-
-            // =================================================
-            // ATUALIZAR SESSÃO SE FOR O PRÓPRIO ADMIN
-            // =================================================
-
-            if (
                 proprioUsuario
             ) {
 
                 req.session.usuario.nome =
-                    resultado.rows[0]
-                        .nome;
+                    resultado.rows[0].nome;
 
 
                 req.session.usuario.email =
-                    resultado.rows[0]
-                        .email;
+                    resultado.rows[0].email;
 
 
                 req.session.usuario.perfil =
-                    resultado.rows[0]
-                        .perfil;
+                    resultado.rows[0].perfil;
             }
 
 

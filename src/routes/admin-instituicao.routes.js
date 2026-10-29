@@ -1,34 +1,36 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
+const express =
+    require("express");
 
-const pool = require("../config/database");
+const bcrypt =
+    require("bcryptjs");
+
+const pool =
+    require("../config/database");
 
 const {
-    exigirPerfil
-} = require("../middleware/auth");
+    exigirPermissao,
+    exigirUmaDasPermissoes
+} =
+    require("../middleware/auth");
 
 
-const router = express.Router();
-
-
-// =========================================================
-// TODAS AS ROTAS EXIGEM ADMIN DA INSTITUIÇÃO
-// =========================================================
-
-router.use(
-    exigirPerfil(
-        "admin_universidade"
-    )
-);
+const router =
+    express.Router();
 
 
 // =========================================================
 // UTILITÁRIOS
 // =========================================================
 
-function idValido(valor) {
+function idValido(
+    valor
+) {
 
-    const id = Number(valor);
+    const id =
+        Number(
+            valor
+        );
+
 
     return (
         Number.isInteger(id) &&
@@ -37,10 +39,37 @@ function idValido(valor) {
 }
 
 
-function emailValido(email) {
+function emailValido(
+    email
+) {
 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         .test(email);
+}
+
+
+function exigirUniversidade(
+    req,
+    res,
+    next
+) {
+
+    if (
+        !req.session.usuario ||
+        !req.session.usuario
+            .universidade_id
+    ) {
+
+        return res
+            .status(400)
+            .json({
+                erro:
+                    "O usuário não está vinculado a uma instituição"
+            });
+    }
+
+
+    next();
 }
 
 
@@ -50,6 +79,14 @@ function emailValido(email) {
 
 router.get(
     "/resumo",
+
+    exigirUmaDasPermissoes(
+        "GERENCIAR_USUARIOS",
+        "GERENCIAR_VINCULOS"
+    ),
+
+    exigirUniversidade,
+
     async (req, res) => {
 
         try {
@@ -75,7 +112,6 @@ router.get(
                         )
                             AS solicitacoes_pendentes,
 
-
                         (
                             SELECT COUNT(*)::INT
 
@@ -86,7 +122,6 @@ router.get(
                                 AND ativo = TRUE
                         )
                             AS usuarios_vinculados,
-
 
                         (
                             SELECT COUNT(*)::INT
@@ -100,7 +135,6 @@ router.get(
                         )
                             AS alunos_vinculados,
 
-
                         (
                             SELECT COUNT(*)::INT
 
@@ -110,6 +144,7 @@ router.get(
                                 universidade_id = $1
 
                                 AND perfil IN (
+                                    'institucional',
                                     'consulta_institucional',
                                     'gestor',
                                     'admin_universidade'
@@ -138,21 +173,30 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao carregar resumo administrativo"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar resumo administrativo"
+                });
         }
     }
 );
 
 
 // =========================================================
-// LISTAR SOLICITAÇÕES
+// SOLICITAÇÕES
 // =========================================================
 
 router.get(
     "/solicitacoes",
+
+    exigirPermissao(
+        "GERENCIAR_VINCULOS"
+    ),
+
+    exigirUniversidade,
+
     async (req, res) => {
 
         try {
@@ -266,26 +310,35 @@ router.get(
         } catch (erro) {
 
             console.error(
-                "Erro ao listar solicitações da instituição:",
+                "Erro ao listar solicitações:",
                 erro
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar solicitações"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar solicitações"
+                });
         }
     }
 );
 
 
 // =========================================================
-// APROVAR SOLICITAÇÃO
+// APROVAR VÍNCULO
 // =========================================================
 
 router.patch(
     "/solicitacoes/:id/aprovar",
+
+    exigirPermissao(
+        "GERENCIAR_VINCULOS"
+    ),
+
+    exigirUniversidade,
+
     async (req, res) => {
 
         const client =
@@ -360,8 +413,7 @@ router.patch(
 
 
             if (
-                resultadoSolicitacao
-                    .rows
+                resultadoSolicitacao.rows
                     .length === 0
             ) {
 
@@ -417,7 +469,8 @@ router.patch(
 
                     FROM usuario
 
-                    WHERE id = $1
+                    WHERE
+                        id = $1
 
                     FOR UPDATE
                     `,
@@ -428,8 +481,7 @@ router.patch(
 
 
             if (
-                resultadoUsuario
-                    .rows
+                resultadoUsuario.rows
                     .length === 0
             ) {
 
@@ -448,10 +500,13 @@ router.patch(
 
 
             const usuario =
-                resultadoUsuario.rows[0];
+                resultadoUsuario
+                    .rows[0];
 
 
-            if (!usuario.ativo) {
+            if (
+                !usuario.ativo
+            ) {
 
                 await client.query(
                     "ROLLBACK"
@@ -506,39 +561,7 @@ router.patch(
             ) {
 
                 novoPerfil =
-                    String(
-                        req.body
-                            .perfil_funcionario ||
-                        ""
-                    )
-                        .trim();
-
-
-                const perfisFuncionario = [
-                    "consulta_institucional",
-                    "gestor",
-                    "admin_universidade"
-                ];
-
-
-                if (
-                    !perfisFuncionario.includes(
-                        novoPerfil
-                    )
-                ) {
-
-                    await client.query(
-                        "ROLLBACK"
-                    );
-
-
-                    return res
-                        .status(400)
-                        .json({
-                            erro:
-                                "Selecione a permissão do funcionário"
-                        });
-                }
+                    "institucional";
 
 
             } else {
@@ -567,7 +590,8 @@ router.patch(
                         perfil = $2,
                         atualizado_em = NOW()
 
-                    WHERE id = $3
+                    WHERE
+                        id = $3
 
                     RETURNING
 
@@ -586,6 +610,47 @@ router.patch(
                 );
 
 
+            // =================================================
+            // FUNCIONÁRIO RECEBE VISUALIZAÇÃO COMO PADRÃO.
+            // PERMISSÕES EXTRAS SÃO DADAS PELO SUPER ADMIN.
+            // =================================================
+
+            if (
+                novoPerfil ===
+                "institucional"
+            ) {
+
+                await client.query(
+                    `
+                    INSERT INTO usuario_permissao
+                    (
+                        usuario_id,
+                        permissao_id,
+                        concedido_por
+                    )
+
+                    SELECT
+                        $1,
+                        p.id,
+                        $2
+
+                    FROM permissao p
+
+                    WHERE
+                        p.codigo =
+                            'VISUALIZAR_DADOS_INSTITUCIONAIS'
+
+                    ON CONFLICT
+                        DO NOTHING
+                    `,
+                    [
+                        usuario.id,
+                        administradorId
+                    ]
+                );
+            }
+
+
             await client.query(
                 `
                 UPDATE solicitacao_vinculo
@@ -597,7 +662,8 @@ router.patch(
                     atualizado_em = NOW(),
                     observacao_analise = NULL
 
-                WHERE id = $2
+                WHERE
+                    id = $2
                 `,
                 [
                     administradorId,
@@ -630,7 +696,7 @@ router.patch(
                 );
 
             } catch {
-                // nenhuma ação necessária
+                // nenhuma ação
             }
 
 
@@ -640,24 +706,12 @@ router.patch(
             );
 
 
-            if (
-                erro.code ===
-                "23514"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Perfil e instituição incompatíveis"
-                    });
-            }
-
-
-            res.status(500).json({
-                erro:
-                    "Erro ao aprovar solicitação"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao aprovar solicitação"
+                });
 
 
         } finally {
@@ -674,6 +728,13 @@ router.patch(
 
 router.patch(
     "/solicitacoes/:id/rejeitar",
+
+    exigirPermissao(
+        "GERENCIAR_VINCULOS"
+    ),
+
+    exigirUniversidade,
+
     async (req, res) => {
 
         try {
@@ -796,21 +857,30 @@ router.patch(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao rejeitar solicitação"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao rejeitar solicitação"
+                });
         }
     }
 );
 
 
 // =========================================================
-// USUÁRIOS DA PRÓPRIA INSTITUIÇÃO
+// USUÁRIOS DA IES
 // =========================================================
 
 router.get(
     "/usuarios",
+
+    exigirPermissao(
+        "GERENCIAR_USUARIOS"
+    ),
+
+    exigirUniversidade,
+
     async (req, res) => {
 
         try {
@@ -860,33 +930,33 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar usuários vinculados"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar usuários vinculados"
+                });
         }
     }
 );
 
 
 // =========================================================
-// EDITAR CONTA
+// EDITAR CONTA DE USUÁRIO DA IES
 //
-// Permite ao admin:
-// - nome
-// - e-mail
-// - perfil de outros funcionários
-// - redefinir senha de outro usuário
-//
-// Na própria conta:
-// - nome
-// - e-mail
-// - senha, exigindo a senha atual
-// - NÃO permite remover o próprio perfil de administrador
+// NÃO ALTERA PERFIL OU PERMISSÕES.
+// ISSO É RESPONSABILIDADE DO SUPER ADMIN.
 // =========================================================
 
 router.patch(
     "/usuarios/:id/conta",
+
+    exigirPermissao(
+        "GERENCIAR_USUARIOS"
+    ),
+
+    exigirUniversidade,
+
     async (req, res) => {
 
         try {
@@ -930,7 +1000,7 @@ router.patch(
                 usuarioId;
 
 
-            let nome =
+            const nome =
                 String(
                     req.body.nome ||
                     ""
@@ -938,21 +1008,13 @@ router.patch(
                     .trim();
 
 
-            let email =
+            const email =
                 String(
                     req.body.email ||
                     ""
                 )
                     .trim()
                     .toLowerCase();
-
-
-            const perfil =
-                String(
-                    req.body.perfil ||
-                    ""
-                )
-                    .trim();
 
 
             const senhaAtual =
@@ -977,10 +1039,6 @@ router.patch(
                 );
 
 
-            // =================================================
-            // DADOS BÁSICOS
-            // =================================================
-
             if (
                 nome.length < 3
             ) {
@@ -990,19 +1048,6 @@ router.patch(
                     .json({
                         erro:
                             "Informe um nome válido"
-                    });
-            }
-
-
-            if (
-                nome.length > 150
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "O nome deve possuir no máximo 150 caracteres"
                     });
             }
 
@@ -1021,23 +1066,6 @@ router.patch(
                     });
             }
 
-
-            if (
-                email.length > 150
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "O e-mail deve possuir no máximo 150 caracteres"
-                    });
-            }
-
-
-            // =================================================
-            // GARANTIR QUE A CONTA PERTENCE À MESMA IES
-            // =================================================
 
             const atual =
                 await pool.query(
@@ -1085,77 +1113,6 @@ router.patch(
                 atual.rows[0];
 
 
-            // =================================================
-            // PERFIL
-            // =================================================
-
-            if (
-                usuarioAtual.perfil ===
-                "aluno"
-            ) {
-
-                if (
-                    perfil !==
-                    "aluno"
-                ) {
-
-                    return res
-                        .status(400)
-                        .json({
-                            erro:
-                                "O perfil de aluno não pode ser convertido por esta operação"
-                        });
-                }
-
-
-            } else {
-
-                const perfisFuncionario = [
-                    "consulta_institucional",
-                    "gestor",
-                    "admin_universidade"
-                ];
-
-
-                if (
-                    !perfisFuncionario.includes(
-                        perfil
-                    )
-                ) {
-
-                    return res
-                        .status(400)
-                        .json({
-                            erro:
-                                "Permissão inválida"
-                        });
-                }
-            }
-
-
-            // =================================================
-            // NÃO DEIXAR ADMIN REMOVER O PRÓPRIO ACESSO
-            // =================================================
-
-            if (
-                ehProprioUsuario &&
-                perfil !==
-                "admin_universidade"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Você não pode remover o próprio acesso de administrador. Essa alteração deve ser feita pelo super administrador."
-                    });
-            }
-
-
-            // =================================================
-            // E-MAIL ÚNICO
-            // =================================================
-
             const emailExistente =
                 await pool.query(
                     `
@@ -1191,10 +1148,6 @@ router.patch(
                     });
             }
 
-
-            // =================================================
-            // SENHA
-            // =================================================
 
             const pretendeAlterarSenha =
                 senhaAtual.length > 0 ||
@@ -1264,10 +1217,6 @@ router.patch(
                 }
 
 
-                // =============================================
-                // NA PRÓPRIA CONTA, EXIGIR SENHA ATUAL
-                // =============================================
-
                 if (
                     ehProprioUsuario
                 ) {
@@ -1280,7 +1229,7 @@ router.patch(
                             .status(400)
                             .json({
                                 erro:
-                                    "Informe sua senha atual para alterar a própria senha"
+                                    "Informe sua senha atual"
                             });
                     }
 
@@ -1288,8 +1237,7 @@ router.patch(
                     const senhaCorreta =
                         await bcrypt.compare(
                             senhaAtual,
-                            usuarioAtual
-                                .senha_hash
+                            usuarioAtual.senha_hash
                         );
 
 
@@ -1304,27 +1252,6 @@ router.patch(
                                     "A senha atual está incorreta"
                             });
                     }
-
-
-                    const mesmaSenha =
-                        await bcrypt.compare(
-                            novaSenha,
-                            usuarioAtual
-                                .senha_hash
-                        );
-
-
-                    if (
-                        mesmaSenha
-                    ) {
-
-                        return res
-                            .status(400)
-                            .json({
-                                erro:
-                                    "A nova senha deve ser diferente da senha atual"
-                            });
-                    }
                 }
 
 
@@ -1336,110 +1263,47 @@ router.patch(
             }
 
 
-            // =================================================
-            // ATUALIZAR CONTA
-            // =================================================
+            const resultado =
+                await pool.query(
+                    `
+                    UPDATE usuario
 
-            let resultado;
+                    SET
+                        nome = $1,
+                        email = $2,
 
+                        senha_hash =
+                            COALESCE(
+                                $3,
+                                senha_hash
+                            ),
 
-            if (
-                novoHash
-            ) {
+                        atualizado_em =
+                            NOW()
 
-                resultado =
-                    await pool.query(
-                        `
-                        UPDATE usuario
+                    WHERE
+                        id = $4
+                        AND universidade_id = $5
 
-                        SET
-                            nome = $1,
-                            email = $2,
-                            perfil = $3,
-                            senha_hash = $4,
-                            atualizado_em = NOW()
+                    RETURNING
 
-                        WHERE
-                            id = $5
-                            AND universidade_id = $6
+                        id,
+                        universidade_id,
+                        nome,
+                        email,
+                        perfil,
+                        ativo,
+                        atualizado_em
+                    `,
+                    [
+                        nome,
+                        email,
+                        novoHash,
+                        usuarioId,
+                        universidadeId
+                    ]
+                );
 
-                        RETURNING
-
-                            id,
-                            universidade_id,
-                            nome,
-                            email,
-                            perfil,
-                            ativo,
-                            atualizado_em
-                        `,
-                        [
-                            nome,
-                            email,
-                            perfil,
-                            novoHash,
-                            usuarioId,
-                            universidadeId
-                        ]
-                    );
-
-
-            } else {
-
-                resultado =
-                    await pool.query(
-                        `
-                        UPDATE usuario
-
-                        SET
-                            nome = $1,
-                            email = $2,
-                            perfil = $3,
-                            atualizado_em = NOW()
-
-                        WHERE
-                            id = $4
-                            AND universidade_id = $5
-
-                        RETURNING
-
-                            id,
-                            universidade_id,
-                            nome,
-                            email,
-                            perfil,
-                            ativo,
-                            atualizado_em
-                        `,
-                        [
-                            nome,
-                            email,
-                            perfil,
-                            usuarioId,
-                            universidadeId
-                        ]
-                    );
-            }
-
-
-            if (
-                resultado.rows.length ===
-                0
-            ) {
-
-                return res
-                    .status(404)
-                    .json({
-                        erro:
-                            "Usuário não encontrado"
-                    });
-            }
-
-
-            // =================================================
-            // SE EDITOU A PRÓPRIA CONTA,
-            // ATUALIZAR A SESSÃO
-            // =================================================
 
             if (
                 ehProprioUsuario
@@ -1453,11 +1317,6 @@ router.patch(
                 req.session.usuario.email =
                     resultado.rows[0]
                         .email;
-
-
-                req.session.usuario.perfil =
-                    resultado.rows[0]
-                        .perfil;
             }
 
 
@@ -1495,226 +1354,12 @@ router.patch(
             }
 
 
-            if (
-                erro.code ===
-                "23514"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Perfil e instituição incompatíveis"
-                    });
-            }
-
-
-            res.status(500).json({
-                erro:
-                    "Erro ao atualizar a conta"
-            });
-        }
-    }
-);
-
-
-// =========================================================
-// ROTA ANTIGA DE PERFIL
-//
-// Mantida para compatibilidade com versões anteriores
-// do frontend.
-// =========================================================
-
-router.patch(
-    "/usuarios/:id/perfil",
-    async (req, res) => {
-
-        try {
-
-            const usuarioId =
-                Number(
-                    req.params.id
-                );
-
-
-            if (
-                !idValido(
-                    usuarioId
-                )
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Usuário inválido"
-                    });
-            }
-
-
-            const universidadeId =
-                Number(
-                    req.session.usuario
-                        .universidade_id
-                );
-
-
-            const administradorId =
-                Number(
-                    req.session.usuario.id
-                );
-
-
-            const novoPerfil =
-                String(
-                    req.body.perfil ||
-                    ""
-                )
-                    .trim();
-
-
-            const perfisPermitidos = [
-                "consulta_institucional",
-                "gestor",
-                "admin_universidade"
-            ];
-
-
-            if (
-                !perfisPermitidos.includes(
-                    novoPerfil
-                )
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Permissão inválida"
-                    });
-            }
-
-
-            const atual =
-                await pool.query(
-                    `
-                    SELECT
-
-                        id,
-                        perfil,
-                        universidade_id
-
-                    FROM usuario
-
-                    WHERE
-                        id = $1
-                        AND universidade_id = $2
-
-                    LIMIT 1
-                    `,
-                    [
-                        usuarioId,
-                        universidadeId
-                    ]
-                );
-
-
-            if (
-                atual.rows.length ===
-                0
-            ) {
-
-                return res
-                    .status(404)
-                    .json({
-                        erro:
-                            "Usuário não encontrado nesta instituição"
-                    });
-            }
-
-
-            if (
-                atual.rows[0].perfil ===
-                "aluno"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "O perfil de aluno não pode ser convertido em perfil administrativo"
-                    });
-            }
-
-
-            if (
-                administradorId ===
-                    usuarioId &&
-                novoPerfil !==
-                    "admin_universidade"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Você não pode remover o próprio acesso de administrador"
-                    });
-            }
-
-
-            const resultado =
-                await pool.query(
-                    `
-                    UPDATE usuario
-
-                    SET
-                        perfil = $1,
-                        atualizado_em = NOW()
-
-                    WHERE
-                        id = $2
-                        AND universidade_id = $3
-
-                    RETURNING
-
-                        id,
-                        nome,
-                        email,
-                        perfil,
-                        ativo,
-                        atualizado_em
-                    `,
-                    [
-                        novoPerfil,
-                        usuarioId,
-                        universidadeId
-                    ]
-                );
-
-
-            res.json({
-
-                mensagem:
-                    "Permissão atualizada com sucesso",
-
-                usuario:
-                    resultado.rows[0]
-            });
-
-
-        } catch (erro) {
-
-            console.error(
-                "Erro ao alterar permissão institucional:",
-                erro
-            );
-
-
-            res.status(500).json({
-                erro:
-                    "Erro ao alterar permissão"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao atualizar a conta"
+                });
         }
     }
 );

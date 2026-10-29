@@ -5,7 +5,7 @@ const pool =
     require("../config/database");
 
 const {
-    exigirPerfil
+    exigirPermissao
 } =
     require("../middleware/auth");
 
@@ -15,8 +15,7 @@ const router =
 
 
 // =========================================================
-// LISTAR CURSOS
-// PÚBLICO
+// LISTAGEM PÚBLICA
 // =========================================================
 
 router.get(
@@ -36,10 +35,6 @@ router.get(
             } =
                 req.query;
 
-
-            // =================================================
-            // LIMITE DE RESULTADOS
-            // =================================================
 
             let limiteConsulta =
                 Number.parseInt(
@@ -69,10 +64,6 @@ router.get(
                 );
 
 
-            // =================================================
-            // FILTROS
-            // =================================================
-
             const parametros =
                 [];
 
@@ -83,11 +74,9 @@ router.get(
             ];
 
 
-            // =================================================
-            // INSTITUIÇÃO
-            // =================================================
-
-            if (universidade_id) {
+            if (
+                universidade_id
+            ) {
 
                 const universidadeId =
                     Number.parseInt(
@@ -114,10 +103,6 @@ router.get(
             }
 
 
-            // =================================================
-            // NOME
-            // =================================================
-
             if (
                 nome &&
                 String(nome).trim()
@@ -133,10 +118,6 @@ router.get(
                 );
             }
 
-
-            // =================================================
-            // ESTADO
-            // =================================================
 
             if (
                 estado &&
@@ -156,10 +137,6 @@ router.get(
             }
 
 
-            // =================================================
-            // CIDADE
-            // =================================================
-
             if (
                 cidade &&
                 String(cidade).trim()
@@ -176,10 +153,6 @@ router.get(
                 );
             }
 
-
-            // =================================================
-            // MODALIDADE
-            // =================================================
 
             if (
                 modalidade &&
@@ -198,10 +171,6 @@ router.get(
             }
 
 
-            // =================================================
-            // GRAU
-            // =================================================
-
             if (
                 grau &&
                 String(grau).trim()
@@ -219,10 +188,6 @@ router.get(
             }
 
 
-            // =================================================
-            // LIMIT
-            // =================================================
-
             parametros.push(
                 limiteConsulta
             );
@@ -232,39 +197,23 @@ router.get(
                 parametros.length;
 
 
-            // =================================================
-            // CONSULTA
-            // =================================================
-
             const resultado =
                 await pool.query(
                     `
                     SELECT
 
                         c.id,
-
                         c.codigo_inep,
-
                         c.nome,
-
                         c.grau_academico,
-
                         c.nivel_academico,
-
                         c.modalidade,
-
                         c.duracao_semestres,
-
                         c.carga_horaria,
-
                         c.situacao_inep,
-
                         c.status,
-
                         c.ano_censo,
-
                         c.origem_dados,
-
 
                         u.id
                             AS universidade_id,
@@ -279,32 +228,24 @@ router.get(
                             AS universidade_sigla,
 
                         u.cidade,
-
                         u.estado,
-
                         u.organizacao_academica,
-
                         u.categoria_administrativa
 
-
                     FROM curso c
-
 
                     JOIN universidade u
                         ON u.id =
                             c.universidade_id
 
-
                     WHERE
                         ${filtros.join(" AND ")}
-
 
                     ORDER BY
                         c.nome,
                         u.estado,
                         u.cidade,
                         u.nome
-
 
                     LIMIT $${indiceLimite}
                     `,
@@ -325,31 +266,26 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar cursos"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar cursos"
+                });
         }
     }
 );
 
 
 // =========================================================
-// CURSOS DA INSTITUIÇÃO DO USUÁRIO
-//
-// ROTA PRIVADA DO DASHBOARD.
-//
-// Aluno NÃO utiliza esta rota.
-// Para consulta pública, inclusive aluno, existe GET /api/cursos.
+// CURSOS DA PRÓPRIA INSTITUIÇÃO
 // =========================================================
 
 router.get(
     "/minha-universidade",
 
-    exigirPerfil(
-        "consulta_institucional",
-        "gestor",
-        "admin_universidade"
+    exigirPermissao(
+        "VISUALIZAR_DADOS_INSTITUCIONAIS"
     ),
 
     async (req, res) => {
@@ -379,27 +315,16 @@ router.get(
                     SELECT
 
                         id,
-
                         codigo_inep,
-
                         nome,
-
                         grau_academico,
-
                         nivel_academico,
-
                         modalidade,
-
                         duracao_semestres,
-
                         carga_horaria,
-
                         situacao_inep,
-
                         status,
-
                         ano_censo,
-
                         origem_dados
 
                     FROM curso
@@ -431,10 +356,12 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar cursos"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar cursos"
+                });
         }
     }
 );
@@ -447,9 +374,8 @@ router.get(
 router.post(
     "/",
 
-    exigirPerfil(
-        "super_admin",
-        "admin_universidade"
+    exigirPermissao(
+        "GERENCIAR_CURSOS"
     ),
 
     async (req, res) => {
@@ -471,10 +397,6 @@ router.post(
                 req.body;
 
 
-            // =================================================
-            // CAMPOS OBRIGATÓRIOS
-            // =================================================
-
             if (
                 !nome ||
                 !modalidade
@@ -490,15 +412,13 @@ router.post(
 
 
             // =================================================
-            // ADMIN DA INSTITUIÇÃO
-            //
-            // Ignora qualquer universidade enviada pelo frontend
-            // e utiliza obrigatoriamente sua própria instituição.
+            // QUALQUER USUÁRIO QUE NÃO SEJA SUPER ADMIN
+            // FICA RESTRITO À PRÓPRIA IES.
             // =================================================
 
             if (
-                usuario.perfil ===
-                "admin_universidade"
+                usuario.perfil !==
+                "super_admin"
             ) {
 
                 universidade_id =
@@ -506,10 +426,6 @@ router.post(
                         .universidade_id;
             }
 
-
-            // =================================================
-            // SUPER ADMIN
-            // =================================================
 
             if (
                 usuario.perfil ===
@@ -548,15 +464,10 @@ router.post(
             }
 
 
-            // =================================================
-            // VALIDAR INSTITUIÇÃO
-            // =================================================
-
             const instituicao =
                 await pool.query(
                     `
-                    SELECT
-                        id
+                    SELECT id
 
                     FROM universidade
 
@@ -584,10 +495,6 @@ router.post(
             }
 
 
-            // =================================================
-            // VALIDAR MODALIDADE
-            // =================================================
-
             const modalidadesPermitidas = [
                 "Presencial",
                 "EAD"
@@ -609,10 +516,6 @@ router.post(
             }
 
 
-            // =================================================
-            // VALIDAR GRAU ACADÊMICO
-            // =================================================
-
             if (
                 grau_academico &&
                 ![
@@ -632,10 +535,6 @@ router.post(
                     });
             }
 
-
-            // =================================================
-            // DURAÇÃO
-            // =================================================
 
             let duracaoSemestres =
                 null;
@@ -673,10 +572,6 @@ router.post(
             }
 
 
-            // =================================================
-            // CARGA HORÁRIA
-            // =================================================
-
             let cargaHoraria =
                 null;
 
@@ -712,10 +607,6 @@ router.post(
                 }
             }
 
-
-            // =================================================
-            // CADASTRAR
-            // =================================================
 
             const resultado =
                 await pool.query(
@@ -807,10 +698,12 @@ router.post(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao cadastrar curso"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao cadastrar curso"
+                });
         }
     }
 );

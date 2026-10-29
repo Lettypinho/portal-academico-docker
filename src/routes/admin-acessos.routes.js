@@ -17,15 +17,45 @@ const router =
     express.Router();
 
 
-// =========================================================
-// SOMENTE SUPER ADMIN
-// =========================================================
-
 router.use(
     exigirPerfil(
         "super_admin"
     )
 );
+
+
+// =========================================================
+// NORMALIZAR PERFIL
+// =========================================================
+
+function normalizarPerfil(
+    perfil
+) {
+
+    const valor =
+        String(
+            perfil ||
+            ""
+        )
+            .trim();
+
+
+    if (
+        [
+            "consulta_institucional",
+            "gestor",
+            "admin_universidade"
+        ].includes(
+            valor
+        )
+    ) {
+
+        return "institucional";
+    }
+
+
+    return valor;
+}
 
 
 // =========================================================
@@ -51,14 +81,16 @@ router.post(
 
             nome =
                 String(
-                    nome || ""
+                    nome ||
+                    ""
                 )
                     .trim();
 
 
             email =
                 String(
-                    email || ""
+                    email ||
+                    ""
                 )
                     .trim()
                     .toLowerCase();
@@ -66,20 +98,16 @@ router.post(
 
             senha =
                 String(
-                    senha || ""
+                    senha ||
+                    ""
                 );
 
 
             perfil =
-                String(
-                    perfil || ""
-                )
-                    .trim();
+                normalizarPerfil(
+                    perfil
+                );
 
-
-            // =================================================
-            // CAMPOS
-            // =================================================
 
             if (
                 !nome ||
@@ -98,8 +126,7 @@ router.post(
 
 
             if (
-                nome.length <
-                3
+                nome.length < 3
             ) {
 
                 return res
@@ -107,6 +134,19 @@ router.post(
                     .json({
                         erro:
                             "Informe um nome válido"
+                    });
+            }
+
+
+            if (
+                nome.length > 150
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O nome deve possuir no máximo 150 caracteres"
                     });
             }
 
@@ -128,8 +168,7 @@ router.post(
 
 
             if (
-                senha.length <
-                6
+                senha.length < 6
             ) {
 
                 return res
@@ -142,8 +181,7 @@ router.post(
 
 
             if (
-                senha.length >
-                72
+                senha.length > 72
             ) {
 
                 return res
@@ -155,21 +193,10 @@ router.post(
             }
 
 
-            // =================================================
-            // PERFIS QUE O SUPER ADMIN PODE CRIAR
-            // =================================================
-
             const perfisPermitidos = [
-
                 "publico",
-
                 "aluno",
-
-                "consulta_institucional",
-
-                "gestor",
-
-                "admin_universidade"
+                "institucional"
             ];
 
 
@@ -189,23 +216,14 @@ router.post(
 
 
             // =================================================
-            // PERFIS QUE EXIGEM INSTITUIÇÃO
+            // INSTITUIÇÃO
             // =================================================
 
-            const perfisVinculados = [
-
-                "aluno",
-
-                "consulta_institucional",
-
-                "gestor",
-
-                "admin_universidade"
-            ];
-
-
             if (
-                perfisVinculados.includes(
+                [
+                    "aluno",
+                    "institucional"
+                ].includes(
                     perfil
                 )
             ) {
@@ -237,8 +255,6 @@ router.post(
                         `
                         SELECT
                             id,
-                            nome,
-                            sigla,
                             ativo
 
                         FROM universidade
@@ -269,9 +285,8 @@ router.post(
 
 
                 if (
-                    instituicao.rows[0]
-                        .ativo ===
-                    false
+                    !instituicao.rows[0]
+                        .ativo
                 ) {
 
                     return res
@@ -291,7 +306,7 @@ router.post(
 
 
             // =================================================
-            // EMAIL DUPLICADO
+            // EMAIL
             // =================================================
 
             const emailExistente =
@@ -314,9 +329,7 @@ router.post(
 
 
             if (
-                emailExistente
-                    .rows
-                    .length >
+                emailExistente.rows.length >
                 0
             ) {
 
@@ -442,10 +455,12 @@ router.post(
             }
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao criar acesso"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao criar acesso"
+                });
         }
     }
 );
