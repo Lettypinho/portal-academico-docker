@@ -1,17 +1,14 @@
-const express =
-    require("express");
+const express = require("express");
+const bcrypt = require("bcryptjs");
 
-const pool =
-    require("../config/database");
+const pool = require("../config/database");
 
 const {
     exigirPerfil
-} =
-    require("../middleware/auth");
+} = require("../middleware/auth");
 
 
-const router =
-    express.Router();
+const router = express.Router();
 
 
 // =========================================================
@@ -26,7 +23,29 @@ router.use(
 
 
 // =========================================================
-// RESUMO ADMINISTRATIVO DA PRÓPRIA IES
+// UTILITÁRIOS
+// =========================================================
+
+function idValido(valor) {
+
+    const id = Number(valor);
+
+    return (
+        Number.isInteger(id) &&
+        id > 0
+    );
+}
+
+
+function emailValido(email) {
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        .test(email);
+}
+
+
+// =========================================================
+// RESUMO
 // =========================================================
 
 router.get(
@@ -36,8 +55,7 @@ router.get(
         try {
 
             const universidadeId =
-                req.session
-                    .usuario
+                req.session.usuario
                     .universidade_id;
 
 
@@ -140,8 +158,7 @@ router.get(
         try {
 
             const universidadeId =
-                req.session
-                    .usuario
+                req.session.usuario
                     .universidade_id;
 
 
@@ -184,35 +201,20 @@ router.get(
                     SELECT
 
                         s.id,
-
                         s.usuario_id,
-
                         s.universidade_id,
-
                         s.tipo_vinculo,
-
                         s.email_institucional,
-
                         s.identificacao_institucional,
-
                         s.matricula,
-
                         s.curso_id,
-
                         s.cargo,
-
                         s.setor,
-
                         s.status,
-
                         s.observacao_analise,
-
                         s.criado_em,
-
                         s.atualizado_em,
-
                         s.analisado_em,
-
 
                         us.nome
                             AS usuario_nome,
@@ -226,31 +228,25 @@ router.get(
                         us.ativo
                             AS usuario_ativo,
 
-
                         c.nome
                             AS curso,
 
                         c.modalidade
                             AS curso_modalidade
 
-
                     FROM solicitacao_vinculo s
-
 
                     JOIN usuario us
                         ON us.id =
                             s.usuario_id
 
-
                     LEFT JOIN curso c
                         ON c.id =
                             s.curso_id
 
-
                     WHERE
                         s.universidade_id = $1
                         AND s.status = $2
-
 
                     ORDER BY
                         s.criado_em ASC
@@ -299,14 +295,13 @@ router.patch(
         try {
 
             const solicitacaoId =
-                Number.parseInt(
-                    req.params.id,
-                    10
+                Number(
+                    req.params.id
                 );
 
 
             if (
-                !Number.isInteger(
+                !idValido(
                     solicitacaoId
                 )
             ) {
@@ -321,15 +316,12 @@ router.patch(
 
 
             const universidadeId =
-                req.session
-                    .usuario
+                req.session.usuario
                     .universidade_id;
 
 
             const administradorId =
-                req.session
-                    .usuario
-                    .id;
+                req.session.usuario.id;
 
 
             await client.query(
@@ -337,14 +329,11 @@ router.patch(
             );
 
 
-            // =================================================
-            // BLOQUEAR SOLICITAÇÃO DURANTE ANÁLISE
-            // =================================================
-
             const resultadoSolicitacao =
                 await client.query(
                     `
                     SELECT
+
                         id,
                         usuario_id,
                         universidade_id,
@@ -373,8 +362,7 @@ router.patch(
             if (
                 resultadoSolicitacao
                     .rows
-                    .length ===
-                0
+                    .length === 0
             ) {
 
                 await client.query(
@@ -415,14 +403,11 @@ router.patch(
             }
 
 
-            // =================================================
-            // USUÁRIO SOLICITANTE
-            // =================================================
-
             const resultadoUsuario =
                 await client.query(
                     `
                     SELECT
+
                         id,
                         universidade_id,
                         nome,
@@ -445,8 +430,7 @@ router.patch(
             if (
                 resultadoUsuario
                     .rows
-                    .length ===
-                0
+                    .length === 0
             ) {
 
                 await client.query(
@@ -464,8 +448,7 @@ router.patch(
 
 
             const usuario =
-                resultadoUsuario
-                    .rows[0];
+                resultadoUsuario.rows[0];
 
 
             if (!usuario.ativo) {
@@ -504,10 +487,6 @@ router.patch(
                     });
             }
 
-
-            // =================================================
-            // DEFINIR NOVO PERFIL
-            // =================================================
 
             let novoPerfil;
 
@@ -578,10 +557,6 @@ router.patch(
             }
 
 
-            // =================================================
-            // ALTERAR USUÁRIO
-            // =================================================
-
             const usuarioAtualizado =
                 await client.query(
                     `
@@ -595,6 +570,7 @@ router.patch(
                     WHERE id = $3
 
                     RETURNING
+
                         id,
                         universidade_id,
                         nome,
@@ -609,10 +585,6 @@ router.patch(
                     ]
                 );
 
-
-            // =================================================
-            // MARCAR SOLICITAÇÃO COMO APROVADA
-            // =================================================
 
             await client.query(
                 `
@@ -651,9 +623,15 @@ router.patch(
 
         } catch (erro) {
 
-            await client.query(
-                "ROLLBACK"
-            );
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            } catch {
+                // nenhuma ação necessária
+            }
 
 
             console.error(
@@ -701,14 +679,13 @@ router.patch(
         try {
 
             const solicitacaoId =
-                Number.parseInt(
-                    req.params.id,
-                    10
+                Number(
+                    req.params.id
                 );
 
 
             if (
-                !Number.isInteger(
+                !idValido(
                     solicitacaoId
                 )
             ) {
@@ -723,15 +700,12 @@ router.patch(
 
 
             const universidadeId =
-                req.session
-                    .usuario
+                req.session.usuario
                     .universidade_id;
 
 
             const administradorId =
-                req.session
-                    .usuario
-                    .id;
+                req.session.usuario.id;
 
 
             const observacao =
@@ -784,9 +758,7 @@ router.patch(
                             null,
 
                         administradorId,
-
                         solicitacaoId,
-
                         universidadeId
                     ]
                 );
@@ -834,7 +806,7 @@ router.patch(
 
 
 // =========================================================
-// USUÁRIOS VINCULADOS À PRÓPRIA IES
+// USUÁRIOS DA PRÓPRIA INSTITUIÇÃO
 // =========================================================
 
 router.get(
@@ -844,8 +816,7 @@ router.get(
         try {
 
             const universidadeId =
-                req.session
-                    .usuario
+                req.session.usuario
                     .universidade_id;
 
 
@@ -853,6 +824,7 @@ router.get(
                 await pool.query(
                     `
                     SELECT
+
                         id,
                         nome,
                         email,
@@ -898,7 +870,659 @@ router.get(
 
 
 // =========================================================
-// ALTERAR PERMISSÃO DE FUNCIONÁRIO
+// EDITAR CONTA
+//
+// Permite ao admin:
+// - nome
+// - e-mail
+// - perfil de outros funcionários
+// - redefinir senha de outro usuário
+//
+// Na própria conta:
+// - nome
+// - e-mail
+// - senha, exigindo a senha atual
+// - NÃO permite remover o próprio perfil de administrador
+// =========================================================
+
+router.patch(
+    "/usuarios/:id/conta",
+    async (req, res) => {
+
+        try {
+
+            const usuarioId =
+                Number(
+                    req.params.id
+                );
+
+
+            if (
+                !idValido(
+                    usuarioId
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Usuário inválido"
+                    });
+            }
+
+
+            const universidadeId =
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
+
+
+            const administradorId =
+                Number(
+                    req.session.usuario.id
+                );
+
+
+            const ehProprioUsuario =
+                administradorId ===
+                usuarioId;
+
+
+            let nome =
+                String(
+                    req.body.nome ||
+                    ""
+                )
+                    .trim();
+
+
+            let email =
+                String(
+                    req.body.email ||
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            const perfil =
+                String(
+                    req.body.perfil ||
+                    ""
+                )
+                    .trim();
+
+
+            const senhaAtual =
+                String(
+                    req.body.senha_atual ||
+                    ""
+                );
+
+
+            const novaSenha =
+                String(
+                    req.body.nova_senha ||
+                    ""
+                );
+
+
+            const confirmarNovaSenha =
+                String(
+                    req.body
+                        .confirmar_nova_senha ||
+                    ""
+                );
+
+
+            // =================================================
+            // DADOS BÁSICOS
+            // =================================================
+
+            if (
+                nome.length < 3
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe um nome válido"
+                    });
+            }
+
+
+            if (
+                nome.length > 150
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O nome deve possuir no máximo 150 caracteres"
+                    });
+            }
+
+
+            if (
+                !emailValido(
+                    email
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe um e-mail válido"
+                    });
+            }
+
+
+            if (
+                email.length > 150
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O e-mail deve possuir no máximo 150 caracteres"
+                    });
+            }
+
+
+            // =================================================
+            // GARANTIR QUE A CONTA PERTENCE À MESMA IES
+            // =================================================
+
+            const atual =
+                await pool.query(
+                    `
+                    SELECT
+
+                        id,
+                        universidade_id,
+                        nome,
+                        email,
+                        perfil,
+                        ativo,
+                        senha_hash
+
+                    FROM usuario
+
+                    WHERE
+                        id = $1
+                        AND universidade_id = $2
+
+                    LIMIT 1
+                    `,
+                    [
+                        usuarioId,
+                        universidadeId
+                    ]
+                );
+
+
+            if (
+                atual.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Usuário não encontrado nesta instituição"
+                    });
+            }
+
+
+            const usuarioAtual =
+                atual.rows[0];
+
+
+            // =================================================
+            // PERFIL
+            // =================================================
+
+            if (
+                usuarioAtual.perfil ===
+                "aluno"
+            ) {
+
+                if (
+                    perfil !==
+                    "aluno"
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "O perfil de aluno não pode ser convertido por esta operação"
+                        });
+                }
+
+
+            } else {
+
+                const perfisFuncionario = [
+                    "consulta_institucional",
+                    "gestor",
+                    "admin_universidade"
+                ];
+
+
+                if (
+                    !perfisFuncionario.includes(
+                        perfil
+                    )
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Permissão inválida"
+                        });
+                }
+            }
+
+
+            // =================================================
+            // NÃO DEIXAR ADMIN REMOVER O PRÓPRIO ACESSO
+            // =================================================
+
+            if (
+                ehProprioUsuario &&
+                perfil !==
+                "admin_universidade"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Você não pode remover o próprio acesso de administrador. Essa alteração deve ser feita pelo super administrador."
+                    });
+            }
+
+
+            // =================================================
+            // E-MAIL ÚNICO
+            // =================================================
+
+            const emailExistente =
+                await pool.query(
+                    `
+                    SELECT id
+
+                    FROM usuario
+
+                    WHERE
+                        LOWER(email) =
+                            LOWER($1)
+
+                        AND id <> $2
+
+                    LIMIT 1
+                    `,
+                    [
+                        email,
+                        usuarioId
+                    ]
+                );
+
+
+            if (
+                emailExistente.rows.length >
+                0
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Este e-mail já está cadastrado em outra conta"
+                    });
+            }
+
+
+            // =================================================
+            // SENHA
+            // =================================================
+
+            const pretendeAlterarSenha =
+                senhaAtual.length > 0 ||
+                novaSenha.length > 0 ||
+                confirmarNovaSenha.length > 0;
+
+
+            let novoHash =
+                null;
+
+
+            if (
+                pretendeAlterarSenha
+            ) {
+
+                if (
+                    !novaSenha ||
+                    !confirmarNovaSenha
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Informe e confirme a nova senha"
+                        });
+                }
+
+
+                if (
+                    novaSenha.length < 6
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "A nova senha deve possuir pelo menos 6 caracteres"
+                        });
+                }
+
+
+                if (
+                    novaSenha.length > 72
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "A nova senha deve possuir no máximo 72 caracteres"
+                        });
+                }
+
+
+                if (
+                    novaSenha !==
+                    confirmarNovaSenha
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "A confirmação da nova senha não confere"
+                        });
+                }
+
+
+                // =============================================
+                // NA PRÓPRIA CONTA, EXIGIR SENHA ATUAL
+                // =============================================
+
+                if (
+                    ehProprioUsuario
+                ) {
+
+                    if (
+                        !senhaAtual
+                    ) {
+
+                        return res
+                            .status(400)
+                            .json({
+                                erro:
+                                    "Informe sua senha atual para alterar a própria senha"
+                            });
+                    }
+
+
+                    const senhaCorreta =
+                        await bcrypt.compare(
+                            senhaAtual,
+                            usuarioAtual
+                                .senha_hash
+                        );
+
+
+                    if (
+                        !senhaCorreta
+                    ) {
+
+                        return res
+                            .status(401)
+                            .json({
+                                erro:
+                                    "A senha atual está incorreta"
+                            });
+                    }
+
+
+                    const mesmaSenha =
+                        await bcrypt.compare(
+                            novaSenha,
+                            usuarioAtual
+                                .senha_hash
+                        );
+
+
+                    if (
+                        mesmaSenha
+                    ) {
+
+                        return res
+                            .status(400)
+                            .json({
+                                erro:
+                                    "A nova senha deve ser diferente da senha atual"
+                            });
+                    }
+                }
+
+
+                novoHash =
+                    await bcrypt.hash(
+                        novaSenha,
+                        10
+                    );
+            }
+
+
+            // =================================================
+            // ATUALIZAR CONTA
+            // =================================================
+
+            let resultado;
+
+
+            if (
+                novoHash
+            ) {
+
+                resultado =
+                    await pool.query(
+                        `
+                        UPDATE usuario
+
+                        SET
+                            nome = $1,
+                            email = $2,
+                            perfil = $3,
+                            senha_hash = $4,
+                            atualizado_em = NOW()
+
+                        WHERE
+                            id = $5
+                            AND universidade_id = $6
+
+                        RETURNING
+
+                            id,
+                            universidade_id,
+                            nome,
+                            email,
+                            perfil,
+                            ativo,
+                            atualizado_em
+                        `,
+                        [
+                            nome,
+                            email,
+                            perfil,
+                            novoHash,
+                            usuarioId,
+                            universidadeId
+                        ]
+                    );
+
+
+            } else {
+
+                resultado =
+                    await pool.query(
+                        `
+                        UPDATE usuario
+
+                        SET
+                            nome = $1,
+                            email = $2,
+                            perfil = $3,
+                            atualizado_em = NOW()
+
+                        WHERE
+                            id = $4
+                            AND universidade_id = $5
+
+                        RETURNING
+
+                            id,
+                            universidade_id,
+                            nome,
+                            email,
+                            perfil,
+                            ativo,
+                            atualizado_em
+                        `,
+                        [
+                            nome,
+                            email,
+                            perfil,
+                            usuarioId,
+                            universidadeId
+                        ]
+                    );
+            }
+
+
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Usuário não encontrado"
+                    });
+            }
+
+
+            // =================================================
+            // SE EDITOU A PRÓPRIA CONTA,
+            // ATUALIZAR A SESSÃO
+            // =================================================
+
+            if (
+                ehProprioUsuario
+            ) {
+
+                req.session.usuario.nome =
+                    resultado.rows[0]
+                        .nome;
+
+
+                req.session.usuario.email =
+                    resultado.rows[0]
+                        .email;
+
+
+                req.session.usuario.perfil =
+                    resultado.rows[0]
+                        .perfil;
+            }
+
+
+            res.json({
+
+                mensagem:
+                    pretendeAlterarSenha
+                        ? "Conta e senha atualizadas com sucesso"
+                        : "Conta atualizada com sucesso",
+
+                usuario:
+                    resultado.rows[0]
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao editar conta institucional:",
+                erro
+            );
+
+
+            if (
+                erro.code ===
+                "23505"
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Este e-mail já está cadastrado"
+                    });
+            }
+
+
+            if (
+                erro.code ===
+                "23514"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Perfil e instituição incompatíveis"
+                    });
+            }
+
+
+            res.status(500).json({
+                erro:
+                    "Erro ao atualizar a conta"
+            });
+        }
+    }
+);
+
+
+// =========================================================
+// ROTA ANTIGA DE PERFIL
+//
+// Mantida para compatibilidade com versões anteriores
+// do frontend.
 // =========================================================
 
 router.patch(
@@ -908,23 +1532,36 @@ router.patch(
         try {
 
             const usuarioId =
-                Number.parseInt(
-                    req.params.id,
-                    10
+                Number(
+                    req.params.id
                 );
 
 
+            if (
+                !idValido(
+                    usuarioId
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Usuário inválido"
+                    });
+            }
+
+
             const universidadeId =
-                req.session
-                    .usuario
-                    .universidade_id;
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
 
 
             const administradorId =
                 Number(
-                    req.session
-                        .usuario
-                        .id
+                    req.session.usuario.id
                 );
 
 
@@ -941,21 +1578,6 @@ router.patch(
                 "gestor",
                 "admin_universidade"
             ];
-
-
-            if (
-                !Number.isInteger(
-                    usuarioId
-                )
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Usuário inválido"
-                    });
-            }
 
 
             if (
@@ -977,10 +1599,10 @@ router.patch(
                 await pool.query(
                     `
                     SELECT
+
                         id,
                         perfil,
-                        universidade_id,
-                        ativo
+                        universidade_id
 
                     FROM usuario
 
@@ -1012,8 +1634,7 @@ router.patch(
 
 
             if (
-                atual.rows[0]
-                    .perfil ===
+                atual.rows[0].perfil ===
                 "aluno"
             ) {
 
@@ -1021,7 +1642,7 @@ router.patch(
                     .status(400)
                     .json({
                         erro:
-                            "O perfil de aluno não pode ser convertido em perfil administrativo por esta operação"
+                            "O perfil de aluno não pode ser convertido em perfil administrativo"
                     });
             }
 
@@ -1056,6 +1677,7 @@ router.patch(
                         AND universidade_id = $3
 
                     RETURNING
+
                         id,
                         nome,
                         email,
