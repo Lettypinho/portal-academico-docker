@@ -2,12 +2,16 @@ const express =
     require("express");
 
 const pool =
-    require("../config/database");
+    require(
+        "../config/database"
+    );
 
 const {
     exigirPerfil
 } =
-    require("../middleware/auth");
+    require(
+        "../middleware/auth"
+    );
 
 
 const router =
@@ -88,11 +92,17 @@ router.get(
             const universidadesRecentes =
                 await pool.query(`
                     SELECT
+
                         id,
+
                         codigo,
+
                         nome,
+
                         sigla,
+
                         cidade,
+
                         estado,
 
                         organizacao_academica,
@@ -128,21 +138,17 @@ router.get(
 
                         u.criado_em,
 
-
                         uni.nome
                             AS universidade,
 
                         uni.sigla
                             AS universidade_sigla
 
-
                     FROM usuario u
-
 
                     LEFT JOIN universidade uni
                         ON uni.id =
                             u.universidade_id
-
 
                     ORDER BY
                         u.criado_em DESC
@@ -172,10 +178,12 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao carregar resumo administrativo"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar resumo administrativo"
+                });
         }
     }
 );
@@ -183,7 +191,6 @@ router.get(
 
 // =========================================================
 // LISTAR INSTITUIÇÕES
-// INCLUSIVE INATIVAS
 // =========================================================
 
 router.get(
@@ -224,31 +231,25 @@ router.get(
 
                         u.criado_em,
 
-
                         COUNT(
                             DISTINCT c.id
                         )
                             AS total_cursos,
-
 
                         COUNT(
                             DISTINCT us.id
                         )
                             AS total_usuarios
 
-
                     FROM universidade u
-
 
                     LEFT JOIN curso c
                         ON c.universidade_id =
                             u.id
 
-
                     LEFT JOIN usuario us
                         ON us.universidade_id =
                             u.id
-
 
                     GROUP BY
 
@@ -280,7 +281,6 @@ router.get(
 
                         u.criado_em
 
-
                     ORDER BY
                         u.nome
                 `);
@@ -299,10 +299,12 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar instituições"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar instituições"
+                });
         }
     }
 );
@@ -331,7 +333,9 @@ router.patch(
 
 
             if (
-                !Number.isInteger(id) ||
+                !Number.isInteger(
+                    id
+                ) ||
                 id <= 0
             ) {
 
@@ -370,14 +374,23 @@ router.patch(
                         id = $2
 
                     RETURNING
+
                         id,
+
                         codigo,
+
                         nome,
+
                         sigla,
+
                         cidade,
+
                         estado,
+
                         organizacao_academica,
+
                         categoria_administrativa,
+
                         ativo
                     `,
                     [
@@ -414,10 +427,12 @@ router.patch(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao atualizar instituição"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao atualizar instituição"
+                });
         }
     }
 );
@@ -453,27 +468,24 @@ router.get(
 
                         u.atualizado_em,
 
-
                         uni.nome
                             AS universidade,
 
                         uni.sigla
                             AS universidade_sigla,
 
-
                         uni.organizacao_academica
 
-
                     FROM usuario u
-
 
                     LEFT JOIN universidade uni
                         ON uni.id =
                             u.universidade_id
 
-
                     ORDER BY
+
                         u.criado_em DESC,
+
                         u.nome
                 `);
 
@@ -491,10 +503,12 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao consultar usuários"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao consultar usuários"
+                });
         }
     }
 );
@@ -525,7 +539,9 @@ router.patch(
 
 
             if (
-                !Number.isInteger(id) ||
+                !Number.isInteger(
+                    id
+                ) ||
                 id <= 0
             ) {
 
@@ -538,9 +554,15 @@ router.patch(
             }
 
 
+            // =================================================
+            // PERFIS
+            // =================================================
+
             const perfisPermitidos = [
 
                 "publico",
+
+                "aluno",
 
                 "consulta_institucional",
 
@@ -553,9 +575,10 @@ router.patch(
 
 
             if (
-                !perfisPermitidos.includes(
-                    perfil
-                )
+                !perfisPermitidos
+                    .includes(
+                        perfil
+                    )
             ) {
 
                 return res
@@ -582,17 +605,21 @@ router.patch(
 
 
             // =================================================
-            // PROTEGER PRÓPRIO SUPER ADMIN
+            // PROTEGER O PRÓPRIO SUPER ADMIN
             // =================================================
 
             if (
                 Number(
-                    req.session.usuario.id
-                ) === id &&
+                    req.session
+                        .usuario
+                        .id
+                ) ===
+                    id &&
                 (
                     perfil !==
                         "super_admin" ||
-                    ativo === false
+                    ativo ===
+                        false
                 )
             ) {
 
@@ -605,7 +632,13 @@ router.patch(
             }
 
 
-            const perfisInstitucionais = [
+            // =================================================
+            // PERFIS QUE EXIGEM INSTITUIÇÃO
+            // =================================================
+
+            const perfisComInstituicao = [
+
+                "aluno",
 
                 "consulta_institucional",
 
@@ -616,9 +649,10 @@ router.patch(
 
 
             if (
-                perfisInstitucionais.includes(
-                    perfil
-                )
+                perfisComInstituicao
+                    .includes(
+                        perfil
+                    )
             ) {
 
                 universidade_id =
@@ -631,7 +665,8 @@ router.patch(
                     !Number.isInteger(
                         universidade_id
                     ) ||
-                    universidade_id <= 0
+                    universidade_id <=
+                        0
                 ) {
 
                     return res
@@ -647,13 +682,17 @@ router.patch(
                     await pool.query(
                         `
                         SELECT
+
                             id,
+
                             ativo
 
                         FROM universidade
 
                         WHERE
                             id = $1
+
+                        LIMIT 1
                         `,
                         [
                             universidade_id
@@ -676,8 +715,10 @@ router.patch(
 
 
                 if (
-                    instituicao.rows[0]
-                        .ativo === false
+                    instituicao
+                        .rows[0]
+                        .ativo ===
+                    false
                 ) {
 
                     return res
@@ -696,12 +737,17 @@ router.patch(
             }
 
 
+            // =================================================
+            // ALTERAR
+            // =================================================
+
             const resultado =
                 await pool.query(
                     `
                     UPDATE usuario
 
                     SET
+
                         perfil = $1,
 
                         universidade_id = $2,
@@ -714,12 +760,19 @@ router.patch(
                         id = $4
 
                     RETURNING
+
                         id,
+
                         universidade_id,
+
                         nome,
+
                         email,
+
                         perfil,
+
                         ativo,
+
                         atualizado_em
                     `,
                     [
@@ -777,10 +830,12 @@ router.patch(
             }
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao atualizar usuário"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao atualizar usuário"
+                });
         }
     }
 );

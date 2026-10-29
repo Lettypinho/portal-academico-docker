@@ -1,24 +1,44 @@
-let adminAtual = null;
+let adminAtual =
+    null;
 
-let universidadesAdmin = [];
+let universidadesAdmin =
+    [];
 
-let usuariosAdmin = [];
+let usuariosAdmin =
+    [];
 
 
 // =========================================================
 // SEGURANÇA
 // =========================================================
 
-function escaparHtml(valor) {
+function escaparHtml(
+    valor
+) {
 
     return String(
         valor ?? ""
     )
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
@@ -26,12 +46,17 @@ function escaparHtml(valor) {
 // PERFIS
 // =========================================================
 
-function nomePerfil(perfil) {
+function nomePerfil(
+    perfil
+) {
 
     const nomes = {
 
         publico:
             "Público",
+
+        aluno:
+            "Aluno",
 
         consulta_institucional:
             "Consulta institucional",
@@ -48,19 +73,32 @@ function nomePerfil(perfil) {
 
 
     return (
-        nomes[perfil] ||
-        perfil
+        nomes[
+            perfil
+        ] ||
+        perfil ||
+        "-"
     );
 }
 
 
-function perfilInstitucional(perfil) {
+function perfilComInstituicao(
+    perfil
+) {
 
     return [
+
+        "aluno",
+
         "consulta_institucional",
+
         "gestor",
+
         "admin_universidade"
-    ].includes(perfil);
+
+    ].includes(
+        perfil
+    );
 }
 
 
@@ -68,15 +106,20 @@ function perfilInstitucional(perfil) {
 // DATA
 // =========================================================
 
-function formatarData(valor) {
+function formatarData(
+    valor
+) {
 
     if (!valor) {
+
         return "-";
     }
 
 
     const data =
-        new Date(valor);
+        new Date(
+            valor
+        );
 
 
     if (
@@ -84,13 +127,15 @@ function formatarData(valor) {
             data.getTime()
         )
     ) {
+
         return "-";
     }
 
 
-    return data.toLocaleDateString(
-        "pt-BR"
-    );
+    return data
+        .toLocaleDateString(
+            "pt-BR"
+        );
 }
 
 
@@ -106,7 +151,9 @@ async function carregarAdmin() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         window.location.href =
             "/login.html";
@@ -125,8 +172,12 @@ async function carregarAdmin() {
     ) {
 
         if (
-            adminAtual.perfil ===
-            "publico"
+            [
+                "publico",
+                "aluno"
+            ].includes(
+                adminAtual.perfil
+            )
         ) {
 
             window.location.href =
@@ -143,12 +194,17 @@ async function carregarAdmin() {
     }
 
 
-    document
-        .getElementById(
+    const nome =
+        document.getElementById(
             "admin-nome"
-        )
-        .textContent =
+        );
+
+
+    if (nome) {
+
+        nome.textContent =
             adminAtual.nome;
+    }
 
 
     return true;
@@ -191,7 +247,9 @@ async function carregarResumo() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Erro ao carregar resumo administrativo"
@@ -212,7 +270,8 @@ async function carregarResumo() {
             "stat-universidades"
         )
         .textContent =
-            resumo.total_universidades;
+        resumo
+            .total_universidades;
 
 
     document
@@ -220,7 +279,7 @@ async function carregarResumo() {
             "stat-universidades-ativas"
         )
         .textContent =
-            `${resumo.universidades_ativas} ativas`;
+        `${resumo.universidades_ativas} ativas`;
 
 
     document
@@ -228,7 +287,8 @@ async function carregarResumo() {
             "stat-usuarios"
         )
         .textContent =
-            resumo.total_usuarios;
+        resumo
+            .total_usuarios;
 
 
     document
@@ -236,7 +296,8 @@ async function carregarResumo() {
             "stat-institucionais"
         )
         .textContent =
-            resumo.usuarios_institucionais;
+        resumo
+            .usuarios_institucionais;
 
 
     document
@@ -244,7 +305,8 @@ async function carregarResumo() {
             "stat-cursos"
         )
         .textContent =
-            resumo.total_cursos;
+        resumo
+            .total_cursos;
 
 
     document
@@ -252,16 +314,21 @@ async function carregarResumo() {
             "stat-alunos"
         )
         .textContent =
-            resumo.total_alunos;
+        resumo
+            .total_alunos;
 
 
     renderizarUniversidadesRecentes(
-        dados.universidades_recentes
+        dados
+            .universidades_recentes ||
+        []
     );
 
 
     renderizarUsuariosRecentes(
-        dados.usuarios_recentes
+        dados
+            .usuarios_recentes ||
+        []
     );
 }
 
@@ -280,9 +347,16 @@ function renderizarUniversidadesRecentes(
         );
 
 
-    if (!universidades.length) {
+    if (
+        !Array.isArray(
+            universidades
+        ) ||
+        universidades.length ===
+            0
+    ) {
 
         container.innerHTML = `
+
             <div class="admin-empty">
                 Nenhuma instituição cadastrada.
             </div>
@@ -312,20 +386,28 @@ function renderizarUniversidadesRecentes(
                         <div class="admin-simple-info">
 
                             <strong>
+
                                 ${escaparHtml(
                                     universidade.nome
                                 )}
+
                             </strong>
 
+
                             <span>
+
                                 ${escaparHtml(
-                                    universidade.organizacao_academica ||
+                                    universidade
+                                        .organizacao_academica ||
                                     "Instituição de Ensino Superior"
                                 )}
+
                                 •
+
                                 ${escaparHtml(
                                     universidade.estado
                                 )}
+
                             </span>
 
                         </div>
@@ -341,11 +423,13 @@ function renderizarUniversidadesRecentes(
                                 }
                             "
                         >
+
                             ${
                                 universidade.ativo
                                     ? "Ativa"
                                     : "Inativa"
                             }
+
                         </span>
 
                     </div>
@@ -369,9 +453,16 @@ function renderizarUsuariosRecentes(
         );
 
 
-    if (!usuarios.length) {
+    if (
+        !Array.isArray(
+            usuarios
+        ) ||
+        usuarios.length ===
+            0
+    ) {
 
         container.innerHTML = `
+
             <div class="admin-empty">
                 Nenhum usuário cadastrado.
             </div>
@@ -391,7 +482,10 @@ function renderizarUsuariosRecentes(
                         <div class="admin-simple-avatar user">
 
                             ${escaparHtml(
-                                usuario.nome
+                                String(
+                                    usuario.nome ||
+                                    "U"
+                                )
                                     .charAt(0)
                                     .toUpperCase()
                             )}
@@ -402,26 +496,33 @@ function renderizarUsuariosRecentes(
                         <div class="admin-simple-info">
 
                             <strong>
+
                                 ${escaparHtml(
                                     usuario.nome
                                 )}
+
                             </strong>
 
+
                             <span>
+
                                 ${escaparHtml(
                                     nomePerfil(
                                         usuario.perfil
                                     )
                                 )}
+
                             </span>
 
                         </div>
 
 
                         <small>
+
                             ${formatarData(
                                 usuario.criado_em
                             )}
+
                         </small>
 
                     </div>
@@ -443,7 +544,9 @@ async function carregarUniversidades() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Erro ao carregar instituições"
@@ -465,7 +568,7 @@ async function carregarUniversidades() {
 
 
 // =========================================================
-// TABELA INSTITUIÇÕES
+// RENDERIZAR INSTITUIÇÕES
 // =========================================================
 
 function renderizarUniversidades(
@@ -478,9 +581,16 @@ function renderizarUniversidades(
         );
 
 
-    if (!universidades.length) {
+    if (
+        !Array.isArray(
+            universidades
+        ) ||
+        universidades.length ===
+            0
+    ) {
 
         tbody.innerHTML = `
+
             <tr>
 
                 <td colspan="8">
@@ -506,22 +616,27 @@ function renderizarUniversidades(
                             <div class="admin-table-main">
 
                                 <strong>
+
                                     ${escaparHtml(
                                         universidade.nome
                                     )}
+
                                 </strong>
 
+
                                 <span>
-                                    ${
-                                        escaparHtml(
-                                            universidade.sigla ||
-                                            "Sem sigla"
-                                        )
-                                    }
+
+                                    ${escaparHtml(
+                                        universidade.sigla ||
+                                        "Sem sigla"
+                                    )}
+
                                     • Código
+
                                     ${escaparHtml(
                                         universidade.codigo
                                     )}
+
                                 </span>
 
                             </div>
@@ -530,39 +645,57 @@ function renderizarUniversidades(
 
 
                         <td>
+
                             ${escaparHtml(
-                                universidade.organizacao_academica ||
+                                universidade
+                                    .organizacao_academica ||
                                 "-"
                             )}
+
                         </td>
 
 
                         <td>
+
                             ${escaparHtml(
-                                universidade.categoria_administrativa ||
+                                universidade
+                                    .categoria_administrativa ||
                                 "-"
                             )}
+
                         </td>
 
 
                         <td>
+
                             ${escaparHtml(
                                 universidade.cidade
                             )}
+
                             /
+
                             ${escaparHtml(
                                 universidade.estado
                             )}
+
                         </td>
 
 
                         <td>
-                            ${universidade.total_cursos}
+
+                            ${escaparHtml(
+                                universidade.total_cursos
+                            )}
+
                         </td>
 
 
                         <td>
-                            ${universidade.total_usuarios}
+
+                            ${escaparHtml(
+                                universidade.total_usuarios
+                            )}
+
                         </td>
 
 
@@ -578,11 +711,13 @@ function renderizarUniversidades(
                                     }
                                 "
                             >
+
                                 ${
                                     universidade.ativo
                                         ? "Ativa"
                                         : "Inativa"
                                 }
+
                             </span>
 
                         </td>
@@ -591,6 +726,7 @@ function renderizarUniversidades(
                         <td>
 
                             <button
+                                type="button"
                                 class="
                                     admin-table-button
                                     ${
@@ -599,14 +735,8 @@ function renderizarUniversidades(
                                             : "success"
                                     }
                                 "
-
-                                data-universidade-status="
-                                    ${universidade.id}
-                                "
-
-                                data-ativo="
-                                    ${universidade.ativo}
-                                "
+                                data-universidade-status="${universidade.id}"
+                                data-ativo="${universidade.ativo}"
                             >
 
                                 ${
@@ -638,13 +768,15 @@ function renderizarUniversidades(
 
                         alterarStatusUniversidade(
                             Number(
-                                botao.dataset
+                                botao
+                                    .dataset
                                     .universidadeStatus
                             ),
 
-                            botao.dataset
+                            botao
+                                .dataset
                                 .ativo ===
-                                "true"
+                            "true"
                         );
                     }
                 );
@@ -674,7 +806,10 @@ async function alterarStatusUniversidade(
         );
 
 
-    if (!confirmar) {
+    if (
+        !confirmar
+    ) {
+
         return;
     }
 
@@ -708,9 +843,11 @@ async function alterarStatusUniversidade(
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
-        alert(
+        window.alert(
             dados.erro ||
             "Erro ao atualizar instituição"
         );
@@ -720,7 +857,9 @@ async function alterarStatusUniversidade(
 
 
     await Promise.all([
+
         carregarUniversidades(),
+
         carregarResumo()
     ]);
 }
@@ -743,7 +882,9 @@ async function cadastrarUniversidade(
         );
 
 
-    mensagem.textContent = "";
+    mensagem.textContent =
+        "";
+
 
     mensagem.className =
         "admin-message";
@@ -836,7 +977,9 @@ async function cadastrarUniversidade(
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         mensagem.textContent =
             dados.erro ||
@@ -869,12 +1012,14 @@ async function cadastrarUniversidade(
 
 
     await Promise.all([
+
         carregarUniversidades(),
+
         carregarResumo()
     ]);
 
 
-    setTimeout(
+    window.setTimeout(
         fecharFormularioUniversidade,
         700
     );
@@ -882,7 +1027,7 @@ async function cadastrarUniversidade(
 
 
 // =========================================================
-// FORMULÁRIO
+// FORMULÁRIO DE INSTITUIÇÃO
 // =========================================================
 
 function abrirFormularioUniversidade() {
@@ -915,12 +1060,12 @@ function fecharFormularioUniversidade() {
             "mensagem-universidade"
         )
         .textContent =
-            "";
+        "";
 }
 
 
 // =========================================================
-// PESQUISA INSTITUIÇÕES
+// FILTRAR INSTITUIÇÕES
 // =========================================================
 
 function filtrarUniversidades() {
@@ -936,26 +1081,35 @@ function filtrarUniversidades() {
 
 
     const resultado =
-        universidadesAdmin.filter(
-            universidade => {
+        universidadesAdmin
+            .filter(
+                universidade => {
 
-                const texto = `
-                    ${universidade.nome}
-                    ${universidade.sigla || ""}
-                    ${universidade.codigo}
-                    ${universidade.cidade}
-                    ${universidade.estado}
-                    ${universidade.organizacao_academica || ""}
-                    ${universidade.categoria_administrativa || ""}
-                `
-                    .toLowerCase();
+                    const texto = `
+
+                        ${universidade.nome || ""}
+
+                        ${universidade.sigla || ""}
+
+                        ${universidade.codigo || ""}
+
+                        ${universidade.cidade || ""}
+
+                        ${universidade.estado || ""}
+
+                        ${universidade.organizacao_academica || ""}
+
+                        ${universidade.categoria_administrativa || ""}
+                    `
+                        .toLowerCase();
 
 
-                return texto.includes(
-                    busca
-                );
-            }
-        );
+                    return texto
+                        .includes(
+                            busca
+                        );
+                }
+            );
 
 
     renderizarUniversidades(
@@ -976,7 +1130,9 @@ async function carregarUsuarios() {
         );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         throw new Error(
             "Erro ao carregar usuários"
@@ -991,6 +1147,10 @@ async function carregarUsuarios() {
     filtrarUsuarios();
 }
 
+
+// =========================================================
+// FILTRAR USUÁRIOS
+// =========================================================
 
 function filtrarUsuarios() {
 
@@ -1013,35 +1173,40 @@ function filtrarUsuarios() {
 
 
     const usuarios =
-        usuariosAdmin.filter(
-            usuario => {
+        usuariosAdmin
+            .filter(
+                usuario => {
 
-                const texto = `
-                    ${usuario.nome}
-                    ${usuario.email}
-                    ${usuario.universidade || ""}
-                `
-                    .toLowerCase();
+                    const texto = `
+
+                        ${usuario.nome || ""}
+
+                        ${usuario.email || ""}
+
+                        ${usuario.universidade || ""}
+                    `
+                        .toLowerCase();
 
 
-                const correspondeBusca =
-                    texto.includes(
-                        busca
+                    const correspondeBusca =
+                        texto
+                            .includes(
+                                busca
+                            );
+
+
+                    const correspondePerfil =
+                        !perfil ||
+                        usuario.perfil ===
+                            perfil;
+
+
+                    return (
+                        correspondeBusca &&
+                        correspondePerfil
                     );
-
-
-                const correspondePerfil =
-                    !perfil ||
-                    usuario.perfil ===
-                        perfil;
-
-
-                return (
-                    correspondeBusca &&
-                    correspondePerfil
-                );
-            }
-        );
+                }
+            );
 
 
     renderizarUsuarios(
@@ -1064,9 +1229,16 @@ function renderizarUsuarios(
         );
 
 
-    if (!usuarios.length) {
+    if (
+        !Array.isArray(
+            usuarios
+        ) ||
+        usuarios.length ===
+            0
+    ) {
 
         tbody.innerHTML = `
+
             <tr>
 
                 <td colspan="6">
@@ -1092,15 +1264,20 @@ function renderizarUsuarios(
                             <div class="admin-table-main">
 
                                 <strong>
+
                                     ${escaparHtml(
                                         usuario.nome
                                     )}
+
                                 </strong>
 
+
                                 <span>
+
                                     ${escaparHtml(
                                         usuario.email
                                     )}
+
                                 </span>
 
                             </div>
@@ -1124,10 +1301,12 @@ function renderizarUsuarios(
 
 
                         <td>
+
                             ${escaparHtml(
                                 usuario.universidade ||
                                 "-"
                             )}
+
                         </td>
 
 
@@ -1156,20 +1335,20 @@ function renderizarUsuarios(
 
 
                         <td>
+
                             ${formatarData(
                                 usuario.criado_em
                             )}
+
                         </td>
 
 
                         <td>
 
                             <button
+                                type="button"
                                 class="admin-table-button"
-
-                                data-editar-usuario="
-                                    ${usuario.id}
-                                "
+                                data-editar-usuario="${usuario.id}"
                             >
                                 Editar
                             </button>
@@ -1195,7 +1374,8 @@ function renderizarUsuarios(
 
                         abrirModalUsuario(
                             Number(
-                                botao.dataset
+                                botao
+                                    .dataset
                                     .editarUsuario
                             )
                         );
@@ -1207,7 +1387,7 @@ function renderizarUsuarios(
 
 
 // =========================================================
-// SELECT DE IES
+// SELECT DE INSTITUIÇÕES
 // =========================================================
 
 function preencherSelectUniversidades() {
@@ -1219,6 +1399,7 @@ function preencherSelectUniversidades() {
 
 
     select.innerHTML = `
+
         <option value="">
             Selecione
         </option>
@@ -1229,6 +1410,21 @@ function preencherSelectUniversidades() {
         .filter(
             universidade =>
                 universidade.ativo
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                String(
+                    a.nome
+                )
+                    .localeCompare(
+                        String(
+                            b.nome
+                        ),
+                        "pt-BR"
+                    )
         )
         .forEach(
             universidade => {
@@ -1244,8 +1440,7 @@ function preencherSelectUniversidades() {
 
 
                 const sigla =
-                    universidade.sigla
-                    ||
+                    universidade.sigla ||
                     universidade.nome;
 
 
@@ -1265,17 +1460,27 @@ function preencherSelectUniversidades() {
 // MODAL USUÁRIO
 // =========================================================
 
-function abrirModalUsuario(id) {
+function abrirModalUsuario(
+    id
+) {
 
     const usuario =
-        usuariosAdmin.find(
-            item =>
-                Number(item.id) ===
-                id
-        );
+        usuariosAdmin
+            .find(
+                item =>
+                    Number(
+                        item.id
+                    ) ===
+                    Number(
+                        id
+                    )
+            );
 
 
-    if (!usuario) {
+    if (
+        !usuario
+    ) {
+
         return;
     }
 
@@ -1285,7 +1490,7 @@ function abrirModalUsuario(id) {
             "modal-usuario-id"
         )
         .value =
-            usuario.id;
+        usuario.id;
 
 
     document
@@ -1293,7 +1498,7 @@ function abrirModalUsuario(id) {
             "modal-usuario-nome"
         )
         .textContent =
-            usuario.nome;
+        usuario.nome;
 
 
     document
@@ -1301,7 +1506,7 @@ function abrirModalUsuario(id) {
             "modal-usuario-email"
         )
         .textContent =
-            usuario.email;
+        usuario.email;
 
 
     document
@@ -1309,7 +1514,7 @@ function abrirModalUsuario(id) {
             "modal-perfil"
         )
         .value =
-            usuario.perfil;
+        usuario.perfil;
 
 
     document
@@ -1317,9 +1522,9 @@ function abrirModalUsuario(id) {
             "modal-ativo"
         )
         .value =
-            String(
-                usuario.ativo
-            );
+        String(
+            usuario.ativo
+        );
 
 
     document
@@ -1327,19 +1532,25 @@ function abrirModalUsuario(id) {
             "modal-universidade"
         )
         .value =
-            usuario.universidade_id ||
-            "";
+        usuario.universidade_id ||
+        "";
 
 
     atualizarCampoUniversidade();
 
 
-    document
-        .getElementById(
+    const mensagem =
+        document.getElementById(
             "mensagem-editar-usuario"
-        )
-        .textContent =
-            "";
+        );
+
+
+    mensagem.textContent =
+        "";
+
+
+    mensagem.className =
+        "admin-message";
 
 
     document
@@ -1367,7 +1578,7 @@ function fecharModalUsuario() {
 
 
 // =========================================================
-// PERFIL / IES
+// PERFIL / INSTITUIÇÃO
 // =========================================================
 
 function atualizarCampoUniversidade() {
@@ -1393,7 +1604,7 @@ function atualizarCampoUniversidade() {
 
 
     if (
-        perfilInstitucional(
+        perfilComInstituicao(
             perfil
         )
     ) {
@@ -1402,11 +1613,20 @@ function atualizarCampoUniversidade() {
             "hidden"
         );
 
+
+        select.required =
+            true;
+
     } else {
 
         grupo.classList.add(
             "hidden"
         );
+
+
+        select.required =
+            false;
+
 
         select.value =
             "";
@@ -1455,7 +1675,7 @@ async function salvarUsuario(
                 "modal-ativo"
             )
             .value ===
-            "true";
+        "true";
 
 
     const mensagem =
@@ -1467,19 +1687,20 @@ async function salvarUsuario(
     mensagem.textContent =
         "";
 
+
     mensagem.className =
         "admin-message";
 
 
     if (
-        perfilInstitucional(
+        perfilComInstituicao(
             perfil
         ) &&
         !universidadeId
     ) {
 
         mensagem.textContent =
-            "Selecione uma instituição para o perfil institucional.";
+            "Selecione uma instituição para este perfil.";
 
 
         mensagem.classList.add(
@@ -1529,7 +1750,9 @@ async function salvarUsuario(
             );
 
 
-    if (!resposta.ok) {
+    if (
+        !resposta.ok
+    ) {
 
         mensagem.textContent =
             dados.erro ||
@@ -1555,12 +1778,14 @@ async function salvarUsuario(
 
 
     await Promise.all([
+
         carregarUsuarios(),
+
         carregarResumo()
     ]);
 
 
-    setTimeout(
+    window.setTimeout(
         fecharModalUsuario,
         600
     );
@@ -1571,7 +1796,9 @@ async function salvarUsuario(
 // MENU
 // =========================================================
 
-function abrirSecao(nome) {
+function abrirSecao(
+    nome
+) {
 
     document
         .querySelectorAll(
@@ -1582,9 +1809,8 @@ function abrirSecao(nome) {
 
                 item.classList.toggle(
                     "active",
-
                     item.dataset.section ===
-                    nome
+                        nome
                 );
             }
         );
@@ -1595,16 +1821,25 @@ function abrirSecao(nome) {
             ".admin-section"
         )
         .forEach(
-            section => {
+            secao => {
 
-                section.classList.toggle(
+                secao.classList.toggle(
                     "active",
-
-                    section.id ===
-                    nome
+                    secao.id ===
+                        nome
                 );
             }
         );
+
+
+    window.scrollTo({
+
+        top:
+            0,
+
+        behavior:
+            "smooth"
+    });
 }
 
 
@@ -1622,7 +1857,9 @@ function configurarMenu() {
                     () => {
 
                         abrirSecao(
-                            item.dataset.section
+                            item
+                                .dataset
+                                .section
                         );
                     }
                 );
@@ -1642,7 +1879,9 @@ function configurarMenu() {
                     () => {
 
                         abrirSecao(
-                            botao.dataset.goSection
+                            botao
+                                .dataset
+                                .goSection
                         );
                     }
                 );
@@ -1779,7 +2018,7 @@ function configurarEventos() {
 
     document
         .querySelector(
-            ".admin-modal-backdrop"
+            "#modal-usuario .admin-modal-backdrop"
         )
         .addEventListener(
             "click",
@@ -1800,7 +2039,10 @@ async function iniciarAdmin() {
             await carregarAdmin();
 
 
-        if (!autorizado) {
+        if (
+            !autorizado
+        ) {
+
             return;
         }
 
@@ -1823,31 +2065,40 @@ async function iniciarAdmin() {
     } catch (erro) {
 
         console.error(
+            "Erro ao iniciar administração:",
             erro
         );
 
 
-        document
-            .querySelector(
+        const main =
+            document.querySelector(
                 ".admin-main"
-            )
-            .innerHTML = `
+            );
+
+
+        if (
+            main
+        ) {
+
+            main.innerHTML = `
 
                 <div class="admin-error">
 
                     <h2>
-                        Não foi possível carregar
-                        a administração
+                        Não foi possível carregar a administração
                     </h2>
 
                     <p>
+
                         ${escaparHtml(
                             erro.message
                         )}
+
                     </p>
 
                 </div>
             `;
+        }
     }
 }
 
