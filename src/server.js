@@ -33,6 +33,11 @@ const cursosRoutes =
         "./routes/cursos.routes"
     );
 
+const campiRoutes =
+    require(
+        "./routes/campi.routes"
+    );
+
 const indicadoresRoutes =
     require(
         "./routes/indicadores.routes"
@@ -235,6 +240,16 @@ app.use(
 app.use(
     "/api/universidades",
     universidadesRoutes
+);
+
+
+// =========================================================
+// CAMPI
+// =========================================================
+
+app.use(
+    "/api/campi",
+    campiRoutes
 );
 
 

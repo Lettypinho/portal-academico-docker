@@ -15,17 +15,40 @@ const router =
 
 
 // =========================================================
+// UTILITÁRIOS
+// =========================================================
+
+function idValido(
+    valor
+) {
+
+    const id =
+        Number(
+            valor
+        );
+
+
+    return (
+        Number.isInteger(id) &&
+        id > 0
+    );
+}
+
+
+// =========================================================
 // LISTAGEM PÚBLICA
 // =========================================================
 
 router.get(
     "/",
+
     async (req, res) => {
 
         try {
 
             const {
                 universidade_id,
+                campus_id,
                 nome,
                 modalidade,
                 grau,
@@ -98,6 +121,35 @@ router.get(
 
                     filtros.push(
                         `c.universidade_id = $${parametros.length}`
+                    );
+                }
+            }
+
+
+            if (
+                campus_id
+            ) {
+
+                const campusId =
+                    Number.parseInt(
+                        campus_id,
+                        10
+                    );
+
+
+                if (
+                    Number.isInteger(
+                        campusId
+                    )
+                ) {
+
+                    parametros.push(
+                        campusId
+                    );
+
+
+                    filtros.push(
+                        `c.campus_id = $${parametros.length}`
                     );
                 }
             }
@@ -203,17 +255,31 @@ router.get(
                     SELECT
 
                         c.id,
+
                         c.codigo_inep,
+
                         c.nome,
+
                         c.grau_academico,
+
                         c.nivel_academico,
+
                         c.modalidade,
+
                         c.duracao_semestres,
+
                         c.carga_horaria,
+
                         c.situacao_inep,
+
                         c.status,
+
                         c.ano_censo,
+
                         c.origem_dados,
+
+                        c.campus_id,
+
 
                         u.id
                             AS universidade_id,
@@ -228,9 +294,40 @@ router.get(
                             AS universidade_sigla,
 
                         u.cidade,
+
                         u.estado,
+
                         u.organizacao_academica,
-                        u.categoria_administrativa
+
+                        u.categoria_administrativa,
+
+
+                        ca.nome
+                            AS campus_nome,
+
+                        ca.endereco
+                            AS campus_endereco,
+
+                        ca.numero
+                            AS campus_numero,
+
+                        ca.bairro
+                            AS campus_bairro,
+
+                        ca.cidade
+                            AS campus_cidade,
+
+                        ca.estado
+                            AS campus_estado,
+
+                        ca.cep
+                            AS campus_cep,
+
+                        ca.latitude
+                            AS campus_latitude,
+
+                        ca.longitude
+                            AS campus_longitude
 
                     FROM curso c
 
@@ -238,8 +335,14 @@ router.get(
                         ON u.id =
                             c.universidade_id
 
+                    LEFT JOIN campus ca
+                        ON ca.id =
+                            c.campus_id
+
                     WHERE
-                        ${filtros.join(" AND ")}
+                        ${filtros.join(
+                            " AND "
+                        )}
 
                     ORDER BY
                         c.nome,
@@ -314,27 +417,53 @@ router.get(
                     `
                     SELECT
 
-                        id,
-                        codigo_inep,
-                        nome,
-                        grau_academico,
-                        nivel_academico,
-                        modalidade,
-                        duracao_semestres,
-                        carga_horaria,
-                        situacao_inep,
-                        status,
-                        ano_censo,
-                        origem_dados
+                        c.id,
 
-                    FROM curso
+                        c.codigo_inep,
+
+                        c.nome,
+
+                        c.grau_academico,
+
+                        c.nivel_academico,
+
+                        c.modalidade,
+
+                        c.duracao_semestres,
+
+                        c.carga_horaria,
+
+                        c.situacao_inep,
+
+                        c.status,
+
+                        c.ano_censo,
+
+                        c.origem_dados,
+
+                        c.campus_id,
+
+                        ca.nome
+                            AS campus_nome,
+
+                        ca.cidade
+                            AS campus_cidade,
+
+                        ca.estado
+                            AS campus_estado
+
+                    FROM curso c
+
+                    LEFT JOIN campus ca
+                        ON ca.id =
+                            c.campus_id
 
                     WHERE
-                        universidade_id = $1
+                        c.universidade_id = $1
 
                     ORDER BY
-                        nome,
-                        modalidade
+                        c.nome,
+                        c.modalidade
                     `,
                     [
                         usuario
@@ -388,6 +517,7 @@ router.post(
 
             let {
                 universidade_id,
+                campus_id,
                 nome,
                 modalidade,
                 duracao_semestres,
@@ -410,11 +540,6 @@ router.post(
                     });
             }
 
-
-            // =================================================
-            // QUALQUER USUÁRIO QUE NÃO SEJA SUPER ADMIN
-            // FICA RESTRITO À PRÓPRIA IES.
-            // =================================================
 
             if (
                 usuario.perfil !==
@@ -449,10 +574,9 @@ router.post(
 
 
             if (
-                !Number.isInteger(
+                !idValido(
                     universidade_id
-                ) ||
-                universidade_id <= 0
+                )
             ) {
 
                 return res
@@ -492,6 +616,75 @@ router.post(
                         erro:
                             "Instituição inválida"
                     });
+            }
+
+
+            let campusId =
+                null;
+
+
+            if (
+                campus_id !== undefined &&
+                campus_id !== null &&
+                campus_id !== ""
+            ) {
+
+                campusId =
+                    Number(
+                        campus_id
+                    );
+
+
+                if (
+                    !idValido(
+                        campusId
+                    )
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Campus inválido"
+                        });
+                }
+
+
+                const campus =
+                    await pool.query(
+                        `
+                        SELECT id
+
+                        FROM campus
+
+                        WHERE
+                            id = $1
+
+                            AND universidade_id = $2
+
+                            AND ativo = TRUE
+
+                        LIMIT 1
+                        `,
+                        [
+                            campusId,
+                            universidade_id
+                        ]
+                    );
+
+
+                if (
+                    campus.rows.length ===
+                    0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "O campus informado não pertence à instituição"
+                        });
+                }
             }
 
 
@@ -614,12 +807,21 @@ router.post(
                     INSERT INTO curso
                     (
                         universidade_id,
+
+                        campus_id,
+
                         nome,
+
                         modalidade,
+
                         duracao_semestres,
+
                         grau_academico,
+
                         nivel_academico,
+
                         carga_horaria,
+
                         origem_dados
                     )
 
@@ -630,8 +832,9 @@ router.post(
                         $3,
                         $4,
                         $5,
-                        'Graduação',
                         $6,
+                        'Graduação',
+                        $7,
                         'SIA'
                     )
 
@@ -639,6 +842,8 @@ router.post(
                     `,
                     [
                         universidade_id,
+
+                        campusId,
 
                         String(nome)
                             .trim(),
@@ -673,7 +878,7 @@ router.post(
                     .status(409)
                     .json({
                         erro:
-                            "Este curso já está cadastrado nesta instituição"
+                            "Este curso já está cadastrado"
                     });
             }
 
@@ -703,6 +908,232 @@ router.post(
                 .json({
                     erro:
                         "Erro ao cadastrar curso"
+                });
+        }
+    }
+);
+
+
+// =========================================================
+// ALTERAR CAMPUS DE UM CURSO
+// =========================================================
+
+router.patch(
+    "/:id/campus",
+
+    exigirPermissao(
+        "GERENCIAR_CURSOS"
+    ),
+
+    async (req, res) => {
+
+        try {
+
+            const usuario =
+                req.session.usuario;
+
+
+            const cursoId =
+                Number(
+                    req.params.id
+                );
+
+
+            if (
+                !idValido(
+                    cursoId
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Curso inválido"
+                    });
+            }
+
+
+            const cursoResultado =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        universidade_id
+
+                    FROM curso
+
+                    WHERE
+                        id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        cursoId
+                    ]
+                );
+
+
+            if (
+                cursoResultado.rows
+                    .length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Curso não encontrado"
+                    });
+            }
+
+
+            const curso =
+                cursoResultado.rows[0];
+
+
+            if (
+                usuario.perfil !==
+                    "super_admin" &&
+                Number(
+                    usuario.universidade_id
+                ) !==
+                Number(
+                    curso.universidade_id
+                )
+            ) {
+
+                return res
+                    .status(403)
+                    .json({
+                        erro:
+                            "Você só pode alterar cursos da sua instituição"
+                    });
+            }
+
+
+            let campusId =
+                null;
+
+
+            if (
+                req.body.campus_id !==
+                    undefined &&
+                req.body.campus_id !==
+                    null &&
+                req.body.campus_id !==
+                    ""
+            ) {
+
+                campusId =
+                    Number(
+                        req.body
+                            .campus_id
+                    );
+
+
+                if (
+                    !idValido(
+                        campusId
+                    )
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "Campus inválido"
+                        });
+                }
+
+
+                const campus =
+                    await pool.query(
+                        `
+                        SELECT id
+
+                        FROM campus
+
+                        WHERE
+                            id = $1
+
+                            AND universidade_id = $2
+
+                            AND ativo = TRUE
+
+                        LIMIT 1
+                        `,
+                        [
+                            campusId,
+                            curso.universidade_id
+                        ]
+                    );
+
+
+                if (
+                    campus.rows.length ===
+                    0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "O campus informado não pertence à instituição"
+                        });
+                }
+            }
+
+
+            const resultado =
+                await pool.query(
+                    `
+                    UPDATE curso
+
+                    SET
+                        campus_id = $1
+
+                    WHERE
+                        id = $2
+
+                    RETURNING
+                        id,
+                        universidade_id,
+                        campus_id,
+                        nome,
+                        modalidade
+                    `,
+                    [
+                        campusId,
+                        cursoId
+                    ]
+                );
+
+
+            res.json({
+
+                mensagem:
+                    "Campus do curso atualizado com sucesso",
+
+                curso:
+                    resultado.rows[0]
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao alterar campus do curso:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao alterar campus do curso"
                 });
         }
     }
