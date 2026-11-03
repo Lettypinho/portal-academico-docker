@@ -1,10 +1,25 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
+const express =
+    require("express");
 
-const pool = require("../config/database");
-const { exigirLogin } = require("../middleware/auth");
+const bcrypt =
+    require("bcryptjs");
 
-const router = express.Router();
+const pool =
+    require("../config/database");
+
+const {
+    exigirLogin
+} =
+    require("../middleware/auth");
+
+const {
+    listarPermissoesUsuario
+} =
+    require("../services/permissoes.service");
+
+
+const router =
+    express.Router();
 
 
 // =========================================================
@@ -13,7 +28,9 @@ const router = express.Router();
 
 router.get(
     "/",
+
     exigirLogin,
+
     async (req, res) => {
 
         try {
@@ -26,11 +43,17 @@ router.get(
                 await pool.query(
                     `
                     SELECT
+
                         u.id,
+
                         u.nome,
+
                         u.email,
+
                         u.perfil,
+
                         u.universidade_id,
+
 
                         uni.codigo
                             AS universidade_codigo,
@@ -78,8 +101,40 @@ router.get(
             }
 
 
+            const usuario =
+                resultado.rows[0];
+
+
+            // =================================================
+            // ATUALIZAR SESSÃO
+            //
+            // Evita manter perfil ou instituição antigos
+            // depois de alterações administrativas.
+            // =================================================
+
+            req.session.usuario = {
+
+                ...req.session.usuario,
+
+                id:
+                    usuario.id,
+
+                nome:
+                    usuario.nome,
+
+                email:
+                    usuario.email,
+
+                perfil:
+                    usuario.perfil,
+
+                universidade_id:
+                    usuario.universidade_id
+            };
+
+
             res.json(
-                resultado.rows[0]
+                usuario
             );
 
 
@@ -91,10 +146,60 @@ router.get(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao carregar perfil"
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar perfil"
+                });
+        }
+    }
+);
+
+
+// =========================================================
+// CONSULTAR PRÓPRIAS PERMISSÕES
+// =========================================================
+
+router.get(
+    "/permissoes",
+
+    exigirLogin,
+
+    async (req, res) => {
+
+        try {
+
+            const usuarioId =
+                req.session.usuario.id;
+
+
+            const permissoes =
+                await listarPermissoesUsuario(
+                    usuarioId
+                );
+
+
+            res.json({
+
+                permissoes
             });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao carregar permissões do usuário:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar permissões do usuário"
+                });
         }
     }
 );
@@ -106,7 +211,9 @@ router.get(
 
 router.put(
     "/dados",
+
     exigirLogin,
+
     async (req, res) => {
 
         try {
@@ -114,7 +221,8 @@ router.put(
             let {
                 nome,
                 email
-            } = req.body;
+            } =
+                req.body;
 
 
             if (
@@ -132,12 +240,16 @@ router.put(
 
 
             nome =
-                String(nome)
+                String(
+                    nome
+                )
                     .trim();
 
 
             email =
-                String(email)
+                String(
+                    email
+                )
                     .trim()
                     .toLowerCase();
 
@@ -217,16 +329,27 @@ router.put(
                     UPDATE usuario
 
                     SET
-                        nome = $1,
-                        email = $2
 
-                    WHERE id = $3
+                        nome = $1,
+
+                        email = $2,
+
+                        atualizado_em =
+                            NOW()
+
+                    WHERE
+                        id = $3
 
                     RETURNING
+
                         id,
+
                         nome,
+
                         email,
+
                         perfil,
+
                         universidade_id
                     `,
                     [
@@ -252,11 +375,13 @@ router.put(
 
 
             req.session.usuario.nome =
-                resultado.rows[0].nome;
+                resultado.rows[0]
+                    .nome;
 
 
             req.session.usuario.email =
-                resultado.rows[0].email;
+                resultado.rows[0]
+                    .email;
 
 
             res.json({
@@ -292,10 +417,12 @@ router.put(
             }
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao atualizar perfil"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao atualizar perfil"
+                });
         }
     }
 );
@@ -307,7 +434,9 @@ router.put(
 
 router.put(
     "/senha",
+
     exigirLogin,
+
     async (req, res) => {
 
         try {
@@ -316,7 +445,8 @@ router.put(
                 senha_atual,
                 nova_senha,
                 confirmar_nova_senha
-            } = req.body;
+            } =
+                req.body;
 
 
             if (
@@ -388,7 +518,8 @@ router.put(
 
                     FROM usuario
 
-                    WHERE id = $1
+                    WHERE
+                        id = $1
 
                     LIMIT 1
                     `,
@@ -441,7 +572,9 @@ router.put(
                 );
 
 
-            if (mesmaSenha) {
+            if (
+                mesmaSenha
+            ) {
 
                 return res
                     .status(400)
@@ -463,9 +596,15 @@ router.put(
                 `
                 UPDATE usuario
 
-                SET senha_hash = $1
+                SET
 
-                WHERE id = $2
+                    senha_hash = $1,
+
+                    atualizado_em =
+                        NOW()
+
+                WHERE
+                    id = $2
                 `,
                 [
                     novoHash,
@@ -488,13 +627,16 @@ router.put(
             );
 
 
-            res.status(500).json({
-                erro:
-                    "Erro ao alterar senha"
-            });
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao alterar senha"
+                });
         }
     }
 );
 
 
-module.exports = router;
+module.exports =
+    router;
