@@ -68,6 +68,11 @@ const notasCorteRoutes =
         "./routes/notas-corte.routes"
     );
 
+const mapaRoutes =
+    require(
+        "./routes/mapa.routes"
+    );
+
 
 // =========================================================
 // APP
@@ -250,6 +255,16 @@ app.use(
 app.use(
     "/api/notas-corte",
     notasCorteRoutes
+);
+
+
+// =========================================================
+// MAPAS E ROTAS
+// =========================================================
+
+app.use(
+    "/api/mapa",
+    mapaRoutes
 );
 
 
