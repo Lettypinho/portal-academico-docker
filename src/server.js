@@ -63,6 +63,11 @@ const adminPermissoesRoutes =
         "./routes/admin-permissoes.routes"
     );
 
+const notasCorteRoutes =
+    require(
+        "./routes/notas-corte.routes"
+    );
+
 
 // =========================================================
 // APP
@@ -115,7 +120,7 @@ app.use(
 
 
 // =========================================================
-// EVITAR CACHE ANTIGO DURANTE DESENVOLVIMENTO
+// EVITAR CACHE
 // =========================================================
 
 app.use(
@@ -235,6 +240,16 @@ app.use(
 app.use(
     "/api/cursos",
     cursosRoutes
+);
+
+
+// =========================================================
+// NOTAS DE CORTE
+// =========================================================
+
+app.use(
+    "/api/notas-corte",
+    notasCorteRoutes
 );
 
 
