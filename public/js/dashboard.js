@@ -4,7 +4,7 @@
 // Carrega:
 // 1. dashboard institucional existente
 // 2. core do dashboard
-// 3. gestão Curso -> Campus
+// 3. gestão Curso <-> Campi
 // =========================================================
 
 (function iniciarDashboard() {
@@ -18,7 +18,7 @@
                 () => {
 
                     carregarScript(
-                        "/js/dashboard-curso-campus.js?v=1",
+                        "/js/dashboard-curso-campus.js?v=2",
                         "script-dashboard-curso-campus"
                     );
                 }
@@ -26,10 +26,6 @@
         }
     );
 
-
-    // =====================================================
-    // CARREGAR SCRIPT
-    // =====================================================
 
     function carregarScript(
         src,
@@ -99,10 +95,6 @@
         );
     }
 
-
-    // =====================================================
-    // AGUARDAR CORE
-    // =====================================================
 
     function aguardarDashboardCore(
         callback,

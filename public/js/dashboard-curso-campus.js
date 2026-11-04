@@ -1,5 +1,8 @@
 // =========================================================
-// SIA - VÍNCULO CURSO -> CAMPUS
+// SIA - VÍNCULO CURSO <-> CAMPI
+//
+// Permite que um curso seja ofertado em vários campi
+// da mesma instituição.
 // =========================================================
 
 (function iniciarModuloCursoCampus() {
@@ -56,6 +59,108 @@
         return permissoes.includes(
             codigo
         );
+    }
+
+
+    function obterCampusIdsCurso(
+        curso
+    ) {
+
+        if (
+            Array.isArray(
+                curso.campus_ids
+            )
+        ) {
+
+            return curso.campus_ids
+                .map(
+                    valor =>
+                        Number(
+                            valor
+                        )
+                )
+                .filter(
+                    valor =>
+                        Number.isInteger(
+                            valor
+                        ) &&
+                        valor > 0
+                );
+        }
+
+
+        if (
+            curso.campus_id
+        ) {
+
+            const id =
+                Number(
+                    curso.campus_id
+                );
+
+
+            if (
+                Number.isInteger(
+                    id
+                ) &&
+                id > 0
+            ) {
+
+                return [
+                    id
+                ];
+            }
+        }
+
+
+        return [];
+    }
+
+
+    function obterCampiAtivos() {
+
+        return campi
+            .filter(
+                campus =>
+                    campus.ativo
+            )
+            .sort(
+                (
+                    a,
+                    b
+                ) => {
+
+                    if (
+                        a.principal &&
+                        !b.principal
+                    ) {
+
+                        return -1;
+                    }
+
+
+                    if (
+                        !a.principal &&
+                        b.principal
+                    ) {
+
+                        return 1;
+                    }
+
+
+                    return String(
+                        a.nome ||
+                        ""
+                    )
+                        .localeCompare(
+                            String(
+                                b.nome ||
+                                ""
+                            ),
+                            "pt-BR"
+                        );
+                }
+            );
     }
 
 
@@ -143,6 +248,9 @@
                 margin:
                     0;
 
+                max-width:
+                    720px;
+
                 color:
                     #64748b;
 
@@ -154,7 +262,7 @@
             .curso-campus-filtro {
 
                 width:
-                    min(320px, 100%);
+                    min(340px, 100%);
 
                 min-height:
                     40px;
@@ -183,43 +291,75 @@
             }
 
 
+            .curso-campus-status {
+
+                min-height:
+                    20px;
+
+                margin-bottom:
+                    12px;
+
+                font-size:
+                    13px;
+            }
+
+
+            .curso-campus-status.erro {
+
+                color:
+                    #b91c1c;
+            }
+
+
+            .curso-campus-status.sucesso {
+
+                color:
+                    #15803d;
+            }
+
+
             .curso-campus-lista {
 
                 display:
                     grid;
 
                 gap:
-                    10px;
+                    14px;
             }
 
 
             .curso-campus-item {
 
-                display:
-                    grid;
-
-                grid-template-columns:
-                    minmax(220px, 1fr)
-                    minmax(220px, 320px)
-                    auto;
-
-                align-items:
-                    center;
-
-                gap:
-                    12px;
-
                 padding:
-                    14px;
+                    16px;
 
                 border:
                     1px solid #e2e8f0;
 
                 border-radius:
-                    12px;
+                    14px;
 
                 background:
                     #f8fafc;
+            }
+
+
+            .curso-campus-item-header {
+
+                display:
+                    flex;
+
+                justify-content:
+                    space-between;
+
+                align-items:
+                    flex-start;
+
+                gap:
+                    14px;
+
+                flex-wrap:
+                    wrap;
             }
 
 
@@ -227,6 +367,9 @@
 
                 min-width:
                     0;
+
+                flex:
+                    1 1 300px;
             }
 
 
@@ -238,18 +381,164 @@
                 color:
                     #0f172a;
 
-                overflow:
-                    hidden;
-
-                text-overflow:
-                    ellipsis;
-
-                white-space:
-                    nowrap;
+                font-size:
+                    15px;
             }
 
 
             .curso-campus-info span {
+
+                display:
+                    block;
+
+                margin-top:
+                    4px;
+
+                color:
+                    #64748b;
+
+                font-size:
+                    12px;
+            }
+
+
+            .curso-campus-contador {
+
+                display:
+                    inline-flex;
+
+                align-items:
+                    center;
+
+                padding:
+                    5px 9px;
+
+                border:
+                    1px solid #ddd6fe;
+
+                border-radius:
+                    999px;
+
+                color:
+                    #6d28d9;
+
+                background:
+                    #f5f3ff;
+
+                font-size:
+                    11px;
+
+                font-weight:
+                    800;
+            }
+
+
+            .curso-campus-opcoes {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    repeat(
+                        auto-fit,
+                        minmax(
+                            220px,
+                            1fr
+                        )
+                    );
+
+                gap:
+                    9px;
+
+                margin-top:
+                    14px;
+            }
+
+
+            .curso-campus-opcao {
+
+                display:
+                    flex;
+
+                align-items:
+                    flex-start;
+
+                gap:
+                    9px;
+
+                min-width:
+                    0;
+
+                padding:
+                    11px;
+
+                border:
+                    1px solid #e2e8f0;
+
+                border-radius:
+                    10px;
+
+                background:
+                    #ffffff;
+
+                cursor:
+                    pointer;
+            }
+
+
+            .curso-campus-opcao:hover {
+
+                border-color:
+                    #c4b5fd;
+
+                background:
+                    #faf8ff;
+            }
+
+
+            .curso-campus-opcao input {
+
+                width:
+                    17px;
+
+                height:
+                    17px;
+
+                flex:
+                    0 0 auto;
+
+                margin-top:
+                    1px;
+
+                accent-color:
+                    #6d28d9;
+            }
+
+
+            .curso-campus-opcao-conteudo {
+
+                min-width:
+                    0;
+            }
+
+
+            .curso-campus-opcao-nome {
+
+                display:
+                    block;
+
+                color:
+                    #0f172a;
+
+                font-size:
+                    13px;
+
+                font-weight:
+                    750;
+            }
+
+
+            .curso-campus-opcao-local {
 
                 display:
                     block;
@@ -261,42 +550,70 @@
                     #64748b;
 
                 font-size:
-                    12px;
+                    11px;
             }
 
 
-            .curso-campus-select {
+            .curso-campus-principal {
 
-                width:
-                    100%;
+                display:
+                    inline-flex;
 
-                min-height:
-                    40px;
+                margin-left:
+                    5px;
 
                 padding:
-                    8px 10px;
-
-                border:
-                    1px solid #cbd5e1;
+                    2px 6px;
 
                 border-radius:
-                    8px;
-
-                background:
-                    #ffffff;
+                    999px;
 
                 color:
-                    #0f172a;
+                    #5b21b6;
 
-                font:
-                    inherit;
+                background:
+                    #ede9fe;
+
+                font-size:
+                    9px;
+
+                font-weight:
+                    800;
+            }
+
+
+            .curso-campus-acoes {
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    flex-end;
+
+                gap:
+                    8px;
+
+                flex-wrap:
+                    wrap;
+
+                margin-top:
+                    14px;
+
+                padding-top:
+                    13px;
+
+                border-top:
+                    1px solid #e2e8f0;
             }
 
 
             .curso-campus-button {
 
                 min-height:
-                    40px;
+                    38px;
 
                 padding:
                     8px 14px;
@@ -307,11 +624,11 @@
                 border-radius:
                     8px;
 
-                background:
-                    #6d28d9;
-
                 color:
                     #ffffff;
+
+                background:
+                    #6d28d9;
 
                 font-weight:
                     700;
@@ -338,30 +655,38 @@
             }
 
 
-            .curso-campus-status {
-
-                margin:
-                    0 0 14px;
+            .curso-campus-button-secundario {
 
                 min-height:
-                    20px;
+                    38px;
 
-                font-size:
-                    13px;
+                padding:
+                    8px 12px;
+
+                border:
+                    1px solid #d8c6ed;
+
+                border-radius:
+                    8px;
+
+                color:
+                    #6d28d9;
+
+                background:
+                    #ffffff;
+
+                font-weight:
+                    700;
+
+                cursor:
+                    pointer;
             }
 
 
-            .curso-campus-status.erro {
+            .curso-campus-button-secundario:hover {
 
-                color:
-                    #b91c1c;
-            }
-
-
-            .curso-campus-status.sucesso {
-
-                color:
-                    #15803d;
+                background:
+                    #f8f4ff;
             }
 
 
@@ -376,11 +701,11 @@
                 border-radius:
                     12px;
 
-                text-align:
-                    center;
-
                 color:
                     #64748b;
+
+                text-align:
+                    center;
             }
 
 
@@ -414,11 +739,11 @@
                 border-radius:
                     8px;
 
-                background:
-                    #ffffff;
-
                 color:
                     #6d28d9;
+
+                background:
+                    #ffffff;
 
                 font-weight:
                     700;
@@ -429,17 +754,20 @@
 
 
             @media (
-                max-width: 850px
+                max-width: 700px
             ) {
 
-                .curso-campus-item {
+                .curso-campus-acoes {
 
-                    grid-template-columns:
-                        1fr;
+                    align-items:
+                        stretch;
+
+                    flex-direction:
+                        column;
                 }
 
 
-                .curso-campus-button {
+                .curso-campus-acoes button {
 
                     width:
                         100%;
@@ -508,15 +836,13 @@
                         Gestão institucional
                     </span>
 
-
                     <h3>
                         Vincular cursos aos campi
                     </h3>
 
-
                     <p>
-                        Defina em qual campus cada curso da instituição
-                        é ofertado.
+                        Um curso pode ser ofertado em um ou vários
+                        campi da instituição.
                     </p>
 
                 </div>
@@ -630,7 +956,7 @@
 
 
     // =====================================================
-    // CARREGAR PERMISSÕES
+    // PERMISSÕES
     // =====================================================
 
     async function carregarPermissoes() {
@@ -668,7 +994,7 @@
 
 
     // =====================================================
-    // CARREGAR DADOS
+    // CARREGAR CURSOS E CAMPI
     // =====================================================
 
     async function carregarDados() {
@@ -768,108 +1094,103 @@
 
 
     // =====================================================
-    // OPÇÕES DE CAMPI
+    // CAMPUS CHECKBOX
     // =====================================================
 
-    function montarOpcoesCampi(
+    function renderizarCampusOpcao(
+        campus,
         curso
     ) {
 
-        const ativos =
-            campi.filter(
-                campus =>
-                    campus.ativo
+        const selecionados =
+            obterCampusIdsCurso(
+                curso
             );
 
 
-        let html = `
-
-            <option value="">
-                Sem campus definido
-            </option>
-        `;
-
-
-        ativos
-            .forEach(
-                campus => {
-
-                    const selecionado =
-                        Number(
-                            curso.campus_id
-                        ) ===
-                        Number(
-                            campus.id
-                        );
-
-
-                    html += `
-
-                        <option
-                            value="${campus.id}"
-                            ${
-                                selecionado
-                                    ? "selected"
-                                    : ""
-                            }
-                        >
-                            ${escaparHtml(
-                                campus.nome
-                            )}
-                            ${
-                                campus.principal
-                                    ? " — Principal"
-                                    : ""
-                            }
-                        </option>
-                    `;
-                }
+        const marcado =
+            selecionados.includes(
+                Number(
+                    campus.id
+                )
             );
 
 
-        const campusAtualAtivo =
-            ativos.some(
-                campus =>
-                    Number(
-                        campus.id
-                    ) ===
-                    Number(
-                        curso.campus_id
-                    )
-            );
+        const local =
+            [
+                campus.cidade,
+                campus.estado
+            ]
+                .filter(
+                    Boolean
+                )
+                .join(
+                    " - "
+                );
 
 
-        if (
-            curso.campus_id &&
-            !campusAtualAtivo
-        ) {
+        return `
 
-            html += `
+            <label class="curso-campus-opcao">
 
-                <option
-                    value="${escaparHtml(
-                        curso.campus_id
-                    )}"
-                    selected
-                    disabled
-                >
+                <input
+                    type="checkbox"
+                    value="${campus.id}"
+                    data-curso-campus="${curso.id}"
                     ${
-                        escaparHtml(
-                            curso.campus_nome ||
-                            "Campus atual"
-                        )
-                    } — Inativo
-                </option>
-            `;
-        }
+                        marcado
+                            ? "checked"
+                            : ""
+                    }
+                >
 
 
-        return html;
+                <span class="curso-campus-opcao-conteudo">
+
+                    <span class="curso-campus-opcao-nome">
+
+                        ${escaparHtml(
+                            campus.nome
+                        )}
+
+                        ${
+                            campus.principal
+
+                                ? `
+                                    <span class="curso-campus-principal">
+                                        Principal
+                                    </span>
+                                `
+
+                                : ""
+                        }
+
+                    </span>
+
+
+                    ${
+                        local
+
+                            ? `
+                                <span class="curso-campus-opcao-local">
+                                    ${escaparHtml(
+                                        local
+                                    )}
+                                </span>
+                            `
+
+                            : ""
+                    }
+
+                </span>
+
+            </label>
+        `;
     }
 
 
     // =====================================================
-    // RENDERIZAR
+    // RENDERIZAR CURSOS
     // =====================================================
 
     function renderizarCursos() {
@@ -913,15 +1234,23 @@
                     }
 
 
-                    return (
-                        String(
-                            curso.nome ||
-                            ""
-                        )
-                            .toLowerCase()
-                            .includes(
-                                filtro
+                    const texto =
+                        [
+                            curso.nome,
+                            curso.modalidade,
+                            curso.grau_academico
+                        ]
+                            .filter(
+                                Boolean
                             )
+                            .join(
+                                " "
+                            )
+                            .toLowerCase();
+
+
+                    return texto.includes(
+                        filtro
                     );
                 }
             );
@@ -952,10 +1281,7 @@
 
 
         const campiAtivos =
-            campi.filter(
-                campus =>
-                    campus.ativo
-            );
+            obterCampiAtivos();
 
 
         if (
@@ -971,8 +1297,8 @@
                         Nenhum campus ativo cadastrado
                     </strong>
 
-                    Cadastre pelo menos um campus antes de
-                    vincular os cursos.
+                    Cadastre pelo menos um campus antes
+                    de vincular os cursos.
 
                     ${
                         possuiPermissao(
@@ -1056,68 +1382,132 @@
         container.innerHTML =
             lista
                 .map(
-                    curso => `
+                    curso => {
 
-                        <div
-                            class="curso-campus-item"
-                            data-curso-id="${curso.id}"
-                        >
-
-                            <div class="curso-campus-info">
-
-                                <strong>
-                                    ${escaparHtml(
-                                        curso.nome
-                                    )}
-                                </strong>
+                        const quantidade =
+                            obterCampusIdsCurso(
+                                curso
+                            ).length;
 
 
-                                <span>
+                        return `
 
-                                    ${escaparHtml(
-                                        curso.modalidade ||
-                                        "-"
-                                    )}
-
-                                    ·
-
-                                    ${escaparHtml(
-                                        curso.grau_academico ||
-                                        "-"
-                                    )}
-
-                                </span>
-
-                            </div>
-
-
-                            <select
-                                class="curso-campus-select"
-                                data-campus-select="${curso.id}"
+                            <article
+                                class="curso-campus-item"
+                                data-curso-id="${curso.id}"
                             >
 
-                                ${montarOpcoesCampi(
-                                    curso
-                                )}
+                                <div class="curso-campus-item-header">
 
-                            </select>
+                                    <div class="curso-campus-info">
+
+                                        <strong>
+                                            ${escaparHtml(
+                                                curso.nome
+                                            )}
+                                        </strong>
 
 
-                            <button
-                                type="button"
-                                class="curso-campus-button"
-                                data-salvar-curso="${curso.id}"
-                            >
-                                Salvar
-                            </button>
+                                        <span>
 
-                        </div>
-                    `
+                                            ${escaparHtml(
+                                                curso.modalidade ||
+                                                "-"
+                                            )}
+
+                                            ·
+
+                                            ${escaparHtml(
+                                                curso.grau_academico ||
+                                                "-"
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <span
+                                        class="curso-campus-contador"
+                                        data-contador-curso="${curso.id}"
+                                    >
+                                        ${
+                                            quantidade === 0
+                                                ? "Nenhum campus"
+                                                : quantidade === 1
+                                                    ? "1 campus"
+                                                    : `${quantidade} campi`
+                                        }
+                                    </span>
+
+                                </div>
+
+
+                                <div class="curso-campus-opcoes">
+
+                                    ${
+                                        campiAtivos
+                                            .map(
+                                                campus =>
+                                                    renderizarCampusOpcao(
+                                                        campus,
+                                                        curso
+                                                    )
+                                            )
+                                            .join("")
+                                    }
+
+                                </div>
+
+
+                                <div class="curso-campus-acoes">
+
+                                    <button
+                                        type="button"
+                                        class="curso-campus-button-secundario"
+                                        data-marcar-todos="${curso.id}"
+                                    >
+                                        Selecionar todos
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="curso-campus-button-secundario"
+                                        data-limpar-campi="${curso.id}"
+                                    >
+                                        Limpar
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="curso-campus-button"
+                                        data-salvar-curso="${curso.id}"
+                                    >
+                                        Salvar campi
+                                    </button>
+
+                                </div>
+
+                            </article>
+                        `;
+                    }
                 )
                 .join("");
 
 
-        container
+        registrarEventos();
+    }
+
+
+    // =====================================================
+    // EVENTOS DOS CURSOS
+    // =====================================================
+
+    function registrarEventos() {
+
+        document
             .querySelectorAll(
                 "[data-salvar-curso]"
             )
@@ -1128,7 +1518,7 @@
                         "click",
                         () => {
 
-                            salvarVinculo(
+                            salvarVinculos(
                                 Number(
                                     botao.dataset
                                         .salvarCurso
@@ -1139,46 +1529,201 @@
                     );
                 }
             );
+
+
+        document
+            .querySelectorAll(
+                "[data-marcar-todos]"
+            )
+            .forEach(
+                botao => {
+
+                    botao.addEventListener(
+                        "click",
+                        () => {
+
+                            const cursoId =
+                                Number(
+                                    botao.dataset
+                                        .marcarTodos
+                                );
+
+
+                            document
+                                .querySelectorAll(
+                                    `[data-curso-campus="${cursoId}"]`
+                                )
+                                .forEach(
+                                    checkbox => {
+
+                                        checkbox.checked =
+                                            true;
+                                    }
+                                );
+
+
+                            atualizarContador(
+                                cursoId
+                            );
+                        }
+                    );
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                "[data-limpar-campi]"
+            )
+            .forEach(
+                botao => {
+
+                    botao.addEventListener(
+                        "click",
+                        () => {
+
+                            const cursoId =
+                                Number(
+                                    botao.dataset
+                                        .limparCampi
+                                );
+
+
+                            document
+                                .querySelectorAll(
+                                    `[data-curso-campus="${cursoId}"]`
+                                )
+                                .forEach(
+                                    checkbox => {
+
+                                        checkbox.checked =
+                                            false;
+                                    }
+                                );
+
+
+                            atualizarContador(
+                                cursoId
+                            );
+                        }
+                    );
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                "[data-curso-campus]"
+            )
+            .forEach(
+                checkbox => {
+
+                    checkbox.addEventListener(
+                        "change",
+                        () => {
+
+                            atualizarContador(
+                                Number(
+                                    checkbox.dataset
+                                        .cursoCampus
+                                )
+                            );
+                        }
+                    );
+                }
+            );
     }
 
 
     // =====================================================
-    // SALVAR VÍNCULO
+    // CONTADOR VISUAL
     // =====================================================
 
-    async function salvarVinculo(
-        cursoId,
-        botao
+    function atualizarContador(
+        cursoId
     ) {
 
-        const select =
+        const quantidade =
+            document
+                .querySelectorAll(
+                    `[data-curso-campus="${cursoId}"]:checked`
+                )
+                .length;
+
+
+        const contador =
             document.querySelector(
-                `[data-campus-select="${cursoId}"]`
+                `[data-contador-curso="${cursoId}"]`
             );
 
 
         if (
-            !select
+            !contador
         ) {
 
             return;
         }
 
 
-        const campusId =
-            select.value
-                ? Number(
-                    select.value
-                )
-                : null;
+        contador.textContent =
+            quantidade === 0
+                ? "Nenhum campus"
+                : quantidade === 1
+                    ? "1 campus"
+                    : `${quantidade} campi`;
+    }
 
 
-        botao.disabled =
-            true;
+    // =====================================================
+    // OBTER SELEÇÃO DA TELA
+    // =====================================================
+
+    function obterCampiSelecionados(
+        cursoId
+    ) {
+
+        return [
+            ...document.querySelectorAll(
+                `[data-curso-campus="${cursoId}"]:checked`
+            )
+        ]
+            .map(
+                checkbox =>
+                    Number(
+                        checkbox.value
+                    )
+            )
+            .filter(
+                valor =>
+                    Number.isInteger(
+                        valor
+                    ) &&
+                    valor > 0
+            );
+    }
+
+
+    // =====================================================
+    // SALVAR VÍNCULOS
+    // =====================================================
+
+    async function salvarVinculos(
+        cursoId,
+        botao
+    ) {
+
+        const campusIds =
+            obterCampiSelecionados(
+                cursoId
+            );
 
 
         const textoOriginal =
             botao.textContent;
+
+
+        botao.disabled =
+            true;
 
 
         botao.textContent =
@@ -1194,20 +1739,22 @@
 
             const resposta =
                 await fetch(
-                    `/api/cursos/${cursoId}/campus`,
+                    `/api/cursos/${cursoId}/campi`,
                     {
                         method:
                             "PATCH",
 
                         headers: {
+
                             "Content-Type":
                                 "application/json"
                         },
 
                         body:
                             JSON.stringify({
-                                campus_id:
-                                    campusId
+
+                                campus_ids:
+                                    campusIds
                             })
                     }
                 );
@@ -1223,7 +1770,7 @@
 
                 throw new Error(
                     dados.erro ||
-                    "Erro ao vincular campus"
+                    "Erro ao vincular os campi"
                 );
             }
 
@@ -1244,45 +1791,52 @@
                 curso
             ) {
 
+                curso.campus_ids =
+                    [
+                        ...campusIds
+                    ];
+
+
                 curso.campus_id =
-                    campusId;
+                    campusIds[0] ||
+                    null;
 
 
-                const campus =
-                    campi.find(
-                        item =>
-                            Number(
-                                item.id
-                            ) ===
-                            Number(
-                                campusId
-                            )
-                    );
+                curso.campi =
+                    campi
+                        .filter(
+                            campus =>
+                                campusIds.includes(
+                                    Number(
+                                        campus.id
+                                    )
+                                )
+                        )
+                        .map(
+                            campus => ({
+                                id:
+                                    campus.id,
 
+                                nome:
+                                    campus.nome,
 
-                curso.campus_nome =
-                    campus
-                        ? campus.nome
-                        : null;
+                                cidade:
+                                    campus.cidade,
 
+                                estado:
+                                    campus.estado,
 
-                curso.campus_cidade =
-                    campus
-                        ? campus.cidade
-                        : null;
-
-
-                curso.campus_estado =
-                    campus
-                        ? campus.estado
-                        : null;
+                                principal:
+                                    campus.principal
+                            })
+                        );
             }
 
 
             mostrarStatus(
-                campusId
-                    ? "Campus vinculado ao curso com sucesso."
-                    : "Vínculo de campus removido com sucesso.",
+                campusIds.length === 0
+                    ? "Todos os vínculos de campus foram removidos."
+                    : "Campi do curso atualizados com sucesso.",
                 "sucesso"
             );
 
@@ -1293,14 +1847,14 @@
         } catch (erro) {
 
             console.error(
-                "Erro ao alterar campus do curso:",
+                "Erro ao alterar campi do curso:",
                 erro
             );
 
 
             mostrarStatus(
                 erro.message ||
-                "Não foi possível salvar o vínculo.",
+                "Não foi possível salvar os vínculos.",
                 "erro"
             );
 
@@ -1318,7 +1872,7 @@
 
 
     // =====================================================
-    // ATUALIZAR AO ABRIR A ABA
+    // ATUALIZAR AO ABRIR ABA CURSOS
     // =====================================================
 
     function observarAberturaDaAba() {
