@@ -5,6 +5,8 @@
 // 1. dashboard institucional existente
 // 2. core do dashboard
 // 3. gestão Curso <-> Campi
+// 4. cursos ofertados por campus
+// 5. exclusão de campus
 // =========================================================
 
 (function iniciarDashboard() {
@@ -20,6 +22,18 @@
                     carregarScript(
                         "/js/dashboard-curso-campus.js?v=2",
                         "script-dashboard-curso-campus"
+                    );
+
+
+                    carregarScript(
+                        "/js/dashboard-campi-cursos.js?v=1",
+                        "script-dashboard-campi-cursos"
+                    );
+
+
+                    carregarScript(
+                        "/js/dashboard-campi-excluir.js?v=1",
+                        "script-dashboard-campi-excluir"
                     );
                 }
             );

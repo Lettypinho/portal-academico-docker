@@ -38,6 +38,11 @@ const campiRoutes =
         "./routes/campi.routes"
     );
 
+const campiExclusaoRoutes =
+    require(
+        "./routes/campi-exclusao.routes"
+    );
+
 const indicadoresRoutes =
     require(
         "./routes/indicadores.routes"
@@ -250,6 +255,12 @@ app.use(
 app.use(
     "/api/campi",
     campiRoutes
+);
+
+
+app.use(
+    "/api/campi",
+    campiExclusaoRoutes
 );
 
 
