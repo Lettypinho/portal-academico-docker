@@ -1,10 +1,11 @@
 // =========================================================
 // SIA - EXCLUSÃO DE CAMPI
 //
-// Adiciona:
-// - botão Excluir campus;
-// - confirmação;
-// - exclusão lógica pelo backend.
+// Exclusão lógica:
+// - campus permanece no banco como inativo;
+// - campus inativo não aparece na lista normal;
+// - vínculos com cursos são removidos;
+// - card some imediatamente após excluir.
 // =========================================================
 
 (function iniciarExclusaoCampi() {
@@ -93,7 +94,152 @@
 
 
     // =====================================================
-    // ADICIONAR BOTÕES NOS CARDS
+    // NORMALIZAR LISTA
+    //
+    // Campus inativo existe no banco para histórico,
+    // mas não deve aparecer na interface normal.
+    // =====================================================
+
+    function normalizarListaCampi() {
+
+        const lista =
+            document.getElementById(
+                "campi-lista"
+            );
+
+
+        if (
+            !lista
+        ) {
+
+            return;
+        }
+
+
+        // =================================================
+        // REMOVER CARDS INATIVOS DA INTERFACE
+        // =================================================
+
+        lista
+            .querySelectorAll(
+                ".campus-card.inativo"
+            )
+            .forEach(
+                card => {
+
+                    card.remove();
+                }
+            );
+
+
+        const cardsAtivos =
+            [
+                ...lista.querySelectorAll(
+                    ".campus-card"
+                )
+            ];
+
+
+        // =================================================
+        // RESUMO
+        // =================================================
+
+        const resumo =
+            document.getElementById(
+                "campi-resumo"
+            );
+
+
+        if (
+            resumo
+        ) {
+
+            const quantidade =
+                cardsAtivos.length;
+
+
+            const texto =
+                quantidade === 1
+                    ? "1 campus ativo"
+                    : `${quantidade} campi ativos`;
+
+
+            if (
+                resumo.textContent.trim() !==
+                texto
+            ) {
+
+                resumo.textContent =
+                    texto;
+            }
+        }
+
+
+        // =================================================
+        // ESTADO VAZIO
+        // =================================================
+
+        const vazioPersonalizado =
+            lista.querySelector(
+                ".campi-empty-ativos"
+            );
+
+
+        if (
+            cardsAtivos.length ===
+            0
+        ) {
+
+            const vazioExistente =
+                lista.querySelector(
+                    ".campi-empty"
+                );
+
+
+            if (
+                !vazioExistente
+            ) {
+
+                const vazio =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                vazio.className =
+                    "campi-empty campi-empty-ativos";
+
+
+                vazio.innerHTML = `
+
+                    <strong>
+                        Nenhum campus ativo
+                    </strong>
+
+                    Cadastre um novo campus para
+                    disponibilizá-lo no sistema.
+                `;
+
+
+                lista.appendChild(
+                    vazio
+                );
+            }
+
+        } else if (
+            vazioPersonalizado
+        ) {
+
+            vazioPersonalizado.remove();
+        }
+
+
+        adicionarBotoes();
+    }
+
+
+    // =====================================================
+    // ADICIONAR BOTÃO EXCLUIR
     // =====================================================
 
     function adicionarBotoes() {
@@ -119,6 +265,16 @@
             .forEach(
                 card => {
 
+                    if (
+                        card.classList.contains(
+                            "inativo"
+                        )
+                    ) {
+
+                        return;
+                    }
+
+
                     const botaoEditar =
                         card.querySelector(
                             "[data-editar-campus]"
@@ -143,7 +299,8 @@
                     if (
                         !Number.isInteger(
                             campusId
-                        )
+                        ) ||
+                        campusId <= 0
                     ) {
 
                         return;
@@ -221,7 +378,7 @@
 
 
     // =====================================================
-    // EXCLUIR
+    // EXCLUIR CAMPUS
     // =====================================================
 
     async function excluirCampus(
@@ -246,7 +403,8 @@
         const confirmado =
             window.confirm(
                 `Excluir o campus "${nome}"?\n\n` +
-                "Ele deixará de aparecer no sistema e os vínculos com cursos serão removidos."
+                "O campus deixará de aparecer no sistema e " +
+                "seus vínculos com cursos serão removidos."
             );
 
 
@@ -297,18 +455,19 @@
             }
 
 
+            // =================================================
+            // REMOVER IMEDIATAMENTE DA INTERFACE
+            // =================================================
+
+            card.remove();
+
+
+            normalizarListaCampi();
+
+
             window.alert(
                 "Campus excluído com sucesso."
             );
-
-
-            sessionStorage.setItem(
-                "sia-reabrir-campi",
-                "1"
-            );
-
-
-            window.location.reload();
 
 
         } catch (erro) {
@@ -336,7 +495,7 @@
 
 
     // =====================================================
-    // OBSERVAR CARDS CRIADOS DINAMICAMENTE
+    // OBSERVAR RENDERIZAÇÃO DOS CAMPI
     // =====================================================
 
     function observarCards() {
@@ -345,7 +504,7 @@
             new MutationObserver(
                 () => {
 
-                    adicionarBotoes();
+                    normalizarListaCampi();
                 }
             );
 
@@ -364,72 +523,6 @@
 
 
     // =====================================================
-    // REABRIR CAMPI APÓS EXCLUSÃO
-    // =====================================================
-
-    function reabrirCampi() {
-
-        if (
-            sessionStorage.getItem(
-                "sia-reabrir-campi"
-            ) !==
-            "1"
-        ) {
-
-            return;
-        }
-
-
-        sessionStorage.removeItem(
-            "sia-reabrir-campi"
-        );
-
-
-        let tentativas =
-            0;
-
-
-        const tentar =
-            () => {
-
-                if (
-                    typeof abrirSecao ===
-                        "function" &&
-                    document.getElementById(
-                        "campi"
-                    )
-                ) {
-
-                    abrirSecao(
-                        "campi"
-                    );
-
-                    return;
-                }
-
-
-                tentativas +=
-                    1;
-
-
-                if (
-                    tentativas <
-                    40
-                ) {
-
-                    window.setTimeout(
-                        tentar,
-                        100
-                    );
-                }
-            };
-
-
-        tentar();
-    }
-
-
-    // =====================================================
     // INICIAR
     // =====================================================
 
@@ -439,9 +532,7 @@
 
         observarCards();
 
-        adicionarBotoes();
-
-        reabrirCampi();
+        normalizarListaCampi();
     }
 
 
