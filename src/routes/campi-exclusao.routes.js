@@ -14,10 +14,6 @@ const router =
     express.Router();
 
 
-// =========================================================
-// UTILITÁRIO
-// =========================================================
-
 function idValido(
     valor
 ) {
@@ -34,17 +30,6 @@ function idValido(
     );
 }
 
-
-// =========================================================
-// EXCLUIR CAMPUS
-//
-// Exclusão lógica:
-// - desativa campus;
-// - remove condição de campus principal;
-// - desativa vínculos curso <-> campus;
-// - limpa coluna antiga curso.campus_id;
-// - preserva histórico.
-// =========================================================
 
 router.delete(
     "/:id",
@@ -86,25 +71,22 @@ router.delete(
             }
 
 
-            const resultadoCampus =
+            const consulta =
                 await client.query(
                     `
                     SELECT
-
                         id,
-
                         universidade_id,
-
                         nome,
-
-                        ativo,
-
-                        principal
+                        status_aprovacao
 
                     FROM campus
 
                     WHERE
                         id = $1
+
+                        AND status_aprovacao <>
+                            'excluido'
 
                     LIMIT 1
                     `,
@@ -115,7 +97,7 @@ router.delete(
 
 
             if (
-                resultadoCampus.rows.length ===
+                consulta.rows.length ===
                 0
             ) {
 
@@ -129,12 +111,8 @@ router.delete(
 
 
             const campus =
-                resultadoCampus.rows[0];
+                consulta.rows[0];
 
-
-            // =================================================
-            // ESCOPO DA INSTITUIÇÃO
-            // =================================================
 
             if (
                 usuario.perfil !==
@@ -142,9 +120,9 @@ router.delete(
                 Number(
                     usuario.universidade_id
                 ) !==
-                    Number(
-                        campus.universidade_id
-                    )
+                Number(
+                    campus.universidade_id
+                )
             ) {
 
                 return res
@@ -156,29 +134,10 @@ router.delete(
             }
 
 
-            if (
-                campus.ativo ===
-                false
-            ) {
-
-                return res.json({
-
-                    mensagem:
-                        "Campus já está excluído",
-
-                    campus
-                });
-            }
-
-
             await client.query(
                 "BEGIN"
             );
 
-
-            // =================================================
-            // DESATIVAR VÍNCULOS COM CURSOS
-            // =================================================
 
             await client.query(
                 `
@@ -192,18 +151,12 @@ router.delete(
 
                 WHERE
                     campus_id = $1
-
-                    AND ativo = TRUE
                 `,
                 [
                     campusId
                 ]
             );
 
-
-            // =================================================
-            // COMPATIBILIDADE COM MODELO ANTIGO
-            // =================================================
 
             await client.query(
                 `
@@ -221,20 +174,18 @@ router.delete(
             );
 
 
-            // =================================================
-            // DESATIVAR CAMPUS
-            // =================================================
-
             const resultado =
                 await client.query(
                     `
                     UPDATE campus
 
                     SET
-
                         ativo = FALSE,
 
                         principal = FALSE,
+
+                        status_aprovacao =
+                            'excluido',
 
                         atualizado_em =
                             NOW()
@@ -242,19 +193,7 @@ router.delete(
                     WHERE
                         id = $1
 
-                    RETURNING
-
-                        id,
-
-                        universidade_id,
-
-                        nome,
-
-                        ativo,
-
-                        principal,
-
-                        atualizado_em
+                    RETURNING *
                     `,
                     [
                         campusId

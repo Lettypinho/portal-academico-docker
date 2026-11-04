@@ -9,84 +9,53 @@ const path =
 
 
 const universidadesRoutes =
-    require(
-        "./routes/universidades.routes"
-    );
+    require("./routes/universidades.routes");
 
 const authRoutes =
-    require(
-        "./routes/auth.routes"
-    );
+    require("./routes/auth.routes");
 
 const perfilRoutes =
-    require(
-        "./routes/perfil.routes"
-    );
+    require("./routes/perfil.routes");
 
 const solicitacoesVinculoRoutes =
-    require(
-        "./routes/solicitacoes-vinculo.routes"
-    );
+    require("./routes/solicitacoes-vinculo.routes");
 
 const cursosRoutes =
-    require(
-        "./routes/cursos.routes"
-    );
+    require("./routes/cursos.routes");
+
+const campiAprovacaoRoutes =
+    require("./routes/campi-aprovacao.routes");
 
 const campiRoutes =
-    require(
-        "./routes/campi.routes"
-    );
+    require("./routes/campi.routes");
 
 const campiExclusaoRoutes =
-    require(
-        "./routes/campi-exclusao.routes"
-    );
+    require("./routes/campi-exclusao.routes");
 
 const indicadoresRoutes =
-    require(
-        "./routes/indicadores.routes"
-    );
+    require("./routes/indicadores.routes");
 
 const indicadoresInepRoutes =
-    require(
-        "./routes/indicadores-inep.routes"
-    );
+    require("./routes/indicadores-inep.routes");
 
 const adminRoutes =
-    require(
-        "./routes/admin.routes"
-    );
+    require("./routes/admin.routes");
 
 const adminInstituicaoRoutes =
-    require(
-        "./routes/admin-instituicao.routes"
-    );
+    require("./routes/admin-instituicao.routes");
 
 const adminAcessosRoutes =
-    require(
-        "./routes/admin-acessos.routes"
-    );
+    require("./routes/admin-acessos.routes");
 
 const adminPermissoesRoutes =
-    require(
-        "./routes/admin-permissoes.routes"
-    );
+    require("./routes/admin-permissoes.routes");
 
 const notasCorteRoutes =
-    require(
-        "./routes/notas-corte.routes"
-    );
+    require("./routes/notas-corte.routes");
 
 const mapaRoutes =
-    require(
-        "./routes/mapa.routes"
-    );
+    require("./routes/mapa.routes");
 
-
-// =========================================================
-// APP
-// =========================================================
 
 const app =
     express();
@@ -97,10 +66,6 @@ const PORT =
     3000;
 
 
-// =========================================================
-// MIDDLEWARES
-// =========================================================
-
 app.use(
     express.json()
 );
@@ -110,8 +75,7 @@ app.use(
     session({
 
         secret:
-            process.env
-                .SESSION_SECRET ||
+            process.env.SESSION_SECRET ||
             "segredo-apenas-desenvolvimento",
 
         resave:
@@ -134,10 +98,6 @@ app.use(
 );
 
 
-// =========================================================
-// EVITAR CACHE
-// =========================================================
-
 app.use(
     (
         req,
@@ -151,15 +111,9 @@ app.use(
 
 
         if (
-            caminho.endsWith(
-                ".html"
-            ) ||
-            caminho.endsWith(
-                ".js"
-            ) ||
-            caminho.endsWith(
-                ".css"
-            )
+            caminho.endsWith(".html") ||
+            caminho.endsWith(".js") ||
+            caminho.endsWith(".css")
         ) {
 
             res.setHeader(
@@ -184,10 +138,6 @@ app.use(
 );
 
 
-// =========================================================
-// FRONTEND
-// =========================================================
-
 app.use(
     express.static(
         path.join(
@@ -208,19 +158,11 @@ app.use(
 );
 
 
-// =========================================================
-// AUTENTICAÇÃO
-// =========================================================
-
 app.use(
     "/api/auth",
     authRoutes
 );
 
-
-// =========================================================
-// PERFIL
-// =========================================================
 
 app.use(
     "/api/perfil",
@@ -228,19 +170,11 @@ app.use(
 );
 
 
-// =========================================================
-// SOLICITAÇÕES DE VÍNCULO
-// =========================================================
-
 app.use(
     "/api/solicitacoes-vinculo",
     solicitacoesVinculoRoutes
 );
 
-
-// =========================================================
-// UNIVERSIDADES
-// =========================================================
 
 app.use(
     "/api/universidades",
@@ -248,9 +182,13 @@ app.use(
 );
 
 
-// =========================================================
-// CAMPI
-// =========================================================
+// IMPORTANTE:
+// precisa ficar antes de campiRoutes.
+app.use(
+    "/api/campi",
+    campiAprovacaoRoutes
+);
+
 
 app.use(
     "/api/campi",
@@ -264,19 +202,11 @@ app.use(
 );
 
 
-// =========================================================
-// CURSOS
-// =========================================================
-
 app.use(
     "/api/cursos",
     cursosRoutes
 );
 
-
-// =========================================================
-// NOTAS DE CORTE
-// =========================================================
 
 app.use(
     "/api/notas-corte",
@@ -284,19 +214,11 @@ app.use(
 );
 
 
-// =========================================================
-// MAPAS E ROTAS
-// =========================================================
-
 app.use(
     "/api/mapa",
     mapaRoutes
 );
 
-
-// =========================================================
-// INDICADORES
-// =========================================================
 
 app.use(
     "/api/indicadores",
@@ -304,19 +226,11 @@ app.use(
 );
 
 
-// =========================================================
-// INDICADORES INEP
-// =========================================================
-
 app.use(
     "/api/indicadores-inep",
     indicadoresInepRoutes
 );
 
-
-// =========================================================
-// SUPER ADMIN
-// =========================================================
 
 app.use(
     "/api/admin",
@@ -324,19 +238,11 @@ app.use(
 );
 
 
-// =========================================================
-// ADMINISTRAÇÃO DA INSTITUIÇÃO
-// =========================================================
-
 app.use(
     "/api/admin-instituicao",
     adminInstituicaoRoutes
 );
 
-
-// =========================================================
-// CRIAÇÃO DE ACESSOS
-// =========================================================
 
 app.use(
     "/api/admin-acessos",
@@ -344,22 +250,15 @@ app.use(
 );
 
 
-// =========================================================
-// PERMISSÕES
-// =========================================================
-
 app.use(
     "/api/admin-permissoes",
     adminPermissoesRoutes
 );
 
 
-// =========================================================
-// STATUS
-// =========================================================
-
 app.get(
     "/api/status",
+
     (
         req,
         res
@@ -377,13 +276,10 @@ app.get(
 );
 
 
-// =========================================================
-// SERVIDOR
-// =========================================================
-
 app.listen(
     PORT,
     "0.0.0.0",
+
     () => {
 
         console.log(

@@ -1,12 +1,5 @@
 // =========================================================
 // SIA - CARREGADOR DO DASHBOARD INSTITUCIONAL
-//
-// Carrega:
-// 1. dashboard institucional existente
-// 2. core do dashboard
-// 3. gestão Curso <-> Campi
-// 4. cursos ofertados por campus
-// 5. exclusão lógica de campus
 // =========================================================
 
 (function iniciarDashboard() {
@@ -14,6 +7,7 @@
     carregarScript(
         "/js/dashboard-institucional.js?v=1",
         "script-dashboard-institucional",
+
         () => {
 
             aguardarDashboardCore(
@@ -32,7 +26,7 @@
 
 
                     carregarScript(
-                        "/js/dashboard-campi-excluir.js?v=2",
+                        "/js/dashboard-campi-excluir.js?v=3",
                         "script-dashboard-campi-excluir"
                     );
                 }
@@ -57,13 +51,7 @@
             existente
         ) {
 
-            if (
-                callback
-            ) {
-
-                callback();
-            }
-
+            callback?.();
 
             return;
         }
@@ -86,12 +74,7 @@
         script.onload =
             () => {
 
-                if (
-                    callback
-                ) {
-
-                    callback();
-                }
+                callback?.();
             };
 
 
@@ -146,6 +129,7 @@
                     callback,
                     tentativas + 1
                 );
+
             },
             50
         );
