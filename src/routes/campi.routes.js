@@ -1,65 +1,40 @@
-const express =
-    require("express");
-
-const pool =
-    require("../config/database");
+const express = require("express");
+const pool = require("../config/database");
 
 const {
-    exigirPermissao
-} =
-    require("../middleware/auth");
+    exigirPermissao,
+    exigirPerfil
+} = require("../middleware/auth");
 
-
-const router =
-    express.Router();
+const router = express.Router();
 
 
 // =========================================================
 // UTILITÁRIOS
 // =========================================================
 
-function idValido(
-    valor
-) {
-
-    const id =
-        Number(
-            valor
-        );
-
+function idValido(valor) {
+    const numero = Number(valor);
 
     return (
-        Number.isInteger(id) &&
-        id > 0
+        Number.isInteger(numero) &&
+        numero > 0
     );
 }
 
 
-function texto(
-    valor
-) {
-
+function texto(valor) {
     return String(
-        valor ??
-        ""
-    )
-        .trim();
+        valor ?? ""
+    ).trim();
 }
 
 
-function numero(
-    valor
-) {
-
+function numero(valor) {
     const convertido =
-        Number(
-            valor
-        );
+        Number(valor);
 
-
-    return Number.isFinite(
-        convertido
-    )
+    return Number.isFinite(convertido)
         ? convertido
         : null;
 }
@@ -75,39 +50,22 @@ function booleano(
         valor === null ||
         valor === ""
     ) {
-
         return padrao;
     }
 
-
-    if (
+    return (
         valor === true ||
         valor === "true" ||
         valor === 1 ||
         valor === "1"
-    ) {
-
-        return true;
-    }
-
-
-    if (
-        valor === false ||
-        valor === "false" ||
-        valor === 0 ||
-        valor === "0"
-    ) {
-
-        return false;
-    }
-
-
-    return padrao;
+    );
 }
 
 
 // =========================================================
 // LISTAGEM PÚBLICA
+//
+// Apenas campi aprovados e ativos.
 // =========================================================
 
 router.get(
@@ -143,31 +101,18 @@ router.get(
                 await pool.query(
                     `
                     SELECT
-
                         id,
-
                         universidade_id,
-
                         nome,
-
                         endereco,
-
                         numero,
-
                         complemento,
-
                         bairro,
-
                         cidade,
-
                         estado,
-
                         cep,
-
                         latitude,
-
                         longitude,
-
                         principal
 
                     FROM campus
@@ -176,6 +121,9 @@ router.get(
                         universidade_id = $1
 
                         AND ativo = TRUE
+
+                        AND status_aprovacao =
+                            'aprovado'
 
                     ORDER BY
                         principal DESC,
@@ -190,7 +138,6 @@ router.get(
             res.json(
                 resultado.rows
             );
-
 
         } catch (erro) {
 
@@ -213,6 +160,13 @@ router.get(
 
 // =========================================================
 // CAMPI DA PRÓPRIA INSTITUIÇÃO
+//
+// Mostra:
+// - aprovados ativos;
+// - pendentes;
+// - rejeitados.
+//
+// Não mostra excluídos.
 // =========================================================
 
 router.get(
@@ -252,39 +206,27 @@ router.get(
                 await pool.query(
                     `
                     SELECT
-
                         id,
-
                         universidade_id,
-
                         nome,
-
                         endereco,
-
                         numero,
-
                         complemento,
-
                         bairro,
-
                         cidade,
-
                         estado,
-
                         cep,
-
                         latitude,
-
                         longitude,
-
                         principal,
-
                         ativo,
-
                         origem_dados,
-
+                        status_aprovacao,
+                        solicitado_em,
+                        aprovado_em,
+                        rejeitado_em,
+                        motivo_rejeicao,
                         criado_em,
-
                         atualizado_em
 
                     FROM campus
@@ -292,9 +234,41 @@ router.get(
                     WHERE
                         universidade_id = $1
 
+                        AND
+                        (
+                            (
+                                ativo = TRUE
+
+                                AND status_aprovacao =
+                                    'aprovado'
+                            )
+
+                            OR status_aprovacao IN
+                            (
+                                'pendente',
+                                'rejeitado'
+                            )
+                        )
+
                     ORDER BY
+
+                        CASE status_aprovacao
+
+                            WHEN 'pendente'
+                                THEN 1
+
+                            WHEN 'aprovado'
+                                THEN 2
+
+                            WHEN 'rejeitado'
+                                THEN 3
+
+                            ELSE 4
+
+                        END,
+
                         principal DESC,
-                        ativo DESC,
+
                         nome
                     `,
                     [
@@ -306,7 +280,6 @@ router.get(
             res.json(
                 resultado.rows
             );
-
 
         } catch (erro) {
 
@@ -328,7 +301,13 @@ router.get(
 
 
 // =========================================================
-// CADASTRAR CAMPUS
+// CADASTRAR / SOLICITAR CAMPUS
+//
+// Institucional:
+// pendente + inativo.
+//
+// Super Admin:
+// aprovado + ativo.
 // =========================================================
 
 router.post(
@@ -364,8 +343,7 @@ router.post(
 
                 universidadeId =
                     Number(
-                        usuario
-                            .universidade_id
+                        usuario.universidade_id
                     );
             }
 
@@ -511,6 +489,7 @@ router.post(
 
                     WHERE
                         id = $1
+
                         AND ativo = TRUE
 
                     LIMIT 1
@@ -535,12 +514,86 @@ router.post(
             }
 
 
+            // =================================================
+            // EVITAR DUPLICIDADE ATIVA/PENDENTE
+            // =================================================
+
+            const existente =
+                await client.query(
+                    `
+                    SELECT id
+
+                    FROM campus
+
+                    WHERE
+                        universidade_id = $1
+
+                        AND LOWER(
+                            TRIM(nome)
+                        ) =
+                        LOWER(
+                            TRIM($2)
+                        )
+
+                        AND status_aprovacao IN
+                        (
+                            'aprovado',
+                            'pendente'
+                        )
+
+                        AND
+                        (
+                            ativo = TRUE
+
+                            OR status_aprovacao =
+                                'pendente'
+                        )
+
+                    LIMIT 1
+                    `,
+                    [
+                        universidadeId,
+                        nome
+                    ]
+                );
+
+
+            if (
+                existente.rows.length >
+                0
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Já existe um campus ativo ou aguardando aprovação com este nome"
+                    });
+            }
+
+
+            const superAdmin =
+                usuario.perfil ===
+                "super_admin";
+
+
+            const statusAprovacao =
+                superAdmin
+                    ? "aprovado"
+                    : "pendente";
+
+
+            const ativo =
+                superAdmin;
+
+
             await client.query(
                 "BEGIN"
             );
 
 
             if (
+                superAdmin &&
                 principal
             ) {
 
@@ -550,10 +603,13 @@ router.post(
 
                     SET
                         principal = FALSE,
-                        atualizado_em = NOW()
+
+                        atualizado_em =
+                            NOW()
 
                     WHERE
                         universidade_id = $1
+
                         AND principal = TRUE
                     `,
                     [
@@ -592,24 +648,60 @@ router.post(
 
                         principal,
 
-                        origem_dados
+                        ativo,
+
+                        origem_dados,
+
+                        status_aprovacao,
+
+                        solicitado_por,
+
+                        solicitado_em,
+
+                        aprovado_por,
+
+                        aprovado_em
                     )
 
                     VALUES
                     (
                         $1,
+
                         $2,
+
                         $3,
+
                         $4,
+
                         $5,
+
                         $6,
+
                         $7,
+
                         $8,
+
                         $9,
+
                         $10,
+
                         $11,
+
                         $12,
-                        'SIA'
+
+                        $13,
+
+                        'SIA',
+
+                        $14,
+
+                        $15,
+
+                        NOW(),
+
+                        $16,
+
+                        $17
                     )
 
                     RETURNING *
@@ -637,7 +729,21 @@ router.post(
 
                         longitude,
 
-                        principal
+                        principal,
+
+                        ativo,
+
+                        statusAprovacao,
+
+                        usuario.id,
+
+                        superAdmin
+                            ? usuario.id
+                            : null,
+
+                        superAdmin
+                            ? new Date()
+                            : null
                     ]
                 );
 
@@ -649,9 +755,16 @@ router.post(
 
             res
                 .status(201)
-                .json(
-                    resultado.rows[0]
-                );
+                .json({
+
+                    mensagem:
+                        superAdmin
+                            ? "Campus cadastrado com sucesso"
+                            : "Campus enviado para aprovação do Super Admin",
+
+                    campus:
+                        resultado.rows[0]
+                });
 
 
         } catch (erro) {
@@ -663,6 +776,7 @@ router.post(
                 );
 
             } catch {
+
                 // nenhuma ação
             }
 
@@ -681,8 +795,22 @@ router.post(
             }
 
 
+            if (
+                erro.code ===
+                "23514"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O nome informado não pode ser utilizado para esta instituição"
+                    });
+            }
+
+
             console.error(
-                "Erro ao cadastrar campus:",
+                "Erro ao solicitar campus:",
                 erro
             );
 
@@ -704,7 +832,10 @@ router.post(
 
 
 // =========================================================
-// EDITAR CAMPUS
+// EDITAR CAMPUS PELO PERFIL INSTITUCIONAL
+//
+// Qualquer alteração volta para análise.
+// Super Admin continua usando a rota administrativa normal.
 // =========================================================
 
 router.patch(
@@ -714,17 +845,30 @@ router.patch(
         "GERENCIAR_CAMPI"
     ),
 
-    async (req, res) => {
+    async (
+        req,
+        res,
+        next
+    ) => {
+
+        const usuario =
+            req.session.usuario;
+
+
+        if (
+            usuario.perfil ===
+            "super_admin"
+        ) {
+
+            return next();
+        }
+
 
         const client =
             await pool.connect();
 
 
         try {
-
-            const usuario =
-                req.session.usuario;
-
 
             const campusId =
                 Number(
@@ -747,7 +891,7 @@ router.patch(
             }
 
 
-            const atualResultado =
+            const resultadoAtual =
                 await client.query(
                     `
                     SELECT *
@@ -757,17 +901,22 @@ router.patch(
                     WHERE
                         id = $1
 
+                        AND universidade_id = $2
+
+                        AND status_aprovacao <>
+                            'excluido'
+
                     LIMIT 1
                     `,
                     [
-                        campusId
+                        campusId,
+                        usuario.universidade_id
                     ]
                 );
 
 
             if (
-                atualResultado.rows
-                    .length ===
+                resultadoAtual.rows.length ===
                 0
             ) {
 
@@ -781,27 +930,7 @@ router.patch(
 
 
             const atual =
-                atualResultado.rows[0];
-
-
-            if (
-                usuario.perfil !==
-                    "super_admin" &&
-                Number(
-                    usuario.universidade_id
-                ) !==
-                Number(
-                    atual.universidade_id
-                )
-            ) {
-
-                return res
-                    .status(403)
-                    .json({
-                        erro:
-                            "Você só pode alterar campi da sua instituição"
-                    });
-            }
+                resultadoAtual.rows[0];
 
 
             const nome =
@@ -865,8 +994,7 @@ router.patch(
                 req.body.estado !== undefined
                     ? texto(
                         req.body.estado
-                    )
-                        .toUpperCase()
+                    ).toUpperCase()
                     : atual.estado;
 
 
@@ -901,31 +1029,12 @@ router.patch(
                     );
 
 
-            const ativo =
-                req.body.ativo !== undefined
-                    ? booleano(
-                        req.body.ativo,
-                        atual.ativo
-                    )
-                    : atual.ativo;
-
-
-            let principal =
+            const principal =
                 req.body.principal !== undefined
                     ? booleano(
-                        req.body.principal,
-                        atual.principal
+                        req.body.principal
                     )
                     : atual.principal;
-
-
-            if (
-                !ativo
-            ) {
-
-                principal =
-                    false;
-            }
 
 
             if (
@@ -947,19 +1056,7 @@ router.patch(
             if (
                 latitude === null ||
                 latitude < -90 ||
-                latitude > 90
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        erro:
-                            "Latitude inválida"
-                    });
-            }
-
-
-            if (
+                latitude > 90 ||
                 longitude === null ||
                 longitude < -180 ||
                 longitude > 180
@@ -969,7 +1066,7 @@ router.patch(
                     .status(400)
                     .json({
                         erro:
-                            "Longitude inválida"
+                            "Coordenadas inválidas"
                     });
             }
 
@@ -979,31 +1076,43 @@ router.patch(
             );
 
 
-            if (
-                principal
-            ) {
+            // Enquanto aguarda nova aprovação,
+            // não pode ser utilizado em cursos
+            // nem aparecer publicamente.
 
-                await client.query(
-                    `
-                    UPDATE campus
+            await client.query(
+                `
+                UPDATE curso_campus
 
-                    SET
-                        principal = FALSE,
-                        atualizado_em = NOW()
+                SET
+                    ativo = FALSE,
 
-                    WHERE
-                        universidade_id = $1
+                    atualizado_em =
+                        NOW()
 
-                        AND id <> $2
+                WHERE
+                    campus_id = $1
+                `,
+                [
+                    campusId
+                ]
+            );
 
-                        AND principal = TRUE
-                    `,
-                    [
-                        atual.universidade_id,
-                        campusId
-                    ]
-                );
-            }
+
+            await client.query(
+                `
+                UPDATE curso
+
+                SET
+                    campus_id = NULL
+
+                WHERE
+                    campus_id = $1
+                `,
+                [
+                    campusId
+                ]
+            );
 
 
             const resultado =
@@ -1012,7 +1121,6 @@ router.patch(
                     UPDATE campus
 
                     SET
-
                         nome = $1,
 
                         endereco = $2,
@@ -1035,9 +1143,33 @@ router.patch(
 
                         principal = $11,
 
-                        ativo = $12,
+                        ativo = FALSE,
 
-                        atualizado_em = NOW()
+                        status_aprovacao =
+                            'pendente',
+
+                        solicitado_por = $12,
+
+                        solicitado_em =
+                            NOW(),
+
+                        aprovado_por =
+                            NULL,
+
+                        aprovado_em =
+                            NULL,
+
+                        rejeitado_por =
+                            NULL,
+
+                        rejeitado_em =
+                            NULL,
+
+                        motivo_rejeicao =
+                            NULL,
+
+                        atualizado_em =
+                            NOW()
 
                     WHERE
                         id = $13
@@ -1067,7 +1199,7 @@ router.patch(
 
                         principal,
 
-                        ativo,
+                        usuario.id,
 
                         campusId
                     ]
@@ -1079,9 +1211,14 @@ router.patch(
             );
 
 
-            res.json(
-                resultado.rows[0]
-            );
+            res.json({
+
+                mensagem:
+                    "Alterações enviadas para aprovação do Super Admin",
+
+                campus:
+                    resultado.rows[0]
+            });
 
 
         } catch (erro) {
@@ -1093,6 +1230,428 @@ router.patch(
                 );
 
             } catch {
+
+                // nenhuma ação
+            }
+
+
+            if (
+                erro.code ===
+                "23514"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "O nome informado não pode ser utilizado para esta instituição"
+                    });
+            }
+
+
+            console.error(
+                "Erro ao atualizar solicitação de campus:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao atualizar campus"
+                });
+
+
+        } finally {
+
+            client.release();
+        }
+    }
+);
+
+
+// =========================================================
+// LISTAR PENDENTES - SUPER ADMIN
+// =========================================================
+
+router.get(
+    "/pendentes",
+
+    exigirPerfil(
+        "super_admin"
+    ),
+
+    async (req, res) => {
+
+        try {
+
+            const resultado =
+                await pool.query(
+                    `
+                    SELECT
+                        c.*,
+
+                        u.nome
+                            AS universidade,
+
+                        u.sigla
+                            AS universidade_sigla,
+
+                        solicitante.nome
+                            AS solicitado_por_nome,
+
+                        solicitante.email
+                            AS solicitado_por_email
+
+                    FROM campus c
+
+                    INNER JOIN universidade u
+                        ON u.id =
+                            c.universidade_id
+
+                    LEFT JOIN usuario solicitante
+                        ON solicitante.id =
+                            c.solicitado_por
+
+                    WHERE
+                        c.status_aprovacao =
+                            'pendente'
+
+                    ORDER BY
+                        c.solicitado_em ASC,
+                        c.id ASC
+                    `
+                );
+
+
+            res.json(
+                resultado.rows
+            );
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao listar campi pendentes:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar solicitações de campus"
+                });
+        }
+    }
+);
+
+
+// =========================================================
+// HISTÓRICO DE APROVAÇÕES DE CAMPI
+//
+// NOVO:
+// mostra aprovados e rejeitados.
+// =========================================================
+
+router.get(
+    "/historico",
+
+    exigirPerfil(
+        "super_admin"
+    ),
+
+    async (req, res) => {
+
+        try {
+
+            const resultado =
+                await pool.query(
+                    `
+                    SELECT
+
+                        c.*,
+
+                        u.nome
+                            AS universidade,
+
+                        u.sigla
+                            AS universidade_sigla,
+
+                        solicitante.nome
+                            AS solicitado_por_nome,
+
+                        solicitante.email
+                            AS solicitado_por_email,
+
+                        aprovador.nome
+                            AS aprovado_por_nome,
+
+                        aprovador.email
+                            AS aprovado_por_email,
+
+                        rejeitador.nome
+                            AS rejeitado_por_nome,
+
+                        rejeitador.email
+                            AS rejeitado_por_email
+
+                    FROM campus c
+
+                    INNER JOIN universidade u
+                        ON u.id =
+                            c.universidade_id
+
+                    LEFT JOIN usuario solicitante
+                        ON solicitante.id =
+                            c.solicitado_por
+
+                    LEFT JOIN usuario aprovador
+                        ON aprovador.id =
+                            c.aprovado_por
+
+                    LEFT JOIN usuario rejeitador
+                        ON rejeitador.id =
+                            c.rejeitado_por
+
+                    WHERE
+                        c.status_aprovacao IN
+                        (
+                            'aprovado',
+                            'rejeitado'
+                        )
+
+                        AND
+                        (
+                            c.aprovado_em IS NOT NULL
+
+                            OR
+
+                            c.rejeitado_em IS NOT NULL
+                        )
+
+                    ORDER BY
+                        COALESCE(
+                            c.aprovado_em,
+                            c.rejeitado_em,
+                            c.atualizado_em
+                        ) DESC,
+
+                        c.id DESC
+
+                    LIMIT 100
+                    `
+                );
+
+
+            res.json(
+                resultado.rows
+            );
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao listar histórico de aprovações de campi:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar histórico de aprovações de campi"
+                });
+        }
+    }
+);
+
+
+// =========================================================
+// APROVAR - SUPER ADMIN
+// =========================================================
+
+router.patch(
+    "/:id/aprovar",
+
+    exigirPerfil(
+        "super_admin"
+    ),
+
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const campusId =
+                Number(
+                    req.params.id
+                );
+
+
+            if (
+                !idValido(
+                    campusId
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Campus inválido"
+                    });
+            }
+
+
+            const consulta =
+                await client.query(
+                    `
+                    SELECT *
+
+                    FROM campus
+
+                    WHERE
+                        id = $1
+
+                        AND status_aprovacao =
+                            'pendente'
+
+                    LIMIT 1
+                    `,
+                    [
+                        campusId
+                    ]
+                );
+
+
+            if (
+                consulta.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Solicitação pendente não encontrada"
+                    });
+            }
+
+
+            const campus =
+                consulta.rows[0];
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+            if (
+                campus.principal
+            ) {
+
+                await client.query(
+                    `
+                    UPDATE campus
+
+                    SET
+                        principal = FALSE,
+
+                        atualizado_em =
+                            NOW()
+
+                    WHERE
+                        universidade_id = $1
+
+                        AND id <> $2
+
+                        AND ativo = TRUE
+
+                        AND principal = TRUE
+                    `,
+                    [
+                        campus.universidade_id,
+
+                        campusId
+                    ]
+                );
+            }
+
+
+            const resultado =
+                await client.query(
+                    `
+                    UPDATE campus
+
+                    SET
+                        ativo = TRUE,
+
+                        status_aprovacao =
+                            'aprovado',
+
+                        aprovado_por = $1,
+
+                        aprovado_em =
+                            NOW(),
+
+                        rejeitado_por =
+                            NULL,
+
+                        rejeitado_em =
+                            NULL,
+
+                        motivo_rejeicao =
+                            NULL,
+
+                        atualizado_em =
+                            NOW()
+
+                    WHERE
+                        id = $2
+
+                    RETURNING *
+                    `,
+                    [
+                        req.session.usuario.id,
+
+                        campusId
+                    ]
+                );
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+            res.json({
+
+                mensagem:
+                    "Campus aprovado com sucesso",
+
+                campus:
+                    resultado.rows[0]
+            });
+
+
+        } catch (erro) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            } catch {
+
                 // nenhuma ação
             }
 
@@ -1106,13 +1665,13 @@ router.patch(
                     .status(409)
                     .json({
                         erro:
-                            "Já existe um campus com este nome nesta instituição"
+                            "Já existe um campus ativo com este nome na instituição"
                     });
             }
 
 
             console.error(
-                "Erro ao editar campus:",
+                "Erro ao aprovar campus:",
                 erro
             );
 
@@ -1121,13 +1680,152 @@ router.patch(
                 .status(500)
                 .json({
                     erro:
-                        "Erro ao editar campus"
+                        "Erro ao aprovar campus"
                 });
 
 
         } finally {
 
             client.release();
+        }
+    }
+);
+
+
+// =========================================================
+// REJEITAR - SUPER ADMIN
+// =========================================================
+
+router.patch(
+    "/:id/rejeitar",
+
+    exigirPerfil(
+        "super_admin"
+    ),
+
+    async (req, res) => {
+
+        try {
+
+            const campusId =
+                Number(
+                    req.params.id
+                );
+
+
+            const motivo =
+                texto(
+                    req.body.motivo
+                );
+
+
+            if (
+                !idValido(
+                    campusId
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Campus inválido"
+                    });
+            }
+
+
+            if (
+                motivo.length < 3
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Informe o motivo da rejeição"
+                    });
+            }
+
+
+            const resultado =
+                await pool.query(
+                    `
+                    UPDATE campus
+
+                    SET
+                        ativo = FALSE,
+
+                        principal = FALSE,
+
+                        status_aprovacao =
+                            'rejeitado',
+
+                        rejeitado_por = $1,
+
+                        rejeitado_em =
+                            NOW(),
+
+                        motivo_rejeicao = $2,
+
+                        atualizado_em =
+                            NOW()
+
+                    WHERE
+                        id = $3
+
+                        AND status_aprovacao =
+                            'pendente'
+
+                    RETURNING *
+                    `,
+                    [
+                        req.session.usuario.id,
+
+                        motivo,
+
+                        campusId
+                    ]
+                );
+
+
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Solicitação pendente não encontrada"
+                    });
+            }
+
+
+            res.json({
+
+                mensagem:
+                    "Solicitação rejeitada",
+
+                campus:
+                    resultado.rows[0]
+            });
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao rejeitar campus:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao rejeitar campus"
+                });
         }
     }
 );

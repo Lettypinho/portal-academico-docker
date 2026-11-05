@@ -3,6 +3,7 @@
 //
 // Super Admin:
 // - aprova/rejeita campi;
+// - visualiza histórico de campi;
 // - analisa notas de corte;
 // - abre comprovantes;
 // - aprova/rejeita notas.
@@ -10,27 +11,23 @@
 
 (function iniciarCentralAprovacoes() {
 
-    let campiPendentes =
-        [];
+    let campiPendentes = [];
 
-    let notasPendentes =
-        [];
+    let campiHistorico = [];
 
-    let carregando =
-        false;
+    let notasPendentes = [];
+
+    let carregando = false;
 
 
     // =====================================================
     // UTILITÁRIOS
     // =====================================================
 
-    function escaparHtml(
-        valor
-    ) {
+    function escaparHtml(valor) {
 
         return String(
-            valor ??
-            ""
+            valor ?? ""
         )
             .replaceAll(
                 "&",
@@ -55,14 +52,9 @@
     }
 
 
-    function formatarData(
-        valor
-    ) {
+    function formatarData(valor) {
 
-        if (
-            !valor
-        ) {
-
+        if (!valor) {
             return "-";
         }
 
@@ -100,9 +92,7 @@
     }
 
 
-    function formatarEndereco(
-        campus
-    ) {
+    function formatarEndereco(campus) {
 
         const linha1 = [
 
@@ -156,9 +146,7 @@
     }
 
 
-    function rotuloFonte(
-        fonte
-    ) {
+    function rotuloFonte(fonte) {
 
         const fontes = {
 
@@ -184,9 +172,7 @@
     }
 
 
-    function rotuloGrupo(
-        grupo
-    ) {
+    function rotuloGrupo(grupo) {
 
         const grupos = {
 
@@ -212,9 +198,7 @@
     }
 
 
-    function rotuloTipoNota(
-        tipo
-    ) {
+    function rotuloTipoNota(tipo) {
 
         const tipos = {
 
@@ -377,6 +361,7 @@
 
             .admin-aprovacoes-grid {
                 display: grid;
+
                 gap: 24px;
             }
 
@@ -442,12 +427,14 @@
 
             .admin-aprovacoes-atualizar:hover {
                 color: #ffffff;
+
                 background: #6d28d9;
             }
 
 
             .admin-aprovacoes-lista {
                 display: grid;
+
                 gap: 12px;
             }
 
@@ -461,6 +448,11 @@
                 border-radius: 12px;
 
                 background: #f8fafc;
+            }
+
+
+            .admin-aprovacao-card.historico {
+                background: #ffffff;
             }
 
 
@@ -506,10 +498,26 @@
                 border-radius: 999px;
 
                 color: #b45309;
+
                 background: #fffbeb;
 
                 font-size: 10px;
+
                 font-weight: 800;
+            }
+
+
+            .admin-aprovacao-badge.aprovado {
+                color: #166534;
+
+                background: #dcfce7;
+            }
+
+
+            .admin-aprovacao-badge.rejeitado {
+                color: #b91c1c;
+
+                background: #fee2e2;
             }
 
 
@@ -601,6 +609,7 @@
 
             .admin-aprovacao-btn:disabled {
                 opacity: .55;
+
                 cursor: not-allowed;
             }
 
@@ -610,6 +619,7 @@
                     1px solid #15803d;
 
                 color: #ffffff;
+
                 background: #15803d;
             }
 
@@ -624,12 +634,14 @@
                     1px solid #dc2626;
 
                 color: #dc2626;
+
                 background: #ffffff;
             }
 
 
             .admin-aprovacao-btn.rejeitar:hover {
                 color: #ffffff;
+
                 background: #dc2626;
             }
 
@@ -639,12 +651,14 @@
                     1px solid #6d28d9;
 
                 color: #6d28d9;
+
                 background: #ffffff;
             }
 
 
             .admin-aprovacao-btn.comprovante:hover {
                 color: #ffffff;
+
                 background: #6d28d9;
             }
 
@@ -654,6 +668,7 @@
                     1px solid #475569;
 
                 color: #475569;
+
                 background: #ffffff;
             }
 
@@ -678,6 +693,27 @@
                 margin-bottom: 4px;
 
                 color: #0f172a;
+            }
+
+
+            .admin-aprovacao-motivo {
+                margin-top: 12px;
+
+                padding:
+                    10px 12px;
+
+                border-left:
+                    3px solid #dc2626;
+
+                border-radius: 7px;
+
+                color: #7f1d1d;
+
+                background: #fef2f2;
+
+                font-size: 11px;
+
+                line-height: 1.45;
             }
 
 
@@ -706,20 +742,28 @@
 
                 .admin-aprovacoes-resumo,
                 .admin-aprovacao-dados {
-                    grid-template-columns: 1fr;
+
+                    grid-template-columns:
+                        1fr;
                 }
 
 
                 .admin-aprovacao-acoes {
-                    flex-direction: column;
-                    align-items: stretch;
+
+                    flex-direction:
+                        column;
+
+                    align-items:
+                        stretch;
                 }
 
 
                 .admin-aprovacao-btn {
+
                     width: 100%;
                 }
             }
+
         `;
 
 
@@ -792,6 +836,7 @@
             >
                 0
             </span>
+
         `;
 
 
@@ -1016,7 +1061,42 @@
 
                 </article>
 
+
+                <article class="admin-aprovacoes-panel">
+
+                    <div class="admin-aprovacoes-panel-header">
+
+                        <div>
+
+                            <span class="section-eyebrow">
+                                Histórico
+                            </span>
+
+                            <h2>
+                                Histórico de campi
+                            </h2>
+
+                            <p>
+                                Consulte os campi já aprovados
+                                ou rejeitados pelo Super Admin.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="lista-aprovacoes-historico-campi"
+                        class="admin-aprovacoes-lista"
+                    >
+                        Carregando...
+                    </div>
+
+                </article>
+
             </div>
+
         `;
 
 
@@ -1029,7 +1109,7 @@
             .getElementById(
                 "btn-atualizar-aprovacoes"
             )
-            .addEventListener(
+            ?.addEventListener(
                 "click",
                 carregarAprovacoes
             );
@@ -1106,8 +1186,10 @@
 
             const [
                 respostaCampi,
-                respostaNotas
+                respostaNotas,
+                respostaHistorico
             ] =
+
                 await Promise.all([
 
                     fetch(
@@ -1116,7 +1198,12 @@
 
                     fetch(
                         "/api/notas-corte/admin/pendentes"
+                    ),
+
+                    fetch(
+                        "/api/campi/historico"
                     )
+
                 ]);
 
 
@@ -1132,14 +1219,19 @@
                 );
 
 
+            campiHistorico =
+                await lerResposta(
+                    respostaHistorico
+                );
+
+
             if (
                 !Array.isArray(
                     campiPendentes
                 )
             ) {
 
-                campiPendentes =
-                    [];
+                campiPendentes = [];
             }
 
 
@@ -1149,8 +1241,17 @@
                 )
             ) {
 
-                notasPendentes =
-                    [];
+                notasPendentes = [];
+            }
+
+
+            if (
+                !Array.isArray(
+                    campiHistorico
+                )
+            ) {
+
+                campiHistorico = [];
             }
 
 
@@ -1196,34 +1297,55 @@
             notasPendentes.length;
 
 
-        document
-            .getElementById(
+        const totalEl =
+            document.getElementById(
                 "aprovacoes-total"
-            )
-            .textContent =
-            total;
+            );
 
 
-        document
-            .getElementById(
+        const campiEl =
+            document.getElementById(
                 "aprovacoes-campi-total"
-            )
-            .textContent =
-            campiPendentes.length;
+            );
 
 
-        document
-            .getElementById(
+        const notasEl =
+            document.getElementById(
                 "aprovacoes-notas-total"
-            )
-            .textContent =
-            notasPendentes.length;
+            );
 
 
         const contador =
             document.getElementById(
                 "admin-aprovacoes-contador"
             );
+
+
+        if (
+            totalEl
+        ) {
+
+            totalEl.textContent =
+                total;
+        }
+
+
+        if (
+            campiEl
+        ) {
+
+            campiEl.textContent =
+                campiPendentes.length;
+        }
+
+
+        if (
+            notasEl
+        ) {
+
+            notasEl.textContent =
+                notasPendentes.length;
+        }
 
 
         if (
@@ -1243,7 +1365,7 @@
 
 
     // =====================================================
-    // CAMPI
+    // CAMPI PENDENTES
     // =====================================================
 
     function renderizarCampi() {
@@ -1279,6 +1401,7 @@
                     aparecerão aqui.
 
                 </div>
+
             `;
 
 
@@ -1287,7 +1410,9 @@
 
 
         container.innerHTML =
+
             campiPendentes
+
                 .map(
                     campus => `
 
@@ -1304,14 +1429,18 @@
                                     </h3>
 
                                     <p>
+
                                         ${escaparHtml(
                                             campus.universidade_sigla ||
                                             campus.universidade
                                         )}
+
                                         —
+
                                         ${escaparHtml(
                                             campus.universidade
                                         )}
+
                                     </p>
 
                                 </div>
@@ -1350,10 +1479,12 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             campus.solicitado_por_nome ||
                                             "-"
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1366,11 +1497,13 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             formatarData(
                                                 campus.solicitado_em
                                             )
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1406,6 +1539,7 @@
                             </div>
 
                         </article>
+
                     `
                 )
                 .join("");
@@ -1506,6 +1640,7 @@
         try {
 
             await lerResposta(
+
                 await fetch(
                     `/api/campi/${id}/aprovar`,
                     {
@@ -1522,6 +1657,7 @@
             );
 
 
+            // Recarrega pendentes + histórico.
             await carregarAprovacoes();
 
 
@@ -1571,6 +1707,7 @@
                 "Informe um motivo para a rejeição."
             );
 
+
             return;
         }
 
@@ -1586,6 +1723,7 @@
         try {
 
             await lerResposta(
+
                 await fetch(
                     `/api/campi/${id}/rejeitar`,
                     {
@@ -1615,6 +1753,7 @@
             );
 
 
+            // Recarrega pendentes + histórico.
             await carregarAprovacoes();
 
 
@@ -1633,6 +1772,287 @@
             botao.textContent =
                 "Rejeitar";
         }
+    }
+
+
+    // =====================================================
+    // HISTÓRICO DE CAMPI
+    // =====================================================
+
+    function renderizarHistoricoCampi() {
+
+        const container =
+            document.getElementById(
+                "lista-aprovacoes-historico-campi"
+            );
+
+
+        if (
+            !container
+        ) {
+
+            return;
+        }
+
+
+        if (
+            campiHistorico.length ===
+            0
+        ) {
+
+            container.innerHTML = `
+
+                <div class="admin-aprovacao-vazio">
+
+                    <strong>
+                        Nenhuma decisão registrada
+                    </strong>
+
+                    Os campi aprovados ou rejeitados
+                    aparecerão aqui.
+
+                </div>
+
+            `;
+
+
+            return;
+        }
+
+
+        container.innerHTML =
+
+            campiHistorico
+
+                .map(
+                    campus => {
+
+
+                        const aprovado =
+                            campus.status_aprovacao ===
+                            "aprovado";
+
+
+                        const status =
+                            aprovado
+                                ? "Aprovado"
+                                : "Rejeitado";
+
+
+                        const responsavel =
+                            aprovado
+
+                                ? (
+                                    campus.aprovado_por_nome ||
+                                    "-"
+                                )
+
+                                : (
+                                    campus.rejeitado_por_nome ||
+                                    "-"
+                                );
+
+
+                        const dataDecisao =
+                            aprovado
+
+                                ? campus.aprovado_em
+
+                                : campus.rejeitado_em;
+
+
+                        return `
+
+                            <article
+                                class="
+                                    admin-aprovacao-card
+                                    historico
+                                "
+                            >
+
+                                <div class="admin-aprovacao-card-header">
+
+                                    <div>
+
+                                        <h3>
+                                            ${escaparHtml(
+                                                campus.nome
+                                            )}
+                                        </h3>
+
+                                        <p>
+
+                                            ${escaparHtml(
+                                                campus.universidade_sigla ||
+                                                campus.universidade
+                                            )}
+
+                                            —
+
+                                            ${escaparHtml(
+                                                campus.universidade
+                                            )}
+
+                                        </p>
+
+                                    </div>
+
+
+                                    <span
+                                        class="
+                                            admin-aprovacao-badge
+                                            ${
+                                                aprovado
+                                                    ? "aprovado"
+                                                    : "rejeitado"
+                                            }
+                                        "
+                                    >
+                                        ${status}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="admin-aprovacao-dados">
+
+                                    <div class="admin-aprovacao-dado">
+
+                                        <span>
+                                            Endereço
+                                        </span>
+
+                                        <strong>
+                                            ${escaparHtml(
+                                                formatarEndereco(
+                                                    campus
+                                                )
+                                            )}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="admin-aprovacao-dado">
+
+                                        <span>
+                                            Solicitado por
+                                        </span>
+
+                                        <strong>
+
+                                            ${escaparHtml(
+                                                campus.solicitado_por_nome ||
+                                                "-"
+                                            )}
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="admin-aprovacao-dado">
+
+                                        <span>
+                                            Solicitação
+                                        </span>
+
+                                        <strong>
+
+                                            ${escaparHtml(
+                                                formatarData(
+                                                    campus.solicitado_em
+                                                )
+                                            )}
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="admin-aprovacao-dado">
+
+                                        <span>
+                                            Decisão por
+                                        </span>
+
+                                        <strong>
+                                            ${escaparHtml(
+                                                responsavel
+                                            )}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="admin-aprovacao-dado">
+
+                                        <span>
+                                            Decisão
+                                        </span>
+
+                                        <strong>
+
+                                            ${escaparHtml(
+                                                formatarData(
+                                                    dataDecisao
+                                                )
+                                            )}
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="admin-aprovacao-dado">
+
+                                        <span>
+                                            Status
+                                        </span>
+
+                                        <strong>
+                                            ${status}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                ${
+                                    !aprovado &&
+                                    campus.motivo_rejeicao
+
+                                        ? `
+
+                                            <div
+                                                class="
+                                                    admin-aprovacao-motivo
+                                                "
+                                            >
+
+                                                <strong>
+                                                    Motivo da rejeição:
+                                                </strong>
+
+                                                ${escaparHtml(
+                                                    campus.motivo_rejeicao
+                                                )}
+
+                                            </div>
+
+                                        `
+
+                                        : ""
+                                }
+
+                            </article>
+
+                        `;
+
+                    }
+                )
+                .join("");
     }
 
 
@@ -1673,6 +2093,7 @@
                     aparecerão aqui.
 
                 </div>
+
             `;
 
 
@@ -1681,7 +2102,9 @@
 
 
         container.innerHTML =
+
             notasPendentes
+
                 .map(
                     nota => `
 
@@ -1716,9 +2139,11 @@
 
 
                                 <span class="admin-aprovacao-badge">
+
                                     Nota ${escaparHtml(
                                         nota.nota
                                     )}
+
                                 </span>
 
                             </div>
@@ -1733,17 +2158,23 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             nota.processo_seletivo
                                         )}
+
                                         /
+
                                         ${escaparHtml(
                                             nota.edicao
                                         )}
+
                                         —
+
                                         ${escaparHtml(
                                             nota.ano
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1756,15 +2187,19 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             rotuloGrupo(
                                                 nota.grupo_concorrencia
                                             )
                                         )}
+
                                         —
+
                                         ${escaparHtml(
                                             nota.modalidade_nome
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1777,11 +2212,13 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             rotuloTipoNota(
                                                 nota.tipo_nota
                                             )
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1809,11 +2246,13 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             rotuloFonte(
                                                 nota.fonte
                                             )
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1826,10 +2265,12 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             nota.enviado_por_nome ||
                                             "-"
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1842,10 +2283,12 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             nota.comprovante_nome ||
                                             "-"
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1874,11 +2317,13 @@
                                     </span>
 
                                     <strong>
+
                                         ${escaparHtml(
                                             formatarData(
                                                 nota.criado_em
                                             )
                                         )}
+
                                     </strong>
 
                                 </div>
@@ -1889,9 +2334,11 @@
                             <div class="admin-aprovacao-acoes">
 
                                 ${
+
                                     nota.fonte_url
 
                                         ? `
+
                                             <button
                                                 type="button"
                                                 class="
@@ -1902,6 +2349,7 @@
                                             >
                                                 Fonte oficial
                                             </button>
+
                                         `
 
                                         : ""
@@ -1946,6 +2394,7 @@
                             </div>
 
                         </article>
+
                     `
                 )
                 .join("");
@@ -2145,6 +2594,7 @@
         try {
 
             await lerResposta(
+
                 await fetch(
                     `/api/notas-corte/admin/${id}/aprovar`,
                     {
@@ -2223,6 +2673,7 @@
                 "Informe o motivo da rejeição."
             );
 
+
             return;
         }
 
@@ -2238,6 +2689,7 @@
         try {
 
             await lerResposta(
+
                 await fetch(
                     `/api/notas-corte/admin/${id}/rejeitar`,
                     {
@@ -2299,6 +2751,8 @@
         renderizarCampi();
 
         renderizarNotas();
+
+        renderizarHistoricoCampi();
     }
 
 

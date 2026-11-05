@@ -1745,6 +1745,7 @@ router.patch(
                     erro:
                         "Erro ao rejeitar campus"
                 });
+        
         }
     }
 );
