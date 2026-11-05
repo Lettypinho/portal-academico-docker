@@ -103,7 +103,7 @@ function preencherTopbar() {
     logoutButton.addEventListener("click", () => {
         localStorage.removeItem("sia_usuario");
         localStorage.removeItem("sia_token");
-        window.location.href = "/login.html";
+        window.location.href = "/login";
     });
 }
 

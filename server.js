@@ -291,7 +291,7 @@ app.delete("/api/alunos/:id", exigirLogin, async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    res.redirect("/login.html");
+    res.redirect("/login");
 });
 
 app.listen(3000, "0.0.0.0", () => {

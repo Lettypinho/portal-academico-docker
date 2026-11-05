@@ -167,7 +167,7 @@ async function carregarUsuario() {
         if (!resposta.ok) {
 
             window.location.href =
-                "/login.html";
+                "/login";
 
             return false;
         }
@@ -209,7 +209,7 @@ async function carregarUsuario() {
         ) {
 
             window.location.href =
-                "/login.html";
+                "/login";
 
             return false;
         }
@@ -257,7 +257,7 @@ async function carregarUsuario() {
 
 
         window.location.href =
-            "/login.html";
+            "/login";
 
 
         return false;
@@ -284,7 +284,7 @@ async function logout() {
     } finally {
 
         window.location.href =
-            "/login.html";
+            "/login";
     }
 }
 

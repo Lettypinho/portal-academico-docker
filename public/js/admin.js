@@ -218,7 +218,7 @@ async function carregarAdmin() {
     ) {
 
         window.location.href =
-            "/login.html";
+            "/login";
 
         return false;
     }
@@ -301,7 +301,7 @@ async function logoutAdmin() {
     } finally {
 
         window.location.href =
-            "/login.html";
+            "/login";
     }
 }
 

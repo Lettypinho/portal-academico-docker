@@ -98,6 +98,48 @@ app.use(
 );
 
 
+// =========================================================
+// ROTAS PÚBLICAS AMIGÁVEIS
+// =========================================================
+
+// Ao acessar o domínio principal,
+// enviar diretamente para o login.
+app.get(
+    "/",
+
+    (
+        req,
+        res
+    ) => {
+
+        res.redirect(
+            "/login"
+        );
+    }
+);
+
+
+// Se alguém acessar a URL antiga,
+// redirecionar para a URL limpa.
+app.get(
+    "/login",
+
+    (
+        req,
+        res
+    ) => {
+
+        res.redirect(
+            "/login"
+        );
+    }
+);
+
+
+// =========================================================
+// CACHE
+// =========================================================
+
 app.use(
     (
         req,
@@ -113,7 +155,8 @@ app.use(
         if (
             caminho.endsWith(".html") ||
             caminho.endsWith(".js") ||
-            caminho.endsWith(".css")
+            caminho.endsWith(".css") ||
+            !path.extname(caminho)
         ) {
 
             res.setHeader(
@@ -138,6 +181,19 @@ app.use(
 );
 
 
+// =========================================================
+// ARQUIVOS PÚBLICOS
+//
+// extensions: ["html"]
+// permite:
+//
+// /login      -> login.html
+// /cadastro   -> cadastro.html
+// /dashboard  -> dashboard.html
+// /explorar   -> explorar.html
+// /admin      -> admin.html
+// =========================================================
+
 app.use(
     express.static(
         path.join(
@@ -152,11 +208,22 @@ app.use(
                 false,
 
             maxAge:
-                0
+                0,
+
+            index:
+                false,
+
+            extensions: [
+                "html"
+            ]
         }
     )
 );
 
+
+// =========================================================
+// API
+// =========================================================
 
 app.use(
     "/api/auth",

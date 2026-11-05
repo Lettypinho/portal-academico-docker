@@ -299,7 +299,7 @@ if (
 
 
                         window.location.href =
-                            "/login.html";
+                            "/login";
 
                     },
                     500
@@ -505,7 +505,7 @@ if (
                     () => {
 
                         window.location.href =
-                            "/login.html";
+                            "/login";
 
                     },
                     1200
