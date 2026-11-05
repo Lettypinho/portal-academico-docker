@@ -636,7 +636,121 @@ router.put(
         }
     }
 );
+// =========================================================
+// DADOS ACADÊMICOS DO ALUNO LOGADO
+// =========================================================
 
+router.get(
+    "/aluno",
+
+    exigirLogin,
+
+    async (req, res) => {
+
+        try {
+
+            if (
+                req.session.usuario.perfil !==
+                "aluno"
+            ) {
+
+                return res
+                    .status(403)
+                    .json({
+                        erro:
+                            "Esta área está disponível apenas para alunos"
+                    });
+            }
+
+
+            const resultado =
+                await pool.query(
+                    `
+                    SELECT
+
+                        a.id
+                            AS aluno_id,
+
+                        a.matricula,
+
+                        a.status,
+
+                        a.curso_id,
+
+                        c.nome
+                            AS curso,
+
+                        c.grau_academico,
+
+                        c.modalidade,
+
+                        u.id
+                            AS universidade_id,
+
+                        u.nome
+                            AS universidade,
+
+                        u.sigla
+                            AS universidade_sigla
+
+                    FROM aluno a
+
+                    JOIN curso c
+                        ON c.id =
+                            a.curso_id
+
+                    JOIN universidade u
+                        ON u.id =
+                            a.universidade_id
+
+                    WHERE
+                        a.usuario_id = $1
+                        AND a.status = 'Ativo'
+
+                    LIMIT 1
+                    `,
+                    [
+                        req.session.usuario.id
+                    ]
+                );
+
+
+            if (
+                resultado.rows.length ===
+                0
+            ) {
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Vínculo acadêmico não encontrado"
+                    });
+            }
+
+
+            res.json(
+                resultado.rows[0]
+            );
+
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao carregar dados do aluno:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao carregar dados acadêmicos"
+                });
+        }
+    }
+);
 
 module.exports =
     router;
