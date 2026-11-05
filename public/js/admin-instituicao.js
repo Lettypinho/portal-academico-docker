@@ -72,7 +72,7 @@ function nomePerfilAdmin(
 
 
 // =========================================================
-// CONFIGURAÇÃO DO BOTÃO DE PERFIL
+// BOTÃO DE PERFIL
 // =========================================================
 
 function configurarBotaoConfiguracoesAdmin() {
@@ -225,8 +225,8 @@ function criarAbaAdministracao() {
                 </h2>
 
                 <p>
-                    Gerencie solicitações de vínculo,
-                    alunos e usuários da sua instituição.
+                    Consulte solicitações, alunos e
+                    usuários vinculados à instituição.
                 </p>
 
             </div>
@@ -288,17 +288,12 @@ function criarAbaAdministracao() {
                 <div>
 
                     <span class="section-eyebrow">
-                        Contas
+                        Instituição
                     </span>
 
                     <h3>
                         Usuários vinculados
                     </h3>
-
-                    <p>
-                        Alunos podem ser desvinculados
-                        sem excluir sua conta.
-                    </p>
 
                 </div>
 
@@ -313,12 +308,6 @@ function criarAbaAdministracao() {
             </div>
 
         </div>
-
-
-        <div
-            id="admin-ies-mensagem"
-            class="admin-ies-message"
-        ></div>
     `;
 
 
@@ -364,7 +353,6 @@ function renderizarResumoAdmin(
 
         <article>
             <span>Solicitações pendentes</span>
-
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.solicitacoes_pendentes
@@ -375,7 +363,6 @@ function renderizarResumoAdmin(
 
         <article>
             <span>Usuários</span>
-
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.usuarios_vinculados
@@ -386,7 +373,6 @@ function renderizarResumoAdmin(
 
         <article>
             <span>Alunos</span>
-
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.alunos_vinculados
@@ -396,8 +382,7 @@ function renderizarResumoAdmin(
 
 
         <article>
-            <span>Institucionais</span>
-
+            <span>Funcionários</span>
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.funcionarios_vinculados
@@ -415,8 +400,7 @@ function renderizarResumoAdmin(
 
     const quantidade =
         Number(
-            resumo
-                .solicitacoes_pendentes ||
+            resumo.solicitacoes_pendentes ||
             0
         );
 
@@ -464,29 +448,6 @@ async function carregarSolicitacoesAdmin() {
 
 
     if (
-        resposta.status ===
-        403
-    ) {
-
-        podeGerenciarVinculos =
-            false;
-
-
-        document
-            .getElementById(
-                "admin-ies-solicitacoes"
-            )
-            ?.classList
-            .add(
-                "hidden"
-            );
-
-
-        return;
-    }
-
-
-    if (
         !resposta.ok
     ) {
 
@@ -495,10 +456,6 @@ async function carregarSolicitacoesAdmin() {
 
         return;
     }
-
-
-    podeGerenciarVinculos =
-        true;
 
 
     const solicitacoes =
@@ -579,25 +536,37 @@ async function carregarSolicitacoesAdmin() {
                         </div>
 
 
-                        <div class="admin-ies-request-actions">
+                        ${
+                            podeGerenciarVinculos
+                                ? `
 
-                            <button
-                                type="button"
-                                data-aprovar-vinculo="${solicitacao.id}"
-                            >
-                                Aprovar
-                            </button>
+                                    <div class="admin-ies-request-actions">
+
+                                        <button
+                                            type="button"
+                                            data-aprovar-vinculo="${solicitacao.id}"
+                                        >
+                                            Aprovar
+                                        </button>
 
 
-                            <button
-                                type="button"
-                                class="danger"
-                                data-rejeitar-vinculo="${solicitacao.id}"
-                            >
-                                Rejeitar
-                            </button>
+                                        <button
+                                            type="button"
+                                            class="danger"
+                                            data-rejeitar-vinculo="${solicitacao.id}"
+                                        >
+                                            Rejeitar
+                                        </button>
 
-                        </div>
+                                    </div>
+                                `
+                                : `
+
+                                    <span class="admin-ies-view-only">
+                                        Somente visualização
+                                    </span>
+                                `
+                        }
 
                     </div>
                 `
@@ -605,42 +574,47 @@ async function carregarSolicitacoesAdmin() {
             .join("");
 
 
-    container
-        .querySelectorAll(
-            "[data-aprovar-vinculo]"
-        )
-        .forEach(
-            botao => {
+    if (
+        podeGerenciarVinculos
+    ) {
 
-                botao.addEventListener(
-                    "click",
-                    () =>
-                        aprovarVinculoAdmin(
-                            botao.dataset
-                                .aprovarVinculo
-                        )
-                );
-            }
-        );
+        container
+            .querySelectorAll(
+                "[data-aprovar-vinculo]"
+            )
+            .forEach(
+                botao => {
+
+                    botao.addEventListener(
+                        "click",
+                        () =>
+                            aprovarVinculoAdmin(
+                                botao.dataset
+                                    .aprovarVinculo
+                            )
+                    );
+                }
+            );
 
 
-    container
-        .querySelectorAll(
-            "[data-rejeitar-vinculo]"
-        )
-        .forEach(
-            botao => {
+        container
+            .querySelectorAll(
+                "[data-rejeitar-vinculo]"
+            )
+            .forEach(
+                botao => {
 
-                botao.addEventListener(
-                    "click",
-                    () =>
-                        rejeitarVinculoAdmin(
-                            botao.dataset
-                                .rejeitarVinculo
-                        )
-                );
-            }
-        );
+                    botao.addEventListener(
+                        "click",
+                        () =>
+                            rejeitarVinculoAdmin(
+                                botao.dataset
+                                    .rejeitarVinculo
+                            )
+                    );
+                }
+            );
+    }
 }
 
 
@@ -698,8 +672,7 @@ async function aprovarVinculoAdmin(
 
 
     window.alert(
-        dados.mensagem ||
-        "Vínculo aprovado com sucesso."
+        dados.mensagem
     );
 
 
@@ -799,29 +772,6 @@ async function carregarUsuariosAdminInstituicao() {
 
 
     if (
-        resposta.status ===
-        403
-    ) {
-
-        podeGerenciarUsuarios =
-            false;
-
-
-        document
-            .getElementById(
-                "admin-ies-usuarios"
-            )
-            ?.classList
-            .add(
-                "hidden"
-            );
-
-
-        return;
-    }
-
-
-    if (
         !resposta.ok
     ) {
 
@@ -832,17 +782,12 @@ async function carregarUsuariosAdminInstituicao() {
     }
 
 
-    podeGerenciarUsuarios =
-        true;
-
-
     usuariosAdminInstituicao =
         await resposta.json();
 
 
     if (
-        usuariosAdminInstituicao
-            .length ===
+        usuariosAdminInstituicao.length ===
         0
     ) {
 
@@ -864,27 +809,11 @@ async function carregarUsuariosAdminInstituicao() {
             <thead>
 
                 <tr>
-
-                    <th>
-                        Usuário
-                    </th>
-
-                    <th>
-                        Perfil
-                    </th>
-
-                    <th>
-                        Dados acadêmicos
-                    </th>
-
-                    <th>
-                        Status
-                    </th>
-
-                    <th>
-                        Ações
-                    </th>
-
+                    <th>Usuário</th>
+                    <th>Perfil</th>
+                    <th>Dados acadêmicos</th>
+                    <th>Status</th>
+                    <th>Ações</th>
                 </tr>
 
             </thead>
@@ -916,13 +845,11 @@ async function carregarUsuariosAdminInstituicao() {
 
 
                                 <td>
-
                                     ${escaparHtmlAdmin(
                                         nomePerfilAdmin(
                                             usuario.perfil
                                         )
                                     )}
-
                                 </td>
 
 
@@ -988,12 +915,19 @@ async function carregarUsuariosAdminInstituicao() {
 
                                     <div class="admin-ies-user-actions">
 
-                                        <button
-                                            type="button"
-                                            data-editar-conta="${usuario.id}"
-                                        >
-                                            Editar conta
-                                        </button>
+                                        ${
+                                            podeGerenciarUsuarios
+                                                ? `
+
+                                                    <button
+                                                        type="button"
+                                                        data-editar-conta="${usuario.id}"
+                                                    >
+                                                        Editar conta
+                                                    </button>
+                                                `
+                                                : ""
+                                        }
 
 
                                         ${
@@ -1013,6 +947,22 @@ async function carregarUsuariosAdminInstituicao() {
                                                 : ""
                                         }
 
+
+                                        ${
+                                            !podeGerenciarUsuarios &&
+                                            !(
+                                                usuario.perfil ===
+                                                    "aluno" &&
+                                                podeGerenciarVinculos
+                                            )
+                                                ? `
+                                                    <span class="admin-ies-view-only">
+                                                        Visualização
+                                                    </span>
+                                                `
+                                                : ""
+                                        }
+
                                     </div>
 
                                 </td>
@@ -1028,46 +978,56 @@ async function carregarUsuariosAdminInstituicao() {
     `;
 
 
-    container
-        .querySelectorAll(
-            "[data-editar-conta]"
-        )
-        .forEach(
-            botao => {
+    if (
+        podeGerenciarUsuarios
+    ) {
 
-                botao.addEventListener(
-                    "click",
-                    () =>
-                        abrirModalContaAdmin(
-                            Number(
-                                botao.dataset
-                                    .editarConta
+        container
+            .querySelectorAll(
+                "[data-editar-conta]"
+            )
+            .forEach(
+                botao => {
+
+                    botao.addEventListener(
+                        "click",
+                        () =>
+                            abrirModalContaAdmin(
+                                Number(
+                                    botao.dataset
+                                        .editarConta
+                                )
                             )
-                        )
-                );
-            }
-        );
+                    );
+                }
+            );
+    }
 
 
-    container
-        .querySelectorAll(
-            "[data-desvincular-aluno]"
-        )
-        .forEach(
-            botao => {
+    if (
+        podeGerenciarVinculos
+    ) {
 
-                botao.addEventListener(
-                    "click",
-                    () =>
-                        desvincularAlunoAdmin(
-                            Number(
-                                botao.dataset
-                                    .desvincularAluno
+        container
+            .querySelectorAll(
+                "[data-desvincular-aluno]"
+            )
+            .forEach(
+                botao => {
+
+                    botao.addEventListener(
+                        "click",
+                        () =>
+                            desvincularAlunoAdmin(
+                                Number(
+                                    botao.dataset
+                                        .desvincularAluno
+                                )
                             )
-                        )
-                );
-            }
-        );
+                    );
+                }
+            );
+    }
 }
 
 
@@ -1336,6 +1296,7 @@ function criarModalContaAdmin() {
                     >
                         Cancelar
                     </button>
+
 
                     <button
                         type="submit"
@@ -1667,17 +1628,30 @@ async function atualizarAdministracaoInstituicao() {
 
 
     if (
-        respostaResumo.ok
+        !respostaResumo.ok
     ) {
 
-        const resumo =
-            await respostaResumo.json();
-
-
-        renderizarResumoAdmin(
-            resumo
-        );
+        return;
     }
+
+
+    const resumo =
+        await respostaResumo.json();
+
+
+    podeGerenciarVinculos =
+        resumo.pode_gerenciar_vinculos ===
+        true;
+
+
+    podeGerenciarUsuarios =
+        resumo.pode_gerenciar_usuarios ===
+        true;
+
+
+    renderizarResumoAdmin(
+        resumo
+    );
 
 
     await Promise.all([
@@ -1724,14 +1698,12 @@ function criarEstilosAdminInstituicao() {
             font-size: 9px;
         }
 
-
         .admin-ies-summary {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 20px;
         }
-
 
         .admin-ies-summary article,
         .admin-ies-panel {
@@ -1741,34 +1713,23 @@ function criarEstilosAdminInstituicao() {
             background: white;
         }
 
-
         .admin-ies-summary article {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-
         .admin-ies-summary strong {
             font-size: 22px;
         }
-
 
         .admin-ies-panel {
             margin-bottom: 18px;
         }
 
-
         .admin-ies-panel-header {
             margin-bottom: 14px;
         }
-
-
-        .admin-ies-panel-header p {
-            margin-top: 5px;
-            color: #7c7284;
-        }
-
 
         .admin-ies-request {
             display: flex;
@@ -1778,13 +1739,11 @@ function criarEstilosAdminInstituicao() {
             border-bottom: 1px solid #eee8f1;
         }
 
-
         .admin-ies-request > div:first-child {
             display: flex;
             flex-direction: column;
             gap: 3px;
         }
-
 
         .admin-ies-request-actions,
         .admin-ies-user-actions {
@@ -1792,7 +1751,6 @@ function criarEstilosAdminInstituicao() {
             gap: 6px;
             flex-wrap: wrap;
         }
-
 
         .admin-ies-request-actions button,
         .admin-ies-table button {
@@ -1804,19 +1762,21 @@ function criarEstilosAdminInstituicao() {
             cursor: pointer;
         }
 
-
         .admin-ies-request-actions .danger,
         .admin-ies-table .danger {
             border-color: #fecaca;
             color: #b91c1c;
         }
 
+        .admin-ies-view-only {
+            color: #7c7284;
+            font-size: 12px;
+        }
 
         .admin-ies-table {
             width: 100%;
             border-collapse: collapse;
         }
-
 
         .admin-ies-table th,
         .admin-ies-table td {
@@ -1826,18 +1786,15 @@ function criarEstilosAdminInstituicao() {
             vertical-align: top;
         }
 
-
         .admin-ies-table td:first-child {
             display: flex;
             flex-direction: column;
             gap: 3px;
         }
 
-
         .admin-ies-table small {
             color: #7c7284;
         }
-
 
         .admin-academic-data {
             display: flex;
@@ -1845,7 +1802,6 @@ function criarEstilosAdminInstituicao() {
             gap: 3px;
             font-size: 13px;
         }
-
 
         .admin-account-modal {
             position: fixed;
@@ -1856,18 +1812,15 @@ function criarEstilosAdminInstituicao() {
             justify-content: center;
         }
 
-
         .admin-account-modal.hidden {
             display: none;
         }
-
 
         .admin-account-backdrop {
             position: absolute;
             inset: 0;
             background: rgba(32, 18, 39, 0.55);
         }
-
 
         .admin-account-card {
             position: relative;
@@ -1879,25 +1832,21 @@ function criarEstilosAdminInstituicao() {
             background: white;
         }
 
-
         .admin-account-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 18px;
         }
 
-
         #admin-form-conta {
             display: grid;
             gap: 13px;
         }
 
-
         #admin-form-conta label {
             display: grid;
             gap: 6px;
         }
-
 
         #admin-form-conta input {
             min-height: 42px;
@@ -1906,14 +1855,12 @@ function criarEstilosAdminInstituicao() {
             border-radius: 8px;
         }
 
-
         .admin-account-actions {
             display: flex;
             justify-content: flex-end;
             gap: 8px;
             margin-top: 10px;
         }
-
 
         .admin-account-actions button {
             padding: 10px 14px;
@@ -1922,20 +1869,16 @@ function criarEstilosAdminInstituicao() {
             cursor: pointer;
         }
 
-
         @media (max-width: 900px) {
 
             .admin-ies-table-wrap {
                 overflow-x: auto;
             }
 
-
             .admin-ies-table {
                 min-width: 760px;
             }
-
         }
-
 
         @media (max-width: 800px) {
 
@@ -1943,9 +1886,7 @@ function criarEstilosAdminInstituicao() {
                 grid-template-columns:
                     repeat(2, 1fr);
             }
-
         }
-
 
         @media (max-width: 520px) {
 
@@ -1954,11 +1895,9 @@ function criarEstilosAdminInstituicao() {
                     1fr;
             }
 
-
             .admin-ies-request {
                 flex-direction: column;
             }
-
         }
     `;
 
@@ -2036,23 +1975,10 @@ async function iniciarAdminInstituicao() {
         criarEstilosAdminInstituicao();
 
 
-        // =================================================
-        // TESTAR ACESSO À ADMINISTRAÇÃO
-        // =================================================
-
         const resumoResposta =
             await fetch(
                 "/api/admin-instituicao/resumo"
             );
-
-
-        if (
-            resumoResposta.status ===
-            403
-        ) {
-
-            return;
-        }
 
 
         if (
@@ -2063,11 +1989,21 @@ async function iniciarAdminInstituicao() {
         }
 
 
-        criarAbaAdministracao();
-
-
         const resumo =
             await resumoResposta.json();
+
+
+        podeGerenciarVinculos =
+            resumo.pode_gerenciar_vinculos ===
+            true;
+
+
+        podeGerenciarUsuarios =
+            resumo.pode_gerenciar_usuarios ===
+            true;
+
+
+        criarAbaAdministracao();
 
 
         renderizarResumoAdmin(
@@ -2075,9 +2011,10 @@ async function iniciarAdminInstituicao() {
         );
 
 
-        await carregarSolicitacoesAdmin();
-
-        await carregarUsuariosAdminInstituicao();
+        await Promise.all([
+            carregarSolicitacoesAdmin(),
+            carregarUsuariosAdminInstituicao()
+        ]);
 
 
     } catch (erro) {

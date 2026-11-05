@@ -8,8 +8,8 @@ const pool =
     require("../config/database");
 
 const {
-    exigirPermissao,
-    exigirUmaDasPermissoes
+    exigirPerfil,
+    exigirPermissao
 } =
     require("../middleware/auth");
 
@@ -73,6 +73,14 @@ function exigirUniversidade(
 }
 
 
+const perfisInstitucionais = [
+    "institucional",
+    "consulta_institucional",
+    "gestor",
+    "admin_universidade"
+];
+
+
 // =========================================================
 // RESUMO
 // =========================================================
@@ -80,9 +88,8 @@ function exigirUniversidade(
 router.get(
     "/resumo",
 
-    exigirUmaDasPermissoes(
-        "GERENCIAR_USUARIOS",
-        "GERENCIAR_VINCULOS"
+    exigirPerfil(
+        ...perfisInstitucionais
     ),
 
     exigirUniversidade,
@@ -92,8 +99,16 @@ router.get(
         try {
 
             const universidadeId =
-                req.session.usuario
-                    .universidade_id;
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
+
+
+            const usuarioId =
+                Number(
+                    req.session.usuario.id
+                );
 
 
             const resultado =
@@ -152,10 +167,47 @@ router.get(
 
                                 AND ativo = TRUE
                         )
-                            AS funcionarios_vinculados
+                            AS funcionarios_vinculados,
+
+                        EXISTS (
+
+                            SELECT 1
+
+                            FROM usuario_permissao up
+
+                            JOIN permissao p
+                                ON p.id =
+                                    up.permissao_id
+
+                            WHERE
+                                up.usuario_id = $2
+                                AND p.codigo =
+                                    'GERENCIAR_VINCULOS'
+                                AND p.ativo = TRUE
+                        )
+                            AS pode_gerenciar_vinculos,
+
+                        EXISTS (
+
+                            SELECT 1
+
+                            FROM usuario_permissao up
+
+                            JOIN permissao p
+                                ON p.id =
+                                    up.permissao_id
+
+                            WHERE
+                                up.usuario_id = $2
+                                AND p.codigo =
+                                    'GERENCIAR_USUARIOS'
+                                AND p.ativo = TRUE
+                        )
+                            AS pode_gerenciar_usuarios
                     `,
                     [
-                        universidadeId
+                        universidadeId,
+                        usuarioId
                     ]
                 );
 
@@ -186,13 +238,15 @@ router.get(
 
 // =========================================================
 // SOLICITAÇÕES
+//
+// QUALQUER FUNCIONÁRIO INSTITUCIONAL PODE VISUALIZAR.
 // =========================================================
 
 router.get(
     "/solicitacoes",
 
-    exigirPermissao(
-        "GERENCIAR_VINCULOS"
+    exigirPerfil(
+        ...perfisInstitucionais
     ),
 
     exigirUniversidade,
@@ -202,8 +256,10 @@ router.get(
         try {
 
             const universidadeId =
-                req.session.usuario
-                    .universidade_id;
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
 
 
             const statusPermitidos = [
@@ -585,11 +641,7 @@ router.patch(
 
 
             // =================================================
-            // ALUNO
-            //
-            // Ao aprovar uma solicitação de aluno, além de
-            // atualizar o perfil do usuário, também criamos ou
-            // reativamos o registro acadêmico na tabela aluno.
+            // CRIAR / REATIVAR REGISTRO ACADÊMICO
             // =================================================
 
             if (
@@ -625,10 +677,6 @@ router.patch(
                         });
                 }
 
-
-                // ---------------------------------------------
-                // O curso precisa pertencer à mesma instituição.
-                // ---------------------------------------------
 
                 const cursoValido =
                     await client.query(
@@ -670,13 +718,6 @@ router.patch(
                 }
 
 
-                // ---------------------------------------------
-                // Procurar registro acadêmico existente.
-                //
-                // Pode ser um aluno já existente na base
-                // acadêmica que ainda não tinha conta vinculada.
-                // ---------------------------------------------
-
                 const alunosExistentes =
                     await client.query(
                         `
@@ -710,11 +751,6 @@ router.patch(
                     );
 
 
-                // ---------------------------------------------
-                // Matrícula e e-mail apontando para alunos
-                // diferentes representam conflito.
-                // ---------------------------------------------
-
                 if (
                     alunosExistentes.rows.length >
                     1
@@ -742,10 +778,6 @@ router.patch(
                     const alunoExistente =
                         alunosExistentes.rows[0];
 
-
-                    // -----------------------------------------
-                    // Não permitir tomar o vínculo de outra conta.
-                    // -----------------------------------------
 
                     if (
                         alunoExistente.usuario_id !==
@@ -839,7 +871,7 @@ router.patch(
 
 
             // =================================================
-            // ATUALIZAR PERFIL DO USUÁRIO
+            // ATUALIZAR USUÁRIO
             // =================================================
 
             const usuarioAtualizado =
@@ -873,8 +905,7 @@ router.patch(
 
 
             // =================================================
-            // FUNCIONÁRIO RECEBE VISUALIZAÇÃO COMO PADRÃO.
-            // PERMISSÕES EXTRAS SÃO DADAS PELO SUPER ADMIN.
+            // FUNCIONÁRIO RECEBE VISUALIZAÇÃO POR PADRÃO
             // =================================================
 
             if (
@@ -912,10 +943,6 @@ router.patch(
                 );
             }
 
-
-            // =================================================
-            // MARCAR SOLICITAÇÃO COMO APROVADA
-            // =================================================
 
             await client.query(
                 `
@@ -1041,12 +1068,16 @@ router.patch(
 
 
             const universidadeId =
-                req.session.usuario
-                    .universidade_id;
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
 
 
             const administradorId =
-                req.session.usuario.id;
+                Number(
+                    req.session.usuario.id
+                );
 
 
             const observacao =
@@ -1150,13 +1181,15 @@ router.patch(
 
 // =========================================================
 // USUÁRIOS DA IES
+//
+// QUALQUER FUNCIONÁRIO INSTITUCIONAL PODE VISUALIZAR.
 // =========================================================
 
 router.get(
     "/usuarios",
 
-    exigirPermissao(
-        "GERENCIAR_USUARIOS"
+    exigirPerfil(
+        ...perfisInstitucionais
     ),
 
     exigirUniversidade,
@@ -1166,8 +1199,10 @@ router.get(
         try {
 
             const universidadeId =
-                req.session.usuario
-                    .universidade_id;
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
 
 
             const resultado =
@@ -1243,9 +1278,7 @@ router.get(
 
 
 // =========================================================
-// EDITAR CONTA DE USUÁRIO DA IES
-//
-// NÃO ALTERA PERFIL OU PERMISSÕES.
+// EDITAR CONTA
 // =========================================================
 
 router.patch(
@@ -1337,8 +1370,7 @@ router.patch(
 
             const confirmarNovaSenha =
                 String(
-                    req.body
-                        .confirmar_nova_senha ||
+                    req.body.confirmar_nova_senha ||
                     ""
                 );
 
@@ -1614,10 +1646,6 @@ router.patch(
                 );
 
 
-            // =================================================
-            // MANTER ALUNO ACADÊMICO SINCRONIZADO
-            // =================================================
-
             if (
                 usuarioAtual.perfil ===
                 "aluno"
@@ -1656,13 +1684,10 @@ router.patch(
             ) {
 
                 req.session.usuario.nome =
-                    resultado.rows[0]
-                        .nome;
-
+                    resultado.rows[0].nome;
 
                 req.session.usuario.email =
-                    resultado.rows[0]
-                        .email;
+                    resultado.rows[0].email;
             }
 
 
@@ -1729,11 +1754,6 @@ router.patch(
 
 // =========================================================
 // DESVINCULAR ALUNO
-//
-// A conta NÃO é excluída.
-// O usuário volta a ser público.
-// O registro acadêmico fica inativo.
-// O histórico da solicitação fica como revogado.
 // =========================================================
 
 router.patch(
@@ -1860,10 +1880,6 @@ router.patch(
             }
 
 
-            // =================================================
-            // INATIVAR REGISTRO ACADÊMICO
-            // =================================================
-
             await client.query(
                 `
                 UPDATE aluno
@@ -1884,10 +1900,6 @@ router.patch(
             );
 
 
-            // =================================================
-            // USUÁRIO VOLTA A SER PÚBLICO
-            // =================================================
-
             await client.query(
                 `
                 UPDATE usuario
@@ -1905,10 +1917,6 @@ router.patch(
                 ]
             );
 
-
-            // =================================================
-            // REVOGAR SOLICITAÇÕES APROVADAS
-            // =================================================
 
             await client.query(
                 `
@@ -1944,7 +1952,6 @@ router.patch(
 
 
             res.json({
-
                 mensagem:
                     "Aluno desvinculado com sucesso"
             });
