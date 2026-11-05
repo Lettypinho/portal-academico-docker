@@ -169,8 +169,45 @@ router.get(
                         )
                             AS funcionarios_vinculados,
 
-                        )
-                            AS pode_gerenciar_vinculos,
+                        (
+    SELECT COUNT(*)::INT
+
+    FROM usuario
+
+    WHERE
+        universidade_id = $1
+
+        AND perfil IN (
+            'institucional',
+            'consulta_institucional',
+            'gestor',
+            'admin_universidade'
+        )
+
+        AND ativo = TRUE
+)
+    AS funcionarios_vinculados,
+
+TRUE
+    AS pode_gerenciar_vinculos,
+
+EXISTS (
+
+    SELECT 1
+
+    FROM usuario_permissao up
+
+    JOIN permissao p
+        ON p.id =
+            up.permissao_id
+
+    WHERE
+        up.usuario_id = $2
+        AND p.codigo =
+            'GERENCIAR_USUARIOS'
+        AND p.ativo = TRUE
+)
+    AS pode_gerenciar_usuarios
 
                         EXISTS (
 
