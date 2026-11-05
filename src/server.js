@@ -119,23 +119,6 @@ app.get(
 );
 
 
-// Se alguém acessar a URL antiga,
-// redirecionar para a URL limpa.
-app.get(
-    "/login",
-
-    (
-        req,
-        res
-    ) => {
-
-        res.redirect(
-            "/login"
-        );
-    }
-);
-
-
 // =========================================================
 // CACHE
 // =========================================================
@@ -213,9 +196,7 @@ app.use(
             index:
                 false,
 
-            extensions: [
-                "html"
-            ]
+            
         }
     )
 );
