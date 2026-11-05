@@ -71,41 +71,6 @@ function nomePerfilAdmin(
 }
 
 
-function formatarDataAdmin(
-    valor
-) {
-
-    if (
-        !valor
-    ) {
-
-        return "-";
-    }
-
-
-    const data =
-        new Date(
-            valor
-        );
-
-
-    if (
-        Number.isNaN(
-            data.getTime()
-        )
-    ) {
-
-        return "-";
-    }
-
-
-    return data
-        .toLocaleDateString(
-            "pt-BR"
-        );
-}
-
-
 // =========================================================
 // CONFIGURAÇÃO DO BOTÃO DE PERFIL
 // =========================================================
@@ -134,38 +99,11 @@ function configurarBotaoConfiguracoesAdmin() {
         "aria-label",
         "Configurações da conta"
     );
-
-
-    botao.innerHTML = `
-
-        <svg
-            viewBox="0 0 24 24"
-            width="19"
-            height="19"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-        >
-
-            <circle
-                cx="12"
-                cy="12"
-                r="3"
-            ></circle>
-
-            <path
-                d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.5 1.2V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.4 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.2-.5H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.4a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6a1.7 1.7 0 0 0 .5-1.2V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.6 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 .6 1a1.7 1.7 0 0 0 1.2.5H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"
-            ></path>
-
-        </svg>
-    `;
 }
 
 
 // =========================================================
-// CRIAR ABA
+// CRIAR ABA ADMINISTRAÇÃO
 // =========================================================
 
 function criarAbaAdministracao() {
@@ -287,8 +225,8 @@ function criarAbaAdministracao() {
                 </h2>
 
                 <p>
-                    Recursos disponíveis conforme
-                    suas permissões institucionais.
+                    Gerencie solicitações de vínculo,
+                    alunos e usuários da sua instituição.
                 </p>
 
             </div>
@@ -357,6 +295,11 @@ function criarAbaAdministracao() {
                         Usuários vinculados
                     </h3>
 
+                    <p>
+                        Alunos podem ser desvinculados
+                        sem excluir sua conta.
+                    </p>
+
                 </div>
 
             </div>
@@ -421,6 +364,7 @@ function renderizarResumoAdmin(
 
         <article>
             <span>Solicitações pendentes</span>
+
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.solicitacoes_pendentes
@@ -428,8 +372,10 @@ function renderizarResumoAdmin(
             </strong>
         </article>
 
+
         <article>
             <span>Usuários</span>
+
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.usuarios_vinculados
@@ -437,8 +383,10 @@ function renderizarResumoAdmin(
             </strong>
         </article>
 
+
         <article>
             <span>Alunos</span>
+
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.alunos_vinculados
@@ -446,8 +394,10 @@ function renderizarResumoAdmin(
             </strong>
         </article>
 
+
         <article>
             <span>Institucionais</span>
+
             <strong>
                 ${escaparHtmlAdmin(
                     resumo.funcionarios_vinculados
@@ -601,6 +551,31 @@ async function carregarSolicitacoesAdmin() {
                                 }
                             </small>
 
+
+                            ${
+                                solicitacao.tipo_vinculo ===
+                                "aluno"
+                                    ? `
+
+                                        <small>
+                                            Matrícula:
+                                            ${escaparHtmlAdmin(
+                                                solicitacao.matricula ||
+                                                "-"
+                                            )}
+                                        </small>
+
+                                        <small>
+                                            Curso:
+                                            ${escaparHtmlAdmin(
+                                                solicitacao.curso ||
+                                                "-"
+                                            )}
+                                        </small>
+                                    `
+                                    : ""
+                            }
+
                         </div>
 
 
@@ -612,6 +587,7 @@ async function carregarSolicitacoesAdmin() {
                             >
                                 Aprovar
                             </button>
+
 
                             <button
                                 type="button"
@@ -719,6 +695,12 @@ async function aprovarVinculoAdmin(
 
         return;
     }
+
+
+    window.alert(
+        dados.mensagem ||
+        "Vínculo aprovado com sucesso."
+    );
 
 
     await atualizarAdministracaoInstituicao();
@@ -882,13 +864,31 @@ async function carregarUsuariosAdminInstituicao() {
             <thead>
 
                 <tr>
-                    <th>Usuário</th>
-                    <th>Perfil</th>
-                    <th>Status</th>
-                    <th>Ação</th>
+
+                    <th>
+                        Usuário
+                    </th>
+
+                    <th>
+                        Perfil
+                    </th>
+
+                    <th>
+                        Dados acadêmicos
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Ações
+                    </th>
+
                 </tr>
 
             </thead>
+
 
             <tbody>
 
@@ -914,30 +914,106 @@ async function carregarUsuariosAdminInstituicao() {
 
                                 </td>
 
+
                                 <td>
+
                                     ${escaparHtmlAdmin(
                                         nomePerfilAdmin(
                                             usuario.perfil
                                         )
                                     )}
+
                                 </td>
 
+
                                 <td>
+
                                     ${
-                                        usuario.ativo
-                                            ? "Ativo"
-                                            : "Desativado"
+                                        usuario.perfil ===
+                                        "aluno"
+                                            ? `
+
+                                                <div class="admin-academic-data">
+
+                                                    <span>
+                                                        <strong>
+                                                            Matrícula:
+                                                        </strong>
+
+                                                        ${escaparHtmlAdmin(
+                                                            usuario.matricula ||
+                                                            "-"
+                                                        )}
+                                                    </span>
+
+                                                    <span>
+                                                        <strong>
+                                                            Curso:
+                                                        </strong>
+
+                                                        ${escaparHtmlAdmin(
+                                                            usuario.curso ||
+                                                            "-"
+                                                        )}
+                                                    </span>
+
+                                                </div>
+                                            `
+                                            : "-"
                                     }
+
                                 </td>
+
 
                                 <td>
 
-                                    <button
-                                        type="button"
-                                        data-editar-conta="${usuario.id}"
-                                    >
-                                        Editar conta
-                                    </button>
+                                    ${
+                                        usuario.perfil ===
+                                            "aluno" &&
+                                        usuario.aluno_status
+                                            ? escaparHtmlAdmin(
+                                                usuario.aluno_status
+                                            )
+                                            : (
+                                                usuario.ativo
+                                                    ? "Ativo"
+                                                    : "Desativado"
+                                            )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="admin-ies-user-actions">
+
+                                        <button
+                                            type="button"
+                                            data-editar-conta="${usuario.id}"
+                                        >
+                                            Editar conta
+                                        </button>
+
+
+                                        ${
+                                            usuario.perfil ===
+                                                "aluno" &&
+                                            podeGerenciarVinculos
+                                                ? `
+
+                                                    <button
+                                                        type="button"
+                                                        class="danger"
+                                                        data-desvincular-aluno="${usuario.id}"
+                                                    >
+                                                        Desvincular
+                                                    </button>
+                                                `
+                                                : ""
+                                        }
+
+                                    </div>
 
                                 </td>
 
@@ -971,6 +1047,121 @@ async function carregarUsuariosAdminInstituicao() {
                 );
             }
         );
+
+
+    container
+        .querySelectorAll(
+            "[data-desvincular-aluno]"
+        )
+        .forEach(
+            botao => {
+
+                botao.addEventListener(
+                    "click",
+                    () =>
+                        desvincularAlunoAdmin(
+                            Number(
+                                botao.dataset
+                                    .desvincularAluno
+                            )
+                        )
+                );
+            }
+        );
+}
+
+
+// =========================================================
+// DESVINCULAR ALUNO
+// =========================================================
+
+async function desvincularAlunoAdmin(
+    usuarioId
+) {
+
+    const usuario =
+        usuariosAdminInstituicao
+            .find(
+                item =>
+                    Number(
+                        item.id
+                    ) ===
+                    Number(
+                        usuarioId
+                    )
+            );
+
+
+    if (
+        !usuario
+    ) {
+
+        return;
+    }
+
+
+    const confirmar =
+        window.confirm(
+            `Deseja desvincular o aluno ${usuario.nome}?\n\n` +
+            "A conta não será excluída. " +
+            "O usuário voltará ao perfil público."
+        );
+
+
+    if (
+        !confirmar
+    ) {
+
+        return;
+    }
+
+
+    const resposta =
+        await fetch(
+            `/api/admin-instituicao/usuarios/${usuarioId}/desvincular-aluno`,
+            {
+                method:
+                    "PATCH",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({})
+            }
+        );
+
+
+    const dados =
+        await resposta
+            .json()
+            .catch(
+                () => ({})
+            );
+
+
+    if (
+        !resposta.ok
+    ) {
+
+        window.alert(
+            dados.erro ||
+            "Não foi possível desvincular o aluno."
+        );
+
+        return;
+    }
+
+
+    window.alert(
+        dados.mensagem ||
+        "Aluno desvinculado com sucesso."
+    );
+
+
+    await atualizarAdministracaoInstituicao();
 }
 
 
@@ -1048,6 +1239,7 @@ function criarModalContaAdmin() {
 
 
                 <label>
+
                     Nome
 
                     <input
@@ -1055,10 +1247,12 @@ function criarModalContaAdmin() {
                         id="admin-conta-nome"
                         required
                     >
+
                 </label>
 
 
                 <label>
+
                     E-mail
 
                     <input
@@ -1066,10 +1260,12 @@ function criarModalContaAdmin() {
                         id="admin-conta-email"
                         required
                     >
+
                 </label>
 
 
                 <label>
+
                     Perfil
 
                     <input
@@ -1077,6 +1273,7 @@ function criarModalContaAdmin() {
                         id="admin-conta-perfil"
                         disabled
                     >
+
                 </label>
 
 
@@ -1086,18 +1283,21 @@ function criarModalContaAdmin() {
                 >
 
                     <label>
+
                         Senha atual
 
                         <input
                             type="password"
                             id="admin-conta-senha-atual"
                         >
+
                     </label>
 
                 </div>
 
 
                 <label>
+
                     Nova senha
 
                     <input
@@ -1105,10 +1305,12 @@ function criarModalContaAdmin() {
                         id="admin-conta-nova-senha"
                         minlength="6"
                     >
+
                 </label>
 
 
                 <label>
+
                     Confirmar nova senha
 
                     <input
@@ -1116,6 +1318,7 @@ function criarModalContaAdmin() {
                         id="admin-conta-confirmar-senha"
                         minlength="6"
                     >
+
                 </label>
 
 
@@ -1308,6 +1511,10 @@ function fecharModalContaAdmin() {
 }
 
 
+// =========================================================
+// SALVAR CONTA
+// =========================================================
+
 async function salvarContaAdmin(
     event
 ) {
@@ -1448,7 +1655,7 @@ async function salvarContaAdmin(
 
 
 // =========================================================
-// ATUALIZAR
+// ATUALIZAR ADMINISTRAÇÃO
 // =========================================================
 
 async function atualizarAdministracaoInstituicao() {
@@ -1517,12 +1724,14 @@ function criarEstilosAdminInstituicao() {
             font-size: 9px;
         }
 
+
         .admin-ies-summary {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 20px;
         }
+
 
         .admin-ies-summary article,
         .admin-ies-panel {
@@ -1532,23 +1741,34 @@ function criarEstilosAdminInstituicao() {
             background: white;
         }
 
+
         .admin-ies-summary article {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
+
         .admin-ies-summary strong {
             font-size: 22px;
         }
+
 
         .admin-ies-panel {
             margin-bottom: 18px;
         }
 
+
         .admin-ies-panel-header {
             margin-bottom: 14px;
         }
+
+
+        .admin-ies-panel-header p {
+            margin-top: 5px;
+            color: #7c7284;
+        }
+
 
         .admin-ies-request {
             display: flex;
@@ -1558,16 +1778,21 @@ function criarEstilosAdminInstituicao() {
             border-bottom: 1px solid #eee8f1;
         }
 
+
         .admin-ies-request > div:first-child {
             display: flex;
             flex-direction: column;
             gap: 3px;
         }
 
-        .admin-ies-request-actions {
+
+        .admin-ies-request-actions,
+        .admin-ies-user-actions {
             display: flex;
             gap: 6px;
+            flex-wrap: wrap;
         }
+
 
         .admin-ies-request-actions button,
         .admin-ies-table button {
@@ -1579,21 +1804,28 @@ function criarEstilosAdminInstituicao() {
             cursor: pointer;
         }
 
-        .admin-ies-request-actions .danger {
+
+        .admin-ies-request-actions .danger,
+        .admin-ies-table .danger {
+            border-color: #fecaca;
             color: #b91c1c;
         }
+
 
         .admin-ies-table {
             width: 100%;
             border-collapse: collapse;
         }
 
+
         .admin-ies-table th,
         .admin-ies-table td {
             padding: 10px;
             border-bottom: 1px solid #eee8f1;
             text-align: left;
+            vertical-align: top;
         }
+
 
         .admin-ies-table td:first-child {
             display: flex;
@@ -1601,9 +1833,19 @@ function criarEstilosAdminInstituicao() {
             gap: 3px;
         }
 
+
         .admin-ies-table small {
             color: #7c7284;
         }
+
+
+        .admin-academic-data {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 13px;
+        }
+
 
         .admin-account-modal {
             position: fixed;
@@ -1614,15 +1856,18 @@ function criarEstilosAdminInstituicao() {
             justify-content: center;
         }
 
+
         .admin-account-modal.hidden {
             display: none;
         }
+
 
         .admin-account-backdrop {
             position: absolute;
             inset: 0;
             background: rgba(32, 18, 39, 0.55);
         }
+
 
         .admin-account-card {
             position: relative;
@@ -1634,21 +1879,25 @@ function criarEstilosAdminInstituicao() {
             background: white;
         }
 
+
         .admin-account-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 18px;
         }
 
+
         #admin-form-conta {
             display: grid;
             gap: 13px;
         }
 
+
         #admin-form-conta label {
             display: grid;
             gap: 6px;
         }
+
 
         #admin-form-conta input {
             min-height: 42px;
@@ -1657,6 +1906,7 @@ function criarEstilosAdminInstituicao() {
             border-radius: 8px;
         }
 
+
         .admin-account-actions {
             display: flex;
             justify-content: flex-end;
@@ -1664,12 +1914,28 @@ function criarEstilosAdminInstituicao() {
             margin-top: 10px;
         }
 
+
         .admin-account-actions button {
             padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid #ddd6fe;
             cursor: pointer;
         }
+
+
+        @media (max-width: 900px) {
+
+            .admin-ies-table-wrap {
+                overflow-x: auto;
+            }
+
+
+            .admin-ies-table {
+                min-width: 760px;
+            }
+
+        }
+
 
         @media (max-width: 800px) {
 
@@ -1680,12 +1946,14 @@ function criarEstilosAdminInstituicao() {
 
         }
 
+
         @media (max-width: 520px) {
 
             .admin-ies-summary {
                 grid-template-columns:
                     1fr;
             }
+
 
             .admin-ies-request {
                 flex-direction: column;
@@ -1730,8 +1998,6 @@ async function iniciarAdminInstituicao() {
         if (
             ![
                 "institucional",
-
-                // Compatibilidade com sessões antigas.
                 "consulta_institucional",
                 "gestor",
                 "admin_universidade"
@@ -1771,8 +2037,7 @@ async function iniciarAdminInstituicao() {
 
 
         // =================================================
-        // DESCOBRIR SE O USUÁRIO POSSUI ALGUMA PERMISSÃO
-        // ADMINISTRATIVA.
+        // TESTAR ACESSO À ADMINISTRAÇÃO
         // =================================================
 
         const resumoResposta =
@@ -1810,10 +2075,9 @@ async function iniciarAdminInstituicao() {
         );
 
 
-        await Promise.all([
-            carregarSolicitacoesAdmin(),
-            carregarUsuariosAdminInstituicao()
-        ]);
+        await carregarSolicitacoesAdmin();
+
+        await carregarUsuariosAdminInstituicao();
 
 
     } catch (erro) {

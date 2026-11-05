@@ -369,12 +369,16 @@ router.patch(
 
 
             const universidadeId =
-                req.session.usuario
-                    .universidade_id;
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
 
 
             const administradorId =
-                req.session.usuario.id;
+                Number(
+                    req.session.usuario.id
+                );
 
 
             await client.query(
@@ -580,6 +584,264 @@ router.patch(
             }
 
 
+            // =================================================
+            // ALUNO
+            //
+            // Ao aprovar uma solicitação de aluno, além de
+            // atualizar o perfil do usuário, também criamos ou
+            // reativamos o registro acadêmico na tabela aluno.
+            // =================================================
+
+            if (
+                novoPerfil ===
+                "aluno"
+            ) {
+
+                const matricula =
+                    String(
+                        solicitacao.matricula ||
+                        ""
+                    )
+                        .trim();
+
+
+                if (
+                    !idValido(
+                        solicitacao.curso_id
+                    ) ||
+                    !matricula
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "A solicitação do aluno não possui curso ou matrícula válidos"
+                        });
+                }
+
+
+                // ---------------------------------------------
+                // O curso precisa pertencer à mesma instituição.
+                // ---------------------------------------------
+
+                const cursoValido =
+                    await client.query(
+                        `
+                        SELECT id
+
+                        FROM curso
+
+                        WHERE
+                            id = $1
+                            AND universidade_id = $2
+                            AND status = 'Ativo'
+
+                        LIMIT 1
+                        `,
+                        [
+                            solicitacao.curso_id,
+                            universidadeId
+                        ]
+                    );
+
+
+                if (
+                    cursoValido.rows.length ===
+                    0
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res
+                        .status(400)
+                        .json({
+                            erro:
+                                "O curso informado não pertence à instituição ou está inativo"
+                        });
+                }
+
+
+                // ---------------------------------------------
+                // Procurar registro acadêmico existente.
+                //
+                // Pode ser um aluno já existente na base
+                // acadêmica que ainda não tinha conta vinculada.
+                // ---------------------------------------------
+
+                const alunosExistentes =
+                    await client.query(
+                        `
+                        SELECT
+
+                            id,
+                            usuario_id,
+                            matricula,
+                            email,
+                            status
+
+                        FROM aluno
+
+                        WHERE
+                            universidade_id = $1
+
+                            AND (
+                                matricula = $2
+                                OR LOWER(email) = LOWER($3)
+                                OR usuario_id = $4
+                            )
+
+                        FOR UPDATE
+                        `,
+                        [
+                            universidadeId,
+                            matricula,
+                            usuario.email,
+                            usuario.id
+                        ]
+                    );
+
+
+                // ---------------------------------------------
+                // Matrícula e e-mail apontando para alunos
+                // diferentes representam conflito.
+                // ---------------------------------------------
+
+                if (
+                    alunosExistentes.rows.length >
+                    1
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res
+                        .status(409)
+                        .json({
+                            erro:
+                                "Existem registros acadêmicos conflitantes para esta matrícula ou e-mail"
+                        });
+                }
+
+
+                if (
+                    alunosExistentes.rows.length ===
+                    1
+                ) {
+
+                    const alunoExistente =
+                        alunosExistentes.rows[0];
+
+
+                    // -----------------------------------------
+                    // Não permitir tomar o vínculo de outra conta.
+                    // -----------------------------------------
+
+                    if (
+                        alunoExistente.usuario_id !==
+                            null &&
+                        Number(
+                            alunoExistente.usuario_id
+                        ) !==
+                        Number(
+                            usuario.id
+                        )
+                    ) {
+
+                        await client.query(
+                            "ROLLBACK"
+                        );
+
+
+                        return res
+                            .status(409)
+                            .json({
+                                erro:
+                                    "Este registro acadêmico já está vinculado a outra conta"
+                            });
+                    }
+
+
+                    await client.query(
+                        `
+                        UPDATE aluno
+
+                        SET
+                            usuario_id = $1,
+                            curso_id = $2,
+                            matricula = $3,
+                            nome = $4,
+                            email = $5,
+                            status = 'Ativo',
+                            atualizado_em = NOW()
+
+                        WHERE
+                            id = $6
+                        `,
+                        [
+                            usuario.id,
+                            solicitacao.curso_id,
+                            matricula,
+                            usuario.nome,
+                            usuario.email,
+                            alunoExistente.id
+                        ]
+                    );
+
+
+                } else {
+
+                    await client.query(
+                        `
+                        INSERT INTO aluno
+                        (
+                            usuario_id,
+                            universidade_id,
+                            curso_id,
+                            matricula,
+                            nome,
+                            email,
+                            status
+                        )
+
+                        VALUES
+                        (
+                            $1,
+                            $2,
+                            $3,
+                            $4,
+                            $5,
+                            $6,
+                            'Ativo'
+                        )
+                        `,
+                        [
+                            usuario.id,
+                            universidadeId,
+                            solicitacao.curso_id,
+                            matricula,
+                            usuario.nome,
+                            usuario.email
+                        ]
+                    );
+                }
+            }
+
+
+            // =================================================
+            // ATUALIZAR PERFIL DO USUÁRIO
+            // =================================================
+
             const usuarioAtualizado =
                 await client.query(
                     `
@@ -651,6 +913,10 @@ router.patch(
             }
 
 
+            // =================================================
+            // MARCAR SOLICITAÇÃO COMO APROVADA
+            // =================================================
+
             await client.query(
                 `
                 UPDATE solicitacao_vinculo
@@ -704,6 +970,20 @@ router.patch(
                 "Erro ao aprovar solicitação:",
                 erro
             );
+
+
+            if (
+                erro.code ===
+                "23505"
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+                        erro:
+                            "Já existe um aluno utilizando esta matrícula, e-mail ou conta"
+                    });
+            }
 
 
             res
@@ -895,21 +1175,42 @@ router.get(
                     `
                     SELECT
 
-                        id,
-                        nome,
-                        email,
-                        perfil,
-                        ativo,
-                        criado_em,
-                        atualizado_em
+                        u.id,
+                        u.nome,
+                        u.email,
+                        u.perfil,
+                        u.ativo,
+                        u.criado_em,
+                        u.atualizado_em,
 
-                    FROM usuario
+                        a.id
+                            AS aluno_id,
+
+                        a.matricula,
+
+                        a.status
+                            AS aluno_status,
+
+                        a.curso_id,
+
+                        c.nome
+                            AS curso
+
+                    FROM usuario u
+
+                    LEFT JOIN aluno a
+                        ON a.usuario_id =
+                            u.id
+
+                    LEFT JOIN curso c
+                        ON c.id =
+                            a.curso_id
 
                     WHERE
-                        universidade_id = $1
+                        u.universidade_id = $1
 
                     ORDER BY
-                        nome
+                        u.nome
                     `,
                     [
                         universidadeId
@@ -945,7 +1246,6 @@ router.get(
 // EDITAR CONTA DE USUÁRIO DA IES
 //
 // NÃO ALTERA PERFIL OU PERMISSÕES.
-// ISSO É RESPONSABILIDADE DO SUPER ADMIN.
 // =========================================================
 
 router.patch(
@@ -958,6 +1258,10 @@ router.patch(
     exigirUniversidade,
 
     async (req, res) => {
+
+        const client =
+            await pool.connect();
+
 
         try {
 
@@ -1068,7 +1372,7 @@ router.patch(
 
 
             const atual =
-                await pool.query(
+                await client.query(
                     `
                     SELECT
 
@@ -1114,7 +1418,7 @@ router.patch(
 
 
             const emailExistente =
-                await pool.query(
+                await client.query(
                     `
                     SELECT id
 
@@ -1263,8 +1567,13 @@ router.patch(
             }
 
 
+            await client.query(
+                "BEGIN"
+            );
+
+
             const resultado =
-                await pool.query(
+                await client.query(
                     `
                     UPDATE usuario
 
@@ -1305,6 +1614,43 @@ router.patch(
                 );
 
 
+            // =================================================
+            // MANTER ALUNO ACADÊMICO SINCRONIZADO
+            // =================================================
+
+            if (
+                usuarioAtual.perfil ===
+                "aluno"
+            ) {
+
+                await client.query(
+                    `
+                    UPDATE aluno
+
+                    SET
+                        nome = $1,
+                        email = $2,
+                        atualizado_em = NOW()
+
+                    WHERE
+                        usuario_id = $3
+                        AND universidade_id = $4
+                    `,
+                    [
+                        nome,
+                        email,
+                        usuarioId,
+                        universidadeId
+                    ]
+                );
+            }
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
             if (
                 ehProprioUsuario
             ) {
@@ -1334,6 +1680,17 @@ router.patch(
 
         } catch (erro) {
 
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            } catch {
+                // nenhuma ação
+            }
+
+
             console.error(
                 "Erro ao editar conta institucional:",
                 erro
@@ -1360,6 +1717,269 @@ router.patch(
                     erro:
                         "Erro ao atualizar a conta"
                 });
+
+
+        } finally {
+
+            client.release();
+        }
+    }
+);
+
+
+// =========================================================
+// DESVINCULAR ALUNO
+//
+// A conta NÃO é excluída.
+// O usuário volta a ser público.
+// O registro acadêmico fica inativo.
+// O histórico da solicitação fica como revogado.
+// =========================================================
+
+router.patch(
+    "/usuarios/:id/desvincular-aluno",
+
+    exigirPermissao(
+        "GERENCIAR_VINCULOS"
+    ),
+
+    exigirUniversidade,
+
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const usuarioId =
+                Number(
+                    req.params.id
+                );
+
+
+            if (
+                !idValido(
+                    usuarioId
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Aluno inválido"
+                    });
+            }
+
+
+            const universidadeId =
+                Number(
+                    req.session.usuario
+                        .universidade_id
+                );
+
+
+            const administradorId =
+                Number(
+                    req.session.usuario.id
+                );
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+            const resultadoUsuario =
+                await client.query(
+                    `
+                    SELECT
+
+                        id,
+                        nome,
+                        email,
+                        perfil,
+                        universidade_id
+
+                    FROM usuario
+
+                    WHERE
+                        id = $1
+                        AND universidade_id = $2
+
+                    FOR UPDATE
+                    `,
+                    [
+                        usuarioId,
+                        universidadeId
+                    ]
+                );
+
+
+            if (
+                resultadoUsuario.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res
+                    .status(404)
+                    .json({
+                        erro:
+                            "Aluno não encontrado nesta instituição"
+                    });
+            }
+
+
+            const usuario =
+                resultadoUsuario.rows[0];
+
+
+            if (
+                usuario.perfil !==
+                "aluno"
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res
+                    .status(400)
+                    .json({
+                        erro:
+                            "Este usuário não possui perfil de aluno"
+                    });
+            }
+
+
+            // =================================================
+            // INATIVAR REGISTRO ACADÊMICO
+            // =================================================
+
+            await client.query(
+                `
+                UPDATE aluno
+
+                SET
+                    status = 'Inativo',
+                    usuario_id = NULL,
+                    atualizado_em = NOW()
+
+                WHERE
+                    usuario_id = $1
+                    AND universidade_id = $2
+                `,
+                [
+                    usuarioId,
+                    universidadeId
+                ]
+            );
+
+
+            // =================================================
+            // USUÁRIO VOLTA A SER PÚBLICO
+            // =================================================
+
+            await client.query(
+                `
+                UPDATE usuario
+
+                SET
+                    perfil = 'publico',
+                    universidade_id = NULL,
+                    atualizado_em = NOW()
+
+                WHERE
+                    id = $1
+                `,
+                [
+                    usuarioId
+                ]
+            );
+
+
+            // =================================================
+            // REVOGAR SOLICITAÇÕES APROVADAS
+            // =================================================
+
+            await client.query(
+                `
+                UPDATE solicitacao_vinculo
+
+                SET
+                    status = 'revogado',
+
+                    observacao_analise =
+                        'Vínculo de aluno revogado pela instituição',
+
+                    analisado_por = $1,
+                    analisado_em = NOW(),
+                    atualizado_em = NOW()
+
+                WHERE
+                    usuario_id = $2
+                    AND universidade_id = $3
+                    AND tipo_vinculo = 'aluno'
+                    AND status = 'aprovado'
+                `,
+                [
+                    administradorId,
+                    usuarioId,
+                    universidadeId
+                ]
+            );
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+            res.json({
+
+                mensagem:
+                    "Aluno desvinculado com sucesso"
+            });
+
+
+        } catch (erro) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            } catch {
+                // nenhuma ação
+            }
+
+
+            console.error(
+                "Erro ao desvincular aluno:",
+                erro
+            );
+
+
+            res
+                .status(500)
+                .json({
+                    erro:
+                        "Erro ao desvincular aluno"
+                });
+
+
+        } finally {
+
+            client.release();
         }
     }
 );
