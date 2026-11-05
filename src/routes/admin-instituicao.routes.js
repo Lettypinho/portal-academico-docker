@@ -169,21 +169,6 @@ router.get(
                         )
                             AS funcionarios_vinculados,
 
-                        EXISTS (
-
-                            SELECT 1
-
-                            FROM usuario_permissao up
-
-                            JOIN permissao p
-                                ON p.id =
-                                    up.permissao_id
-
-                            WHERE
-                                up.usuario_id = $2
-                                AND p.codigo =
-                                    'GERENCIAR_VINCULOS'
-                                AND p.ativo = TRUE
                         )
                             AS pode_gerenciar_vinculos,
 
@@ -389,9 +374,9 @@ router.get(
 router.patch(
     "/solicitacoes/:id/aprovar",
 
-    exigirPermissao(
-        "GERENCIAR_VINCULOS"
-    ),
+    exigirPerfil(
+    ...perfisInstitucionais
+),
 
     exigirUniversidade,
 
@@ -1036,9 +1021,9 @@ router.patch(
 router.patch(
     "/solicitacoes/:id/rejeitar",
 
-    exigirPermissao(
-        "GERENCIAR_VINCULOS"
-    ),
+    exigirPerfil(
+    ...perfisInstitucionais
+),
 
     exigirUniversidade,
 
@@ -1759,9 +1744,9 @@ router.patch(
 router.patch(
     "/usuarios/:id/desvincular-aluno",
 
-    exigirPermissao(
-        "GERENCIAR_VINCULOS"
-    ),
+    exigirPerfil(
+    ...perfisInstitucionais
+),
 
     exigirUniversidade,
 
